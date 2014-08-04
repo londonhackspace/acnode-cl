@@ -1,4 +1,3 @@
-
 /*
 ACNodeClient
  v0.1
@@ -8,9 +7,9 @@ ACNodeClient
 #include <Ethernet.h>
 #include <Mfrc522.h>
 #include <SPI.h>
+#include <EEPROM.h>
 
-byte mac[] = { 
-  0x00, 0xAA, 0xBB, 0xCC, 0xDE, 0x02 };
+byte mac[] = { 0x00, 0xAA, 0xBB, 0xCC, 0xDE, 0x02 };
 EthernetClient client;
 
 char serverName[] = "babbage.lan.london.hackspace.org.uk";
@@ -22,11 +21,21 @@ unsigned char serNum7[8];
 enum cardTypes { CARDUID4, CARDUID7, NOCARD };
 cardTypes cardType = NOCARD;
 
+/* config me */
+int nodeID = -1;
+
 void setup() {
   Serial.begin(9600);
   Serial.println("\n\nACNode Client Startup");
-  // start the Ethernet connection:
 
+//  nodeID = EEPROM.read(0);
+  
+  if (nodeID == 0 || nodeID < 0) {
+    Serial.println("nodeID not set, setting to 2");
+    nodeID = 2;
+//    EEPROM.write(0, 2);
+  }
+  // start the Ethernet connection:
   if (Ethernet.begin(mac) == 0) {
     Serial.println("Failed to configure Ethernet using DHCP");
     // no point in carrying on, so do nothing forevermore:
@@ -58,6 +67,24 @@ void setup() {
   digitalWrite(NRSTPD, HIGH);
 
   Mfrc522.Init();
+  
+  Serial.println("Checking tool status");
+  Serial.println(networkCheckToolStatus());
+  
+}
+
+void loop(){
+  digitalWrite(RED_LED, HIGH);
+  readcard();
+  if (cardType != NOCARD)
+  {
+    digitalWrite(GREEN_LED, HIGH);
+    querycard();
+  }
+  delay(500);
+  digitalWrite(RED_LED, LOW);
+  digitalWrite(GREEN_LED, LOW);
+  delay(500);
 }
 
 void readcard()
@@ -151,52 +178,139 @@ void readcard()
   Mfrc522.Halt();       
 }
 
-
 void querycard()
 {
+  char path[13 + 14 + 1];
+  int i;
+  int result = -1;
+
+  if (cardType == NOCARD) {
+    return;
+  }
+  
   Serial.print("Connecting to http://");
   Serial.println(serverName);
 
   if (client.connect(serverName, 1234)) {
     Serial.println("Connected");
     Serial.println("Querying");
-    client.println("GET /1/card/0477861A402480");
+    sprintf(path, "GET /%d/card/", nodeID);
+
+    if (cardType == CARDUID4) {
+      for(byte i=0; i < 4; i++) {
+        sprintf(path + strlen(path), "%02X\00", serNum[i]);
+      }
+    }
+    else if (cardType == CARDUID7) {
+      for(byte i=0; i < 7; i++) {
+        sprintf(path + strlen(path), "%02X\00", serNum7[i]);
+      }
+    }
+    Serial.println(path);
+    client.println(path);
     client.println();
 
-    delay(50);
+    int timeout = 0;
+
+    while (!client.available()) {
+       delay(25);
+       timeout++;
+       if (timeout > 400) {
+         Serial.println("Timeout :(");
+         break;
+       }
+    }
 
     if (client.available()) {
-      Serial.println("Got Response:\n");
-      char c = client.read();
-      Serial.print(c);
-      Serial.println();
+      char c;
+      Serial.print("Got Response: >");
+
+      while (client.available()) {
+        c = client.read();
+        Serial.print(c);
+        if (result == -1) {
+          result = c - '0';
+        }
+      }
+
+      Serial.println("<");
       Serial.println("Disconnecting");
+      client.flush();
       client.stop();
     }
     Serial.println();
-
-  }
-  else {
+  } else {
     // if you didn't get a connection to the server:
     Serial.println("connection failed");
   }
-}
-
-void loop(){
-  digitalWrite(RED_LED, HIGH);
-  readcard();
-  if (cardType != NOCARD)
-  {
-    digitalWrite(GREEN_LED, HIGH);
-    querycard();
+  // if it's 2 it's a maintainer.
+  if (result == 1 || result == 2) {
+    Serial.println("access granted");
+  } else {
+    Serial.println("access denied");
   }
-  delay(500);
-  digitalWrite(RED_LED, LOW);
-  digitalWrite(GREEN_LED, LOW);
-  delay(500);
 }
 
+bool networkCheckToolStatus()
+{
+  char path[13 + 2];
+  int i;
+  int result = -1;
+  
+  Serial.print("Connecting to http://");
+  Serial.println(serverName);
 
+  if (client.connect(serverName, 1234)) {
+    Serial.println("Querying");
+    sprintf(path, "GET /%d/status/", nodeID);
+
+    Serial.println(path);
+    client.println(path);
+    client.println();
+
+    int timeout = 0;
+
+    while (!client.available()) {
+       delay(25);
+       timeout++;
+       if (timeout > 400) {
+         Serial.println("Timeout :(");
+         break;
+       }
+    }
+
+    if (client.available()) {
+      char c;
+      Serial.print("Got Response: >");
+
+      while (client.available()) {
+        c = client.read();
+        Serial.print(c);
+        if (result == -1) {
+          result = c - '0';
+        }
+      }
+
+      Serial.println("<");
+      Serial.println("Disconnecting");
+      client.flush();
+      client.stop();
+    }
+    Serial.println();
+  } else {
+    // if you didn't get a connection to the server:
+    Serial.println("connection failed");
+  }
+  // if it's 2 it's a maintainer.
+  if (result == 1) {
+    Serial.println("tool is service");
+    return true;
+  } else {
+    Serial.println("tool out of service");
+  }
+  
+  return false;
+}
 
 void dumpHex(char* buffer, int len)
 {
