@@ -17,7 +17,7 @@ PN532 nfc(pnhsu);
 byte mac[] = { 0x00, 0xAA, 0xBB, 0xCC, 0xDE, 0x02 };
 EthernetClient client;
 
-char serverName[] = "babbage.lan.london.hackspace.org.uk";
+char serverName[] = "acserver.lan.london.hackspace.org.uk";
 
 unsigned char serNum[5];
 unsigned char serNum7[8];
