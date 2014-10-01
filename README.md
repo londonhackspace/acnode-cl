@@ -8,4 +8,8 @@ How to get this running with a cooqrobot/elechouse pn532 breakout board:
 
 # This sketch uses Serial6 which uses PP0 and PP1, aka pins 43 and 44 on the connected launchpad, connect those too, PP0 goes to RX on the board and PP1 to TX.
 
+See here for the Connected Launchpad pinouts:
+
+http://energia.nu/pin-maps/guide_tm4c129launchpad/
+
 N.B.: use energia-0101E0012, not energia-0101E0013, as 13 breaks things (i think it defines a function called wakeup which clashes with the one in the PN532 stuff).
