@@ -1,24 +1,29 @@
 /*
 ACNodeClient
- v0.1
- tgreer@tsone.net.uk
+ v0.2+
  
  */
 #include <Ethernet.h>
-#include <Mfrc522.h>
-#include <SPI.h>
 #include <EEPROM.h>
+
+#define DEBUG 1
+#include <PN532_debug.h>
+#include <PN532_HSU.h>
+#include <PN532.h>
+
+PN532_HSU pnhsu(Serial6);
+PN532 nfc(pnhsu);
 
 byte mac[] = { 0x00, 0xAA, 0xBB, 0xCC, 0xDE, 0x02 };
 EthernetClient client;
 
 char serverName[] = "babbage.lan.london.hackspace.org.uk";
-int chipSelectPin = 42;
-int NRSTPD = 13;
-Mfrc522 Mfrc522(chipSelectPin, NRSTPD);
+
 unsigned char serNum[5];
 unsigned char serNum7[8];
+
 enum cardTypes { CARDUID4, CARDUID7, NOCARD };
+
 cardTypes cardType = NOCARD;
 
 /* config me */
@@ -27,6 +32,11 @@ int nodeID = -1;
 void setup() {
   Serial.begin(9600);
   Serial.println("\n\nACNode Client Startup");
+  // lets use all the LED's
+  pinMode(D1_LED, OUTPUT);     
+  pinMode(D2_LED, OUTPUT);     
+  pinMode(D3_LED, OUTPUT);     
+  pinMode(D4_LED, OUTPUT);     
 
 //  nodeID = EEPROM.read(0);
   
@@ -57,16 +67,30 @@ void setup() {
   digitalWrite(RED_LED, HIGH);
   digitalWrite(GREEN_LED, LOW);
 
-  Serial.println("Initialising Mfrc522");
+  Serial.println("Initialising PN532");
 
-  SPI.setModule(2);
+  nfc.begin();
 
-  pinMode(chipSelectPin, OUTPUT);
-  digitalWrite(chipSelectPin, LOW);
-  pinMode(NRSTPD, OUTPUT);   
-  digitalWrite(NRSTPD, HIGH);
+  uint32_t versiondata = nfc.getFirmwareVersion();
 
-  Mfrc522.Init();
+  if (! versiondata) {
+    Serial.print("Didn't find PN53x board");
+    while (1); // halt
+  }
+  
+  // Got ok data, print it out!
+  Serial.print("Found chip PN5"); Serial.println((versiondata>>24) & 0xFF, HEX); 
+  Serial.print("Firmware ver. "); Serial.print((versiondata>>16) & 0xFF, DEC); 
+  Serial.print('.'); Serial.println((versiondata>>8) & 0xFF, DEC);
+
+  // Set the max number of retry attempts to read from a card
+  // This prevents us from waiting forever for a card, which is
+  // the default behaviour of the PN532.
+  nfc.setPassiveActivationRetries(0xFF);
+  
+  // configure board to read RFID tags
+  nfc.SAMConfig();
+
   
   Serial.println("Checking tool status");
   Serial.println(networkCheckToolStatus());
@@ -91,91 +115,44 @@ void readcard()
 {
   unsigned char i,tmp;
   unsigned char status;
-  unsigned char temp[MAX_LEN];
   unsigned char RC_size;
   unsigned char blockAddr;
   String mynum = "";
 
-  temp[1] = 0;
-  temp[2] = 0;
+  boolean success;
+  uint8_t uid[] = { 0, 0, 0, 0, 0, 0, 0 };  // Buffer to store the returned UID
+  uint8_t uidLength;                        // Length of the UID (4 or 7 bytes depending on ISO14443A card type)
 
-  status = Mfrc522.Request(PICC_REQIDL, temp);
-
-  if (status != MI_OK)
+  // Wait for an ISO14443A type cards (Mifare, etc.).  When one is found
+  // 'uid' will be populated with the UID, and uidLength will indicate
+  // if the uid is 4 bytes (Mifare Classic) or 7 bytes (Mifare Ultralight)
+  success = nfc.readPassiveTargetID(PN532_MIFARE_ISO14443A, &uid[0], &uidLength);
+  
+  if (!success)
   {
     cardType = NOCARD;
     return;
   }
-  Serial.print("Card detected. ATQA:");
-  dumpHex((char*)temp, 2);
-  Serial.println("");
 
-  status = Mfrc522.Anticoll(temp);
-  if (status == MI_OK)
-  {
-    memcpy(serNum, temp, 5);
-    unsigned char sak = 0;
+  dumpHex(uid, uidLength);
 
-    // status here is actually the size of something.
-    status = Mfrc522.SelectTag(serNum, &sak);
-
-    if ((sak & 0x04) == 0x00)
-    {
-      //      Serial.print(" UID: ");
-      dumpHex((char*)serNum, 4);
-      Serial.println("");
+  switch (uidLength) {
+    case 4:
+      memcpy(serNum, uid, 4);
+      serNum[4] = 0;
       cardType = CARDUID4;
-      
-      if ((sak & 0x20) == 0x20)
-      {
-        //ISO/IEC FCD 14443-3: Table 9 — Coding of SAK
-        Serial.println(" UID complete, PICC compliant with ISO/IEC 14443-4");
-        //send RATS (Request for Answer To Select)
-
-        unsigned char ats[MAX_LEN];
-        unsigned int unLen = 0;
-        status = Mfrc522.RATS(ats, &unLen);
-
-        if (status == MI_OK)
-        {
-          Serial.println(" ATS: ");
-          dumpHex((char*)ats, ats[0]);
-          Serial.println("");
-        }
-      }
-      /*      Serial.print(" SAK: ");
-       Serial.print(sak, HEX);
-       Serial.println("");*/
-      return;
-    }
-    else
-    {
-      //cascading level 2
-      memcpy(serNum7, &serNum[1], 3);//cascading L1
-      status = Mfrc522.Anticoll2(temp);
-      if (status == MI_OK)
-      {
-        memcpy(&serNum7[3], temp, 4);
-        status = Mfrc522.SelectTag2(&serNum7[3], &sak);
-        //        Serial.print(" UID: ");
-        dumpHex((char*)serNum7, 7);
-        Serial.println("");
-
-        cardType = CARDUID7;
-
-        /*        Serial.print(" SAK: ");
-         Serial.print(sak, HEX);
-         Serial.println("");*/
-        return;
-      }
-      else
-      {
-        Serial.println("ANTICOLL error: cascading level 2");
-      }
-    }
+      break;
+    case 7:
+      memcpy(serNum7, uid, 7);
+      serNum[7] = 0;
+      cardType = CARDUID7;
+      break;
+    default:
+      Serial.print("Odd card length?: ");
+      cardType = NOCARD;
+      Serial.println(uidLength);
+      break;
   }
-
-  Mfrc522.Halt();       
 }
 
 void querycard()
@@ -312,7 +289,7 @@ bool networkCheckToolStatus()
   return false;
 }
 
-void dumpHex(char* buffer, int len)
+void dumpHex(const uint8_t* buffer, int len)
 {
   for(byte i=0; i < len; i++) {
     char text[4];
@@ -320,10 +297,6 @@ void dumpHex(char* buffer, int len)
     Serial.print(text);
 
   }
-  //Serial.println(" ");
+  Serial.println(" ");
 }
-
-
-
-
 
