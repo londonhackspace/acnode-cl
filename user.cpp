@@ -190,8 +190,8 @@ void list_users(void) {
     }
     if (u.invalid == 0) {
       dump_user(&u);
+      count++;
     }
-    count++;
     address += sizeof(user);
   }
   Serial.print("currently storing: ");
