@@ -26,9 +26,9 @@ PN532_HSU pnhsu(Serial6);
 PN532 nfc(pnhsu);
 
 EthernetClient client;
+boolean network = false;
 
-unsigned char serNum[5];
-unsigned char serNum7[8];
+unsigned char serNum[8];
 
 enum cardTypes { CARDUID4, CARDUID7, NOCARD };
 
@@ -36,6 +36,7 @@ cardTypes cardType = NOCARD;
 
 void setup() {
   Serial.begin(9600);
+  Serial.println("");
   Serial.println("\n\nACNode Client Startup");
   // lets use all the LED's
   pinMode(D1_LED, OUTPUT);
@@ -58,18 +59,20 @@ void setup() {
   // start the Ethernet connection:
   if (Ethernet.begin(acsettings.mac) == 0) {
     Serial.println("Failed to configure Ethernet using DHCP");
-    // no point in carrying on, so do nothing forevermore:
-    // ^-- err, lol?
-    while(true);
+  } else {
+    network = true;
   }
-  // print your local IP address:
-  Serial.print("My IP address: ");
-  for (byte thisByte = 0; thisByte < 4; thisByte++) {
-    // print the value of each byte of the IP address:
-    Serial.print(Ethernet.localIP()[thisByte], DEC);
-    Serial.print(".");
+
+  if (network) {
+    // print your local IP address:
+    Serial.print("My IP address: ");
+    for (byte thisByte = 0; thisByte < 4; thisByte++) {
+      // print the value of each byte of the IP address:
+      Serial.print(Ethernet.localIP()[thisByte], DEC);
+      Serial.print(".");
+    }
+    Serial.println();
   }
-  Serial.println();
 
   pinMode(GREEN_LED, OUTPUT);
   pinMode(RED_LED, OUTPUT);
@@ -100,11 +103,13 @@ void setup() {
   
   // configure board to read RFID tags
   nfc.SAMConfig();
-  
-  Serial.println("Checking tool status");
-  int status = networkCheckToolStatus();
-  Serial.println(status);
-  acsettings.status = status;
+
+  if (network) {
+    Serial.println("Checking tool status");
+    int status = networkCheckToolStatus();
+    Serial.println(status);
+    acsettings.status = status;
+  }
 
   Serial.println("press enter for a prompt");
 }
@@ -116,6 +121,8 @@ unsigned long intstart = 0;
 // can we do a delay() thats interrupted by the arrival of serial data?
 // oh for an rtos and threads/callbacks etc... :(
 //
+// using the irq from the card reader would help.
+//
 void check_ser(void) {
   if (Serial.available()) {
     intstart = millis();
@@ -123,12 +130,26 @@ void check_ser(void) {
   }
 }
 
+// current user
+user *cu = NULL;
+int grace_period = 0;
+
 void loop(){
+  user *tu;
+  boolean check = true;
+
+  if (!interactive) {
+    if (cu != NULL) {
+      Serial.print("user active: ");
+      dump_user(cu);
+      // tool enable etc here.
+    }
+  }
+
   if (!interactive) {
     digitalWrite(RED_LED, HIGH);
   }
   check_ser();
-
 
   if (!interactive) {
     // the 1 second delay looking for cards is annoying when trying to use the cli...
@@ -137,27 +158,122 @@ void loop(){
     {
       int status;
       digitalWrite(GREEN_LED, HIGH);
-      status = querycard();
-      if (status > 0) {
-        user * nu;
-        nu = new user;
-        if (cardType == CARDUID7) {
-          nu->uidlen = 1;
-          memcpy(nu->uid, serNum, 7);
+      user *nu;
+      nu = new user;
+      memset(nu, 0, sizeof(user));
+
+      if (cardType == CARDUID7) {
+        nu->uidlen = 1;
+        memcpy(nu->uid, serNum, 7);
+      } else {
+        memcpy(nu->uid, serNum, 4);
+      }
+
+      // we have a possibly new card, check it against the cache.
+      tu = get_user(nu);
+
+      // was it in the cache?
+      if (tu != NULL && cu != NULL) {
+        // same as current card?
+        if (compare_user(cu, tu)) {
+          Serial.println("card not changed");
+          // no need to check against the server.
+          check = false;
+          grace_period = 3;
+        }
+        delete tu;
+      } else if (cu != NULL and tu == NULL) {
+        // not in the cache.
+        dump_user(cu);
+        dump_user(nu);
+        if (compare_uid(cu, nu)) {
+          // no need to check against the server, we've already got the card
+          check = false;
+          grace_period = 3;
+        }
+      }
+
+      if (network && check) {
+        status = querycard();
+        Serial.println(status);
+
+        if (status >= 0) {
+          nu->status = 1;
+          nu->invalid = 0;
+          nu->end = 0;
+          nu->maintainer = 0;
+
+          // maintainer?
+          if (status == 2) {
+            nu->maintainer = 1;
+          }
+
+          // user exists but can't do anything
+          // so mark as invalid
+          if (status == 0) {
+            nu->status = 0;
+          }
+
+          tu = get_user(nu);
+
+          if (tu != NULL) {
+            if (!compare_user(tu, nu)) {
+              Serial.println("user changed, updating cache");
+              if (status == 0) {
+                nu->invalid = 1;
+              }
+              store_user(nu);
+            }
+            delete tu;
+          } else {
+            // new user, so just store it.
+            if (nu-> status == 1) {
+              store_user(nu);
+            }
+          }
         } else {
-          memcpy(nu->uid, serNum, 4);
+          // network error
+          Serial.println("network error, trying to find cached card");
+          tu = get_user(nu);
+          if (tu != NULL) {
+            delete nu;
+            nu = tu;
+            dump_user(tu);
+          }
         }
-        nu->status = 1;
-        nu->valid = 0;
-        nu->end = 0;
-        // maintainer?
-        if (status == 2) {
-          nu->maintainer = 1;
+      } else {
+        // no network or no need to check, cached users only.
+        Serial.println("trying to find cached card");
+        tu = get_user(nu);
+        if (tu != NULL) {
+          dump_user(tu);
+          delete nu;
+          nu = tu;
         }
-        store_user(nu);
-        delete nu;
+      }
+      
+      if (cu != NULL) {
+        delete cu;
+      }
+      cu = new user;
+      memcpy(cu, nu, sizeof(user));
+      grace_period = 3;
+      delete nu;
+    } else {
+      if (cu != NULL) {
+        // the "TEMP" card (uid 040957827B3280) is very wierd
+        // and only reads on alternate cycles, so allow a card to disappear for a bit.
+        if (grace_period > 0) {
+          grace_period--;
+        } else {
+          Serial.println("Card removed");
+          delete cu;
+          cu = NULL;
+          grace_period = 0;
+        }
       }
     }
+    
     check_ser();
     delay(500);
     check_ser();
@@ -167,8 +283,8 @@ void loop(){
     delay(500);
     check_ser();
   }
-  // 30 second timeout
-  if (interactive && intstart + (1000 * 30) < millis()) {
+  // 10 second timeout
+  if (interactive && intstart + (1000 * 10) < millis()) {
     interactive = false;
     intstart = 0;
   }
@@ -203,17 +319,17 @@ void readcard()
     return;
   }
 
+  Serial.print("Got card with uid: ");
   dumpHex(uid, uidLength);
+  Serial.println("");
 
   switch (uidLength) {
     case 4:
       memcpy(serNum, uid, 4);
-      serNum[4] = 0;
       cardType = CARDUID4;
       break;
     case 7:
-      memcpy(serNum7, uid, 7);
-      serNum[7] = 0;
+      memcpy(serNum, uid, 7);
       cardType = CARDUID7;
       break;
     default:
@@ -243,15 +359,15 @@ int querycard()
     Serial.println("Querying");
     sprintf(path, "GET /%d/card/", acsettings.nodeid);
 
+    int uidlen = 0;
+    
     if (cardType == CARDUID4) {
-      for(byte i=0; i < 4; i++) {
-        sprintf(path + strlen(path), "%02X\00", serNum[i]);
-      }
+      uidlen = 4;
+    } else if (cardType == CARDUID7) {
+      uidlen = 7;
     }
-    else if (cardType == CARDUID7) {
-      for(byte i=0; i < 7; i++) {
-        sprintf(path + strlen(path), "%02X\00", serNum7[i]);
-      }
+    for(byte i=0; i < uidlen; i++) {
+      sprintf(path + strlen(path), "%02X\00", serNum[i]);
     }
     Serial.println(path);
     client.println(path);

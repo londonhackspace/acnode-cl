@@ -8,7 +8,7 @@ struct user {
 unsigned int maintainer :1; // 1 if maintainer
 unsigned int uidlen     :1; // 1 if 7, otherwise 4
 unsigned int status     :1; // 1 if enabled
-unsigned int valid      :1; // 0 if valid - by default the eeprom is set to 0xff
+unsigned int invalid    :1; // 0 if valid - by default the eeprom is set to 0xff
 unsigned int end        :1; // 1 if after the last valid uid 
 unsigned int            :3; // pad to a whole byte
   uint8_t uid[7];
@@ -17,9 +17,17 @@ unsigned int            :3; // pad to a whole byte
 // the base address (begining of 2nd block)
 #define USERBASE (64)
 
-void dump_user(user * u);
-void store_user(user *u);
-void list_users(void);
+user *get_user(user *u);
+int find_user(user *u);
+boolean compare_user(user *u1, user *u2);
+boolean compare_uid(user *u1, user *u2);
 
+void dump_user(user * u);
+int find_free(void);
+void store_user(user *u);
+void write_user(const user *u, int address);
+void list_users(void);
+int nuke_users(void);
+  
 #endif
 

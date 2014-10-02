@@ -15,6 +15,14 @@ void init_settings(void) {
     }
   }
 
+  if (sizeof(acsettings) > 64) {
+    Serial.print("acsettings wrong size, must be smaller than 64: ");
+    Serial.println(sizeof(acsettings));
+    while (true) {
+      ;
+    }
+  }
+
   uint32_t ret, eesize, blocks;
 
   ret = EEPROMInit();

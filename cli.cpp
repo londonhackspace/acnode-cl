@@ -32,13 +32,14 @@ void mrlprint(const char * str) {
 #define _CMD_CLEAR  "clear"
 #define _CMD_LIST   "list"
 #define _CMD_REBOOT "reboot"
+#define _CMD_NUKE   "nuke"
 
-#define _NUM_OF_CMD 11
+#define _NUM_OF_CMD 12
 #define _NUM_OF_VER_SCMD 2
 
 //available  commands
 char * keyworld [] = {
-  _CMD_HELP, _CMD_SHOW, _CMD_MAC, _CMD_SERVER, _CMD_NODEID, _CMD_PORT, _CMD_VER, _CMD_SAVE, _CMD_CLEAR, _CMD_LIST, _CMD_REBOOT};
+  _CMD_HELP, _CMD_SHOW, _CMD_MAC, _CMD_SERVER, _CMD_NODEID, _CMD_PORT, _CMD_VER, _CMD_SAVE, _CMD_CLEAR, _CMD_LIST, _CMD_REBOOT, _CMD_NUKE};
 // version subcommands
 char * ver_keyworld [] = {
   _SCMD_MRL, _SCMD_ACNODE};
@@ -60,6 +61,7 @@ void print_help ()
   Serial.println ("\tclear - clear the current settings");
   Serial.println ("\tlist - list the cached users");
   Serial.println ("\treboot - reboot the node");
+  Serial.println ("\tnuke - clear the cached users");
 }
 
 bool ishex(char c) {
@@ -276,12 +278,16 @@ int mrlexecute (int argc, const char * const * argv)
       }
     }
     else if (strcmp (argv[i], _CMD_LIST) == 0) {
-      Serial.print("Listing cached users... ");
+      Serial.println("Listing cached users... ");
       list_users();
     }
     else if (strcmp (argv[i], _CMD_REBOOT) == 0) {
       Serial.print("Rebooting...!");
       SysCtlReset();
+    }
+    else if (strcmp (argv[i], _CMD_NUKE) == 0) {
+      Serial.println("Nukeing cached users... ");
+      nuke_users();
     }
     else {
       Serial.print ("command: '");
