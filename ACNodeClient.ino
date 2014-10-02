@@ -61,6 +61,8 @@ void setup() {
     Serial.println("Failed to configure Ethernet using DHCP");
   } else {
     network = true;
+    Ethernet.enableLinkLed();
+    Ethernet.enableActivityLed();
   }
 
   if (network) {
