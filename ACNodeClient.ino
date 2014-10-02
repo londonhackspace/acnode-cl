@@ -109,8 +109,8 @@ void setup() {
 boolean interactive = false;
 unsigned long intstart = 0;
 
-
-// can we do a delay() thats inturrupted by the arrival of serial data?
+//
+// can we do a delay() thats interrupted by the arrival of serial data?
 // oh for an rtos and threads/callbacks etc... :(
 //
 void check_ser(void) {
@@ -231,6 +231,8 @@ void querycard()
     }
     Serial.println(path);
     client.println(path);
+    client.print("Host: ");
+    client.println(acsettings.servername);
     client.println();
 
     int timeout = 0;
@@ -251,6 +253,9 @@ void querycard()
       while (client.available()) {
         c = client.read();
         Serial.print(c);
+        if (c == '\n') {
+          Serial.print('\r');
+        }
         if (result == -1) {
           result = c - '0';
         }
@@ -289,6 +294,8 @@ bool networkCheckToolStatus()
 
     Serial.println(path);
     client.println(path);
+    client.print("Host: ");
+    client.println(acsettings.servername);
     client.println();
 
     int timeout = 0;
@@ -309,6 +316,9 @@ bool networkCheckToolStatus()
       while (client.available()) {
         c = client.read();
         Serial.print(c);
+        if (c == '\n') {
+          Serial.print('\r');
+        }
         if (result == -1) {
           result = c - '0';
         }
