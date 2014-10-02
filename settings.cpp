@@ -70,6 +70,15 @@ void dump_settings(settings acsettings) {
   
   Serial.print("nodeid: ");
   Serial.println(acsettings.nodeid);
+
+  Serial.print("status: ");
+  if (acsettings.status == 0) {
+    Serial.println("out of service");
+  } else if (acsettings.status == 1) {
+    Serial.println("in service");
+  } else {
+    Serial.println("invalid status");
+  }
 }
 
 
@@ -95,6 +104,7 @@ settings get_settings(void) {
   strncpy(acsettings.servername, "acserver.lan.london.hackspace.org.uk", SERVERNAMELEN);
   acsettings.nodeid = -1;
   acsettings.port = 1234;
+  acsettings.status = 0;
 
   return acsettings;
 }

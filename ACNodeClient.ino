@@ -37,10 +37,10 @@ void setup() {
   Serial.begin(9600);
   Serial.println("\n\nACNode Client Startup");
   // lets use all the LED's
-  pinMode(D1_LED, OUTPUT);     
-  pinMode(D2_LED, OUTPUT);     
-  pinMode(D3_LED, OUTPUT);     
-  pinMode(D4_LED, OUTPUT);     
+  pinMode(D1_LED, OUTPUT);
+  pinMode(D2_LED, OUTPUT);
+  pinMode(D3_LED, OUTPUT);
+  pinMode(D4_LED, OUTPUT);
   
   init_settings();
 
@@ -101,7 +101,9 @@ void setup() {
   nfc.SAMConfig();
   
   Serial.println("Checking tool status");
-  Serial.println(networkCheckToolStatus());
+  int status = networkCheckToolStatus();
+  Serial.println(status);
+  acsettings.status = status;
 
   Serial.println("press enter for a prompt");
 }
@@ -201,14 +203,14 @@ void readcard()
   }
 }
 
-void querycard()
+int querycard()
 {
   char path[13 + 14 + 1];
   int i;
   int result = -1;
 
   if (cardType == NOCARD) {
-    return;
+    return -1;
   }
   
   Serial.print("Connecting to http://");
@@ -256,7 +258,7 @@ void querycard()
         if (c == '\n') {
           Serial.print('\r');
         }
-        if (result == -1) {
+        if (result == -1 && isdigit(c)) {
           result = c - '0';
         }
       }
@@ -277,6 +279,7 @@ void querycard()
   } else {
     Serial.println("access denied");
   }
+  return result;
 }
 
 bool networkCheckToolStatus()
@@ -336,7 +339,7 @@ bool networkCheckToolStatus()
   }
   // if it's 2 it's a maintainer.
   if (result == 1) {
-    Serial.println("tool is service");
+    Serial.println("tool is in service");
     return true;
   } else {
     Serial.println("tool out of service");
