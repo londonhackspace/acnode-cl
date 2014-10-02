@@ -4,20 +4,27 @@ ACNodeClient
  
  */
 #include <Ethernet.h>
-#include <EEPROM.h>
 
 #define DEBUG 1
 #include <PN532_debug.h>
 #include <PN532_HSU.h>
 #include <PN532.h>
 
+#include "settings.h"
+#include "microrl.h"
+#include "cli.h"
+#include "user.h"
+
+extern settings acsettings;
+
+// create microrl object and pointer on it
+microrl_t rl;
+microrl_t * prl = &rl;
+
 PN532_HSU pnhsu(Serial6);
 PN532 nfc(pnhsu);
 
-byte mac[] = { 0x00, 0xAA, 0xBB, 0xCC, 0xDE, 0x02 };
 EthernetClient client;
-
-char serverName[] = "acserver.lan.london.hackspace.org.uk";
 
 unsigned char serNum[5];
 unsigned char serNum7[8];
@@ -25,9 +32,6 @@ unsigned char serNum7[8];
 enum cardTypes { CARDUID4, CARDUID7, NOCARD };
 
 cardTypes cardType = NOCARD;
-
-/* config me */
-int nodeID = -1;
 
 void setup() {
   Serial.begin(9600);
@@ -37,16 +41,21 @@ void setup() {
   pinMode(D2_LED, OUTPUT);     
   pinMode(D3_LED, OUTPUT);     
   pinMode(D4_LED, OUTPUT);     
-
-//  nodeID = EEPROM.read(0);
   
-  if (nodeID == 0 || nodeID < 0) {
-    Serial.println("nodeID not set, setting to 2");
-    nodeID = 2;
-//    EEPROM.write(0, 2);
-  }
+  init_settings();
+
+  acsettings = get_settings();
+  dump_settings(acsettings);
+
+  microrl_init (prl, mrlprint);
+  // set callback for execute
+  microrl_set_execute_callback (prl, mrlexecute);
+
+  // set callback for completion
+  microrl_set_complete_callback (prl, mrlcomplete);
+
   // start the Ethernet connection:
-  if (Ethernet.begin(mac) == 0) {
+  if (Ethernet.begin(acsettings.mac) == 0) {
     Serial.println("Failed to configure Ethernet using DHCP");
     // no point in carrying on, so do nothing forevermore:
     // ^-- err, lol?
@@ -90,25 +99,62 @@ void setup() {
   
   // configure board to read RFID tags
   nfc.SAMConfig();
-
   
   Serial.println("Checking tool status");
   Serial.println(networkCheckToolStatus());
-  
+
+  Serial.println("press enter for a prompt");
+}
+
+boolean interactive = false;
+unsigned long intstart = 0;
+
+
+// can we do a delay() thats inturrupted by the arrival of serial data?
+// oh for an rtos and threads/callbacks etc... :(
+//
+void check_ser(void) {
+  if (Serial.available()) {
+    intstart = millis();
+    interactive = true;
+  }
 }
 
 void loop(){
-  digitalWrite(RED_LED, HIGH);
-  readcard();
-  if (cardType != NOCARD)
-  {
-    digitalWrite(GREEN_LED, HIGH);
-    querycard();
+  if (!interactive) {
+    digitalWrite(RED_LED, HIGH);
   }
-  delay(500);
-  digitalWrite(RED_LED, LOW);
-  digitalWrite(GREEN_LED, LOW);
-  delay(500);
+  check_ser();
+
+
+  if (!interactive) {
+    // the 1 second delay looking for cards is annoying when trying to use the cli...
+    readcard();
+    if (cardType != NOCARD)
+    {
+      digitalWrite(GREEN_LED, HIGH);
+      querycard();
+    }
+    check_ser();
+    delay(500);
+    check_ser();
+    digitalWrite(RED_LED, LOW);
+    digitalWrite(GREEN_LED, LOW);
+    check_ser();
+    delay(500);
+    check_ser();
+  }
+  // 30 second timeout
+  if (interactive && intstart + (1000 * 30) < millis()) {
+    interactive = false;
+    intstart = 0;
+  }
+  // put received char from stdin to microrl lib
+  if (Serial.available()) {
+    char c;
+    c = Serial.read();
+    microrl_insert_char (prl, c);
+  }
 }
 
 void readcard()
@@ -166,12 +212,12 @@ void querycard()
   }
   
   Serial.print("Connecting to http://");
-  Serial.println(serverName);
+  Serial.println(acsettings.servername);
 
-  if (client.connect(serverName, 1234)) {
+  if (client.connect(acsettings.servername, acsettings.port)) {
     Serial.println("Connected");
     Serial.println("Querying");
-    sprintf(path, "GET /%d/card/", nodeID);
+    sprintf(path, "GET /%d/card/", acsettings.nodeid);
 
     if (cardType == CARDUID4) {
       for(byte i=0; i < 4; i++) {
@@ -235,11 +281,11 @@ bool networkCheckToolStatus()
   int result = -1;
   
   Serial.print("Connecting to http://");
-  Serial.println(serverName);
+  Serial.println(acsettings.servername);
 
-  if (client.connect(serverName, 1234)) {
+  if (client.connect(acsettings.servername, acsettings.port)) {
     Serial.println("Querying");
-    sprintf(path, "GET /%d/status/", nodeID);
+    sprintf(path, "GET /%d/status/", acsettings.nodeid);
 
     Serial.println(path);
     client.println(path);
