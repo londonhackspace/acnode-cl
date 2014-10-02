@@ -14,6 +14,7 @@ ACNodeClient
 #include "microrl.h"
 #include "cli.h"
 #include "user.h"
+#include "utils.h"
 
 extern settings acsettings;
 
@@ -134,8 +135,28 @@ void loop(){
     readcard();
     if (cardType != NOCARD)
     {
+      int status;
       digitalWrite(GREEN_LED, HIGH);
-      querycard();
+      status = querycard();
+      if (status > 0) {
+        user * nu;
+        nu = new user;
+        if (cardType == CARDUID7) {
+          nu->uidlen = 1;
+          memcpy(nu->uid, serNum, 7);
+        } else {
+          memcpy(nu->uid, serNum, 4);
+        }
+        nu->status = 1;
+        nu->valid = 0;
+        nu->end = 0;
+        // maintainer?
+        if (status == 2) {
+          nu->maintainer = 1;
+        }
+        store_user(nu);
+        delete nu;
+      }
     }
     check_ser();
     delay(500);
@@ -208,6 +229,7 @@ int querycard()
   char path[13 + 14 + 1];
   int i;
   int result = -1;
+  boolean first = true;
 
   if (cardType == NOCARD) {
     return -1;
@@ -258,8 +280,12 @@ int querycard()
         if (c == '\n') {
           Serial.print('\r');
         }
-        if (result == -1 && isdigit(c)) {
-          result = c - '0';
+        // we only want the 1st char returned
+        if (first) {
+          if (isdigit(c)) {
+            result = c - '0';
+          }
+          first = false;
         }
       }
 
@@ -287,6 +313,7 @@ bool networkCheckToolStatus()
   char path[13 + 2];
   int i;
   int result = -1;
+  boolean first = true;
   
   Serial.print("Connecting to http://");
   Serial.println(acsettings.servername);
@@ -322,8 +349,11 @@ bool networkCheckToolStatus()
         if (c == '\n') {
           Serial.print('\r');
         }
-        if (result == -1) {
-          result = c - '0';
+        if (first) {
+          if (isdigit(c)) {
+            result = c - '0';
+          }
+          first = false;
         }
       }
 
@@ -348,14 +378,4 @@ bool networkCheckToolStatus()
   return false;
 }
 
-void dumpHex(const uint8_t* buffer, int len)
-{
-  for(byte i=0; i < len; i++) {
-    char text[4];
-    sprintf(text, "%02X\x00", (byte)(*(buffer + i)));
-    Serial.print(text);
-
-  }
-  Serial.println(" ");
-}
 

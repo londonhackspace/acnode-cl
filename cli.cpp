@@ -3,8 +3,10 @@
 #include <limits.h>
 #include <stdio.h>
 #include <errno.h>
+#include <driverlib/sysctl.h>
 
 #include "settings.h"
+#include "user.h"
 #include "version.h"
 #include "microrl.h"
 
@@ -21,20 +23,22 @@ void mrlprint(const char * str) {
 #define _CMD_MAC    "mac"
 #define _CMD_SERVER "server"
 #define _CMD_NODEID "nodeid"
-#define _CMD_PORT "port"
+#define _CMD_PORT   "port"
 #define _CMD_VER    "version"
 // sub commands for version command
-#define _SCMD_MRL  "microrl"
-#define _SCMD_ACNODE "acnode"
+#define _SCMD_MRL     "microrl"
+#define _SCMD_ACNODE  "acnode"
 #define _CMD_SAVE   "save"
-#define _CMD_CLEAR   "clear"
+#define _CMD_CLEAR  "clear"
+#define _CMD_LIST   "list"
+#define _CMD_REBOOT "reboot"
 
-#define _NUM_OF_CMD 9
+#define _NUM_OF_CMD 11
 #define _NUM_OF_VER_SCMD 2
 
 //available  commands
 char * keyworld [] = {
-  _CMD_HELP, _CMD_SHOW, _CMD_MAC, _CMD_SERVER, _CMD_NODEID, _CMD_PORT, _CMD_VER, _CMD_SAVE, _CMD_CLEAR};
+  _CMD_HELP, _CMD_SHOW, _CMD_MAC, _CMD_SERVER, _CMD_NODEID, _CMD_PORT, _CMD_VER, _CMD_SAVE, _CMD_CLEAR, _CMD_LIST, _CMD_REBOOT};
 // version subcommands
 char * ver_keyworld [] = {
   _SCMD_MRL, _SCMD_ACNODE};
@@ -53,6 +57,9 @@ void print_help ()
   Serial.println ("\tnodeid <id> - set this node's id");
   Serial.println ("\tport <port> - set the port on the server to connect to");
   Serial.println ("\tsave - save the current settings");
+  Serial.println ("\tclear - clear the current settings");
+  Serial.println ("\tlist - list the cached users");
+  Serial.println ("\treboot - reboot the node");
 }
 
 bool ishex(char c) {
@@ -267,6 +274,14 @@ int mrlexecute (int argc, const char * const * argv)
         Serial.print("Error: ");
         Serial.println(ret);
       }
+    }
+    else if (strcmp (argv[i], _CMD_LIST) == 0) {
+      Serial.print("Listing cached users... ");
+      list_users();
+    }
+    else if (strcmp (argv[i], _CMD_REBOOT) == 0) {
+      Serial.print("Rebooting...!");
+      SysCtlReset();
     }
     else {
       Serial.print ("command: '");
