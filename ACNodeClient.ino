@@ -19,6 +19,7 @@ ACNodeClient
 #include "tool.h"
 
 extern settings acsettings;
+extern int relay_pin;
 
 // create microrl object and pointer on it
 microrl_t rl;
@@ -49,7 +50,9 @@ void setup() {
   // used for ethernet link and activity
   pinMode(D3_LED, OUTPUT);
   pinMode(D4_LED, OUTPUT);
-  
+
+  pinMode(relay_pin, OUTPUT);     
+
   init_settings();
 
   acsettings = get_settings();
