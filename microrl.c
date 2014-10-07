@@ -17,6 +17,8 @@ BUGS and TODO:
 extern "C" {
 #endif
 
+#define true  1
+#define false 0
 
 //#define DBG(...) fprintf(stderr, "\033[33m");fprintf(stderr,__VA_ARGS__);fprintf(stderr,"\033[0m");
 

@@ -15,8 +15,8 @@ void init_settings(void) {
     }
   }
 
-  if (sizeof(acsettings) > 64) {
-    Serial.print("acsettings wrong size, must be smaller than 64: ");
+  if (sizeof(acsettings) > 128) {
+    Serial.print("acsettings wrong size, must be smaller than 128: ");
     Serial.println(sizeof(acsettings));
     while (true) {
       ;
@@ -56,6 +56,9 @@ void dump_settings(settings acsettings) {
   int i;
   char tmp[3];
 
+  Serial.print("Tool: ");
+  Serial.println(acsettings.toolname);
+
   Serial.print("Mac address: ");
 
   for (i = 0; i < 6; i++) {
@@ -87,6 +90,13 @@ void dump_settings(settings acsettings) {
   } else {
     Serial.println("invalid status");
   }
+
+  Serial.print("Syslog Server: ");
+  if (isprint(acsettings.syslogserver[0])) {
+    Serial.println(acsettings.syslogserver);
+  } else {
+     Serial.println("!Invalid!");
+  }
 }
 
 
@@ -110,6 +120,8 @@ settings get_settings(void) {
   acsettings.mac[5] = 0x02;
 
   strncpy(acsettings.servername, "acserver.lan.london.hackspace.org.uk", SERVERNAMELEN);
+  strncpy(acsettings.syslogserver, "syslog.lan.london.hackspace.org.uk", SERVERNAMELEN);
+  strncpy(acsettings.toolname, "ACNode", SERVERNAMELEN);
   acsettings.nodeid = -1;
   acsettings.port = 1234;
   acsettings.status = 0;

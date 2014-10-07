@@ -9,6 +9,7 @@ ACNodeClient
 #include <PN532_debug.h>
 #include <PN532_HSU.h>
 #include <PN532.h>
+#include <syslog.h>
 
 #include "settings.h"
 #include "microrl.h"
@@ -27,6 +28,8 @@ PN532 nfc(pnhsu);
 
 EthernetClient client;
 boolean network = false;
+Syslog syslog;
+
 
 unsigned char serNum[8];
 
@@ -41,6 +44,8 @@ void setup() {
   // lets use all the LED's
   pinMode(D1_LED, OUTPUT);
   pinMode(D2_LED, OUTPUT);
+
+  // used for ethernet link and activity
   pinMode(D3_LED, OUTPUT);
   pinMode(D4_LED, OUTPUT);
   
@@ -82,6 +87,9 @@ void setup() {
   digitalWrite(RED_LED, HIGH);
   digitalWrite(GREEN_LED, LOW);
 
+  syslog.begin(acsettings.syslogserver, acsettings.toolname, LOG_LOCAL0);
+  syslog.syslog(LOG_NOTICE, "Starting up");
+
   Serial.println("Initialising PN532");
 
   nfc.begin();
@@ -90,6 +98,7 @@ void setup() {
 
   if (! versiondata) {
     Serial.print("Didn't find PN53x board");
+    syslog.syslog(LOG_EMERG, "Couldn't find PN532 board");
     while (1); // halt
   }
   
@@ -111,6 +120,9 @@ void setup() {
     int status = networkCheckToolStatus();
     Serial.println(status);
     acsettings.status = status;
+    char tmp[42];
+    snprintf(tmp, 42, "tool status: %d", status);
+    syslog.syslog(LOG_INFO, tmp);
   }
 
   Serial.println("press enter for a prompt");
@@ -300,10 +312,6 @@ void loop(){
 
 void readcard()
 {
-  unsigned char i,tmp;
-  unsigned char status;
-  unsigned char RC_size;
-  unsigned char blockAddr;
   String mynum = "";
 
   boolean success;
@@ -359,7 +367,7 @@ int querycard()
   if (client.connect(acsettings.servername, acsettings.port)) {
     Serial.println("Connected");
     Serial.println("Querying");
-    sprintf(path, "GET /%d/card/", acsettings.nodeid);
+    sprintf(path, "GET /%l/card/", acsettings.nodeid);
 
     int uidlen = 0;
     
@@ -369,7 +377,7 @@ int querycard()
       uidlen = 7;
     }
     for(byte i=0; i < uidlen; i++) {
-      sprintf(path + strlen(path), "%02X\00", serNum[i]);
+      sprintf(path + strlen(path), "%02X", serNum[i]);
     }
     Serial.println(path);
     client.println(path);

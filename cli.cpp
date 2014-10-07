@@ -33,15 +33,17 @@ void mrlprint(const char * str) {
 #define _CMD_LIST   "list"
 #define _CMD_REBOOT "reboot"
 #define _CMD_NUKE   "nuke"
+#define _CMD_SYSLOG "syslog"
+#define _CMD_NAME   "name"
 
-#define _NUM_OF_CMD 12
+#define _NUM_OF_CMD 14
 #define _NUM_OF_VER_SCMD 2
 
 //available  commands
-char * keyworld [] = {
-  _CMD_HELP, _CMD_SHOW, _CMD_MAC, _CMD_SERVER, _CMD_NODEID, _CMD_PORT, _CMD_VER, _CMD_SAVE, _CMD_CLEAR, _CMD_LIST, _CMD_REBOOT, _CMD_NUKE};
+const char *keyworld [] = {
+  _CMD_HELP, _CMD_SHOW, _CMD_MAC, _CMD_SERVER, _CMD_NODEID, _CMD_PORT, _CMD_VER, _CMD_SAVE, _CMD_CLEAR, _CMD_LIST, _CMD_REBOOT, _CMD_NUKE, _CMD_SYSLOG, _CMD_NAME};
 // version subcommands
-char * ver_keyworld [] = {
+const char * ver_keyworld [] = {
   _SCMD_MRL, _SCMD_ACNODE};
 
 // array for comletion
@@ -62,6 +64,8 @@ void print_help ()
   Serial.println ("\tlist - list the cached users");
   Serial.println ("\treboot - reboot the node");
   Serial.println ("\tnuke - clear the cached users");
+  Serial.println ("\tsyslog <hostname> - set the syslog server");
+  Serial.println ("\tname <toolname> - unique name of the tool");
 }
 
 bool ishex(char c) {
@@ -289,6 +293,34 @@ int mrlexecute (int argc, const char * const * argv)
       Serial.println("Nukeing cached users... ");
       nuke_users();
     }
+    else if (strcmp (argv[i], _CMD_SYSLOG) == 0) {
+      if ((++i) < argc) { // if value preset
+        if (strlen (argv[i]) < SERVERNAMELEN) {
+          Serial.print("new server: ");
+          Serial.println(argv[i]);
+          strncpy(acsettings.syslogserver, argv[i], SERVERNAMELEN);
+        } else {
+          Serial.println("syslog server name too long!");
+        }
+      }
+      else {
+        Serial.println("syslog <hostname>");
+      }
+    }
+    else if (strcmp (argv[i], _CMD_NAME) == 0) {
+      if ((++i) < argc) { // if value preset
+        if (strlen (argv[i]) < sizeof(acsettings.toolname)) {
+          Serial.print("toolname: ");
+          Serial.println(argv[i]);
+          strncpy(acsettings.toolname, argv[i], sizeof(acsettings.toolname));
+        } else {
+          Serial.println("toolname too long");
+        }
+      }
+      else {
+        Serial.println("name <toolname>");
+      }
+    }
     else {
       Serial.print ("command: '");
       Serial.print ((char*)argv[i]);
@@ -315,7 +347,7 @@ char ** mrlcomplete(int argc, const char * const * argv)
       // if token is matched (text is part of our token starting from 0 char)
       if (strstr(keyworld [i], bit) == keyworld [i]) {
         // add it to completion set
-        compl_world [j++] = keyworld [i];
+        compl_world [j++] = (char *)keyworld[i];
       }
     }
   }
@@ -323,13 +355,13 @@ char ** mrlcomplete(int argc, const char * const * argv)
     // iterate through subcommand for command _CMD_VER array
     for (int i = 0; i < _NUM_OF_VER_SCMD; i++) {
       if (strstr (ver_keyworld [i], argv [argc-1]) == ver_keyworld [i]) {
-        compl_world [j++] = ver_keyworld [i];
+        compl_world [j++] = (char *)ver_keyworld[i];
       }
     }
   } 
   else { // if there is no token in cmdline, just print all available token
     for (; j < _NUM_OF_CMD; j++) {
-      compl_world[j] = keyworld [j];
+      compl_world[j] = (char *)keyworld[j];
     }
   }
 

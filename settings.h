@@ -16,7 +16,9 @@ struct settings {
   int16_t port;
   int32_t nodeid; // are we calling this "node id" or "tool id"?
   uint8_t status; // 0 = out of service, 1 = in service
-  int8_t padding;
+  char syslogserver[SERVERNAMELEN];
+  char toolname[16];
+  int8_t padding[1];
 };
 
 

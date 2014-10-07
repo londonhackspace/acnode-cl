@@ -210,7 +210,7 @@ void list_users(void) {
 }
 
 // clear the userdb, this marks the first entry as the end.
-int nuke_users(void) {
+void nuke_users(void) {
   user u;
   memset(&u, 0xff, sizeof(user));
   u.invalid = 1;
