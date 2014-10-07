@@ -62,7 +62,7 @@ void dump_settings(settings acsettings) {
   Serial.print("Mac address: ");
 
   for (i = 0; i < 6; i++) {
-    sprintf(tmp, "%02X\00", acsettings.mac[i]);
+    sprintf(tmp, "%02X", acsettings.mac[i]);
     Serial.print(tmp);
     if (i < 5)
       Serial.print(":");
@@ -112,12 +112,17 @@ settings get_settings(void) {
   }
 
   acsettings.valid = 0;
-  acsettings.mac[0] = 0x00;
-  acsettings.mac[1] = 0xAA;
-  acsettings.mac[2] = 0xBB;
-  acsettings.mac[3] = 0xCC;
-  acsettings.mac[4] = 0xDE;
-  acsettings.mac[5] = 0x02;
+
+  uint32_t ui32User0, ui32User1;
+
+  ROM_FlashUserGet(&ui32User0, &ui32User1);
+
+  acsettings.mac[0] = ((ui32User0 >> 0) & 0xff);
+  acsettings.mac[1] = ((ui32User0 >> 8) & 0xff);
+  acsettings.mac[2] = ((ui32User0 >> 16) & 0xff);
+  acsettings.mac[3] = ((ui32User1 >> 0) & 0xff);
+  acsettings.mac[4] = ((ui32User1 >> 8) & 0xff);
+  acsettings.mac[5] = ((ui32User1 >> 16) & 0xff);
 
   strncpy(acsettings.servername, "acserver.lan.london.hackspace.org.uk", SERVERNAMELEN);
   strncpy(acsettings.syslogserver, "syslog.lan.london.hackspace.org.uk", SERVERNAMELEN);

@@ -353,7 +353,6 @@ void readcard()
 int querycard()
 {
   char path[13 + 14 + 1];
-  int i;
   int result = -1;
   boolean first = true;
 
@@ -367,7 +366,7 @@ int querycard()
   if (client.connect(acsettings.servername, acsettings.port)) {
     Serial.println("Connected");
     Serial.println("Querying");
-    sprintf(path, "GET /%l/card/", acsettings.nodeid);
+    sprintf(path, "GET /%ld/card/", acsettings.nodeid);
 
     int uidlen = 0;
     
@@ -437,7 +436,6 @@ int querycard()
 bool networkCheckToolStatus()
 {
   char path[13 + 2];
-  int i;
   int result = -1;
   boolean first = true;
   
@@ -446,7 +444,7 @@ bool networkCheckToolStatus()
 
   if (client.connect(acsettings.servername, acsettings.port)) {
     Serial.println("Querying");
-    sprintf(path, "GET /%d/status/", acsettings.nodeid);
+    sprintf(path, "GET /%ld/status/", acsettings.nodeid);
 
     Serial.println(path);
     client.println(path);
