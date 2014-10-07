@@ -16,6 +16,7 @@ ACNodeClient
 #include "cli.h"
 #include "user.h"
 #include "utils.h"
+#include "tool.h"
 
 extern settings acsettings;
 
@@ -148,7 +149,7 @@ void check_ser(void) {
 user *cu = NULL;
 int grace_period = 0;
 
-void loop(){
+void loop() {
   user *tu;
   boolean check = true;
 
@@ -157,6 +158,10 @@ void loop(){
       Serial.print("user active: ");
       dump_user(cu);
       // tool enable etc here.
+      if (cu->status == 1) {
+        // this card is authorised to switch the tool on.
+        tool_on();
+      }
     }
   }
 
@@ -281,6 +286,7 @@ void loop(){
           grace_period--;
         } else {
           Serial.println("Card removed");
+          tool_off();
           delete cu;
           cu = NULL;
           grace_period = 0;
