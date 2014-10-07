@@ -13,3 +13,28 @@ See here for the Connected Launchpad pinouts:
 http://energia.nu/pin-maps/guide_tm4c129launchpad/
 
 N.B.: use energia-0101E0012, not energia-0101E0013, as 13 breaks things (i think it defines a function called wakeup which clashes with the one in the PN532 stuff).
+
+You will need 2 libraries:
+
+syslog from here:
+
+https://github.com/londonhackspace/Syslog
+
+put it in the libraries folder under your energia sketches folder
+
+and the PN532 libraries from here:
+
+https://github.com/londonhackspace/PN532
+
+You'll need to copy or symlink PN532 and PN532_HSU into your energia-sketches libraries directory as well.
+
+Once the firmware has been uploaded to the connected launchpad connect with a serial terminal (if you use a real one rather than the Energia serial monitor you get command history and line editing).
+
+Use `help` to see a brief description of commands. You want to set the nodeid and toolname as the minimum:
+
+```
+nodeid <id>
+name <name>
+```
+
+and then `save` to save the settings.
