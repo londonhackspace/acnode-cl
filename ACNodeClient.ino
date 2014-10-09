@@ -46,6 +46,9 @@ void setup() {
   pinMode(D1_LED, OUTPUT);
   pinMode(D2_LED, OUTPUT);
 
+  digitalWrite(D1_LED, HIGH); // heartbeat
+  digitalWrite(D2_LED, LOW);  // lit when we detect a card
+
   // used for ethernet link and activity
   pinMode(D3_LED, OUTPUT);
   pinMode(D4_LED, OUTPUT);
@@ -82,11 +85,6 @@ void setup() {
     Serial.println();
   }
 
-  pinMode(GREEN_LED, OUTPUT);
-  pinMode(RED_LED, OUTPUT);
-
-  digitalWrite(RED_LED, HIGH);
-  digitalWrite(GREEN_LED, LOW);
 
   syslog.begin(acsettings.syslogserver, acsettings.toolname, LOG_LOCAL0);
   syslog.syslog(LOG_NOTICE, "Starting up");
@@ -168,7 +166,7 @@ void loop() {
   }
 
   if (!interactive) {
-    digitalWrite(RED_LED, HIGH);
+    digitalWrite(D1_LED, HIGH);
   }
   check_ser();
 
@@ -178,7 +176,7 @@ void loop() {
     if (cardType != NOCARD)
     {
       int status;
-      digitalWrite(GREEN_LED, HIGH);
+      digitalWrite(D2_LED, HIGH);
       user *nu;
       nu = new user;
       memset(nu, 0, sizeof(user));
@@ -299,8 +297,8 @@ void loop() {
     check_ser();
     delay(500);
     check_ser();
-    digitalWrite(RED_LED, LOW);
-    digitalWrite(GREEN_LED, LOW);
+    digitalWrite(D1_LED, LOW);
+    digitalWrite(D2_LED, LOW);
     check_ser();
     delay(500);
     check_ser();
