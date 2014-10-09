@@ -367,7 +367,9 @@ int querycard()
   }
   
   Serial.print("Connecting to http://");
-  Serial.println(acsettings.servername);
+  Serial.print(acsettings.servername);
+  Serial.print(":");
+  Serial.println(acsettings.port);
 
   if (client.connect(acsettings.servername, acsettings.port)) {
     Serial.println("Connected");
@@ -446,7 +448,9 @@ bool networkCheckToolStatus()
   boolean first = true;
   
   Serial.print("Connecting to http://");
-  Serial.println(acsettings.servername);
+  Serial.print(acsettings.servername);
+  Serial.print(":");
+  Serial.println(acsettings.port);
 
   if (client.connect(acsettings.servername, acsettings.port)) {
     Serial.println("Querying");
@@ -507,5 +511,4 @@ bool networkCheckToolStatus()
   
   return false;
 }
-
 
