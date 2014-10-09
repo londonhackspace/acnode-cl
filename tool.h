@@ -1,4 +1,19 @@
+#ifndef _TOOL_H_
+#define _TOOL_H_
 
-void tool_on(void);
-void tool_off(void);
+#include <Energia.h>
+
+class Tool
+{
+  public:
+    Tool(int pin);
+    void on();
+    void off();
+    void begin();
+  private:
+    int _toolpin;
+    boolean _toolon;
+};
+
+#endif
 

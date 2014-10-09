@@ -19,7 +19,6 @@ ACNodeClient
 #include "tool.h"
 
 extern settings acsettings;
-extern int relay_pin;
 
 // create microrl object and pointer on it
 microrl_t rl;
@@ -31,7 +30,7 @@ PN532 nfc(pnhsu);
 EthernetClient client;
 boolean network = false;
 Syslog syslog;
-
+Tool tool(PG_1);
 
 unsigned char serNum[8];
 
@@ -50,8 +49,6 @@ void setup() {
   // used for ethernet link and activity
   pinMode(D3_LED, OUTPUT);
   pinMode(D4_LED, OUTPUT);
-
-  pinMode(relay_pin, OUTPUT);     
 
   init_settings();
 
@@ -93,6 +90,8 @@ void setup() {
 
   syslog.begin(acsettings.syslogserver, acsettings.toolname, LOG_LOCAL0);
   syslog.syslog(LOG_NOTICE, "Starting up");
+
+  tool.begin();
 
   Serial.println("Initialising PN532");
 
@@ -162,8 +161,8 @@ void loop() {
       dump_user(cu);
       // tool enable etc here.
       if (cu->status == 1) {
-        // this card is authorised to switch the tool on.
-        tool_on();
+        // this card is authorised to switch the tool on, so switch it on.
+        tool.on();
       }
     }
   }
@@ -289,7 +288,7 @@ void loop() {
           grace_period--;
         } else {
           Serial.println("Card removed");
-          tool_off();
+          tool.off();
           delete cu;
           cu = NULL;
           grace_period = 0;

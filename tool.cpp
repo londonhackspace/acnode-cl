@@ -1,26 +1,32 @@
-#include <Energia.h>
+#include "tool.h"
 
-static boolean on = false;
-int relay_pin = PG_1;
+Tool::Tool(int pin) {
+  _toolpin = pin;
+  _toolon = false;
+}
 
-void tool_on(void) {
-  if (!on) {
+void Tool::begin() {
+  pinMode(_toolpin, OUTPUT);
+}
+
+void Tool::on() {
+  if (!_toolon) {
      Serial.println("TOOL ON!!!!");
     // switch tool on here.
-    digitalWrite(relay_pin, HIGH);
+    digitalWrite(_toolpin, HIGH);
     // end 
-    on = true;
+    _toolon = true;
   }
 }
 
-void tool_off(void) {
+void Tool::off() {
   // and switch it off here.
-  if (on) {
+  if (_toolon) {
      Serial.println("TOOL OFF!!!!");
     // switch tool off here
-    digitalWrite(relay_pin, LOW);
+    digitalWrite(_toolpin, LOW);
     // end
-    on = false;
+    _toolon = false;
   }
 }
 
