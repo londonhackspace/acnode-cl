@@ -23,6 +23,8 @@ boolean compare_user(user *u1, user *u2);
 boolean compare_uid(user *u1, user *u2);
 
 void dump_user(user * u);
+void uid_str(char *str, user *u);
+
 int find_free(void);
 void store_user(user *u);
 void write_user(const user *u, int address);

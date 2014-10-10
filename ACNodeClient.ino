@@ -17,8 +17,8 @@ ACNodeClient
 #include "user.h"
 #include "utils.h"
 #include "tool.h"
-
-extern settings acsettings;
+#include "network.h"
+#include "acnode.h"
 
 // create microrl object and pointer on it
 microrl_t rl;
@@ -27,16 +27,13 @@ microrl_t * prl = &rl;
 PN532_HSU pnhsu(Serial6);
 PN532 nfc(pnhsu);
 
+settings acsettings;
+user cc; // current card on the reader
 EthernetClient client;
-boolean network = false;
 Syslog syslog;
+
+boolean network = false;
 Tool tool(PG_1);
-
-unsigned char serNum[8];
-
-enum cardTypes { CARDUID4, CARDUID7, NOCARD };
-
-cardTypes cardType = NOCARD;
 
 void setup() {
   Serial.begin(9600);
@@ -64,6 +61,8 @@ void setup() {
 
   // set callback for completion
   microrl_set_complete_callback (prl, mrlcomplete);
+
+  memset(&cc, 0, sizeof(user));
 
   // start the Ethernet connection:
   if (!Ethernet.begin(acsettings.mac)) {
@@ -127,7 +126,7 @@ void setup() {
     Serial.println(status);
     acsettings.status = status;
     char tmp[42];
-    snprintf(tmp, 42, "tool status: %d", status);
+    snprintf(tmp, 42, "tool status: %s", status ? "in service" : "out of service");
     syslog.syslog(LOG_INFO, tmp);
   }
 
@@ -152,6 +151,9 @@ void check_ser(void) {
 
 // current user
 user *cu = NULL;
+// after the card is removed we have don't shut off the tool immediatly
+// some cards only read on alternate cycles, this means the tool stays on
+// on the missed reads
 int grace_period = 0;
 
 void loop() {
@@ -165,7 +167,7 @@ void loop() {
       // tool enable etc here.
       if (cu->status == 1) {
         // this card is authorised to switch the tool on, so switch it on.
-        tool.on();
+        tool.on(*cu);
       }
     }
   }
@@ -178,20 +180,27 @@ void loop() {
   if (!interactive) {
     // the 1 second delay looking for cards is annoying when trying to use the cli...
     readcard();
-    if (cardType != NOCARD)
+    /*
+     * we have to:
+     *
+     * use the uid on the card to fill in the other info about the user
+     * if the card is in the cache start with the data there
+     * if we can get to the acserver update the data from there,
+     * and save it to the cache if needed
+     * if the user is allowed to run the tool switch it on.
+     */
+    if (!cc.invalid) // we have a valid card
     {
       int status;
       digitalWrite(D2_LED, HIGH);
       user *nu;
       nu = new user;
       memset(nu, 0, sizeof(user));
+      memcpy(nu, &cc, sizeof(user));
 
-      if (cardType == CARDUID7) {
-        nu->uidlen = 1;
-        memcpy(nu->uid, serNum, 7);
-      } else {
-        memcpy(nu->uid, serNum, 4);
-      }
+      Serial.println("got a card");
+
+      dump_user(nu);
 
       // we have a possibly new card, check it against the cache.
       tu = get_user(nu);
@@ -200,10 +209,13 @@ void loop() {
       if (tu != NULL && cu != NULL) {
         // same as current card?
         if (compare_user(cu, tu)) {
-          Serial.println("card not changed");
+          // card not changed
           // no need to check against the server.
           check = false;
           grace_period = 3;
+        } else {
+          Serial.println("card changed");
+          dump_user(tu);
         }
         delete tu;
       } else if (cu != NULL and tu == NULL) {
@@ -218,7 +230,7 @@ void loop() {
       }
 
       if (network && check) {
-        status = querycard();
+        status = querycard(cc);
         Serial.println(status);
 
         if (status >= 0) {
@@ -284,6 +296,7 @@ void loop() {
       grace_period = 3;
       delete nu;
     } else {
+      // no card on the reader
       if (cu != NULL) {
         // the "TEMP" card (uid 040957827B3280) is very wierd
         // and only reads on alternate cycles, so allow a card to disappear for a bit.
@@ -291,7 +304,7 @@ void loop() {
           grace_period--;
         } else {
           Serial.println("Card removed");
-          tool.off();
+          tool.off(*cu);
           delete cu;
           cu = NULL;
           grace_period = 0;
@@ -336,7 +349,7 @@ void readcard()
   
   if (!success)
   {
-    cardType = NOCARD;
+    cc.invalid = 1;
     return;
   }
 
@@ -346,174 +359,21 @@ void readcard()
 
   switch (uidLength) {
     case 4:
-      memcpy(serNum, uid, 4);
-      cardType = CARDUID4;
+      memcpy(cc.uid, uid, 4);
+      cc.uidlen = 0;
+      cc.invalid = 0;
       break;
     case 7:
-      memcpy(serNum, uid, 7);
-      cardType = CARDUID7;
+      memcpy(cc.uid, uid, 7);
+      cc.uidlen = 1;
+      cc.invalid = 0;
       break;
     default:
       Serial.print("Odd card length?: ");
-      cardType = NOCARD;
+      cc.invalid = 1;
       Serial.println(uidLength);
       break;
   }
 }
 
-int querycard()
-{
-  char path[13 + 14 + 1];
-  int result = -1;
-  boolean first = true;
-
-  if (cardType == NOCARD) {
-    return -1;
-  }
-  
-  Serial.print("Connecting to http://");
-  Serial.print(acsettings.servername);
-  Serial.print(":");
-  Serial.println(acsettings.port);
-
-  if (client.connect(acsettings.servername, acsettings.port)) {
-    Serial.println("Connected");
-    Serial.println("Querying");
-    sprintf(path, "GET /%ld/card/", acsettings.nodeid);
-
-    int uidlen = 0;
-    
-    if (cardType == CARDUID4) {
-      uidlen = 4;
-    } else if (cardType == CARDUID7) {
-      uidlen = 7;
-    }
-    for(byte i=0; i < uidlen; i++) {
-      sprintf(path + strlen(path), "%02X", serNum[i]);
-    }
-    Serial.println(path);
-    client.println(path);
-    client.print("Host: ");
-    client.println(acsettings.servername);
-    client.println();
-
-    int timeout = 0;
-
-    while (!client.available()) {
-       delay(25);
-       timeout++;
-       if (timeout > 400) {
-         Serial.println("Timeout :(");
-         break;
-       }
-    }
-
-    if (client.available()) {
-      char c;
-      Serial.print("Got Response: >");
-
-      while (client.available()) {
-        c = client.read();
-        Serial.print(c);
-        if (c == '\n') {
-          Serial.print('\r');
-        }
-        // we only want the 1st char returned
-        if (first) {
-          if (isdigit(c)) {
-            result = c - '0';
-          }
-          first = false;
-        }
-      }
-
-      Serial.println("<");
-      Serial.println("Disconnecting");
-      client.flush();
-      client.stop();
-    }
-    Serial.println();
-  } else {
-    // if you didn't get a connection to the server:
-    Serial.println("connection failed");
-  }
-  // if it's 2 it's a maintainer.
-  if (result == 1 || result == 2) {
-    Serial.println("access granted");
-  } else {
-    Serial.println("access denied");
-  }
-  return result;
-}
-
-bool networkCheckToolStatus()
-{
-  char path[13 + 2];
-  int result = -1;
-  boolean first = true;
-  
-  Serial.print("Connecting to http://");
-  Serial.print(acsettings.servername);
-  Serial.print(":");
-  Serial.println(acsettings.port);
-
-  if (client.connect(acsettings.servername, acsettings.port)) {
-    Serial.println("Querying");
-    sprintf(path, "GET /%ld/status/", acsettings.nodeid);
-
-    Serial.println(path);
-    client.println(path);
-    client.print("Host: ");
-    client.println(acsettings.servername);
-    client.println();
-
-    int timeout = 0;
-
-    while (!client.available()) {
-       delay(25);
-       timeout++;
-       if (timeout > 400) {
-         Serial.println("Timeout :(");
-         break;
-       }
-    }
-
-    if (client.available()) {
-      char c;
-      Serial.print("Got Response: >");
-
-      while (client.available()) {
-        c = client.read();
-        Serial.print(c);
-        if (c == '\n') {
-          Serial.print('\r');
-        }
-        if (first) {
-          if (isdigit(c)) {
-            result = c - '0';
-          }
-          first = false;
-        }
-      }
-
-      Serial.println("<");
-      Serial.println("Disconnecting");
-      client.flush();
-      client.stop();
-    }
-    Serial.println();
-  } else {
-    // if you didn't get a connection to the server:
-    Serial.println("connection failed");
-  }
-  // if it's 2 it's a maintainer.
-  if (result == 1) {
-    Serial.println("tool is in service");
-    return true;
-  } else {
-    Serial.println("tool out of service");
-  }
-  
-  return false;
-}
 

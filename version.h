@@ -1,7 +1,7 @@
 #ifndef _VERSION_H_
 #define _VERSION_H_
 
-#define ACVERSION "0.2"
+#define ACVERSION "0.3"
 
 #endif
 

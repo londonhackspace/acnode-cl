@@ -160,6 +160,20 @@ void dump_user(user * u) {
 
 }
 
+// assumes that we have room in the string
+void uid_str(char *str, user *u) {
+  int len;
+
+  len = u->uidlen ? 7 : 4;
+
+  for(int i = 0; i < len; i++) {
+    sprintf(str, "%02X", u->uid[i]);
+    str[2] = 0;
+    str = str + 2;
+  }
+  str[0] = 0;
+}
+
 // look through the eeprom to find a free slot.
 int find_free(void) {
   int address = USERBASE;
