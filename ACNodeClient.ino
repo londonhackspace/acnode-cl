@@ -124,7 +124,12 @@ void setup() {
     Serial.println("Checking tool status");
     int status = networkCheckToolStatus();
     Serial.println(status);
-    acsettings.status = status;
+    if (acsettings.status != status) {
+      // update them if they have changed.
+      acsettings.status = status;
+      set_settings(acsettings);
+    }
+
     char tmp[42];
     snprintf(tmp, 42, "tool status: %s", status ? "in service" : "out of service");
     syslog.syslog(LOG_INFO, tmp);

@@ -25,6 +25,10 @@ void Tool::on(user user) {
     sprintf(msg, "Tool On for ");
     uid_str(msg + strlen(msg), &user);
 
+    if (user.maintainer) {
+      sprintf(msg + strlen(msg), " (Maintainer)");
+    }
+
     Serial.println(msg);
     syslog.syslog(LOG_NOTICE, msg);
 
