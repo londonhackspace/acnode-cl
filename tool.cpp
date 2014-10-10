@@ -13,6 +13,15 @@ void Tool::begin() {
 void Tool::on(user user) {
   if (!_toolon) {
     char msg[64];
+    if (acsettings.status == 0 && !user.maintainer) {
+      // if the tool is disabled only maintainers can switch it on.
+      sprintf(msg, "Tool out of service, ignoring user ");
+      uid_str(msg + strlen(msg), &user);
+
+      Serial.println(msg);
+      syslog.syslog(LOG_NOTICE, msg);
+      return;
+    }
     sprintf(msg, "Tool On for ");
     uid_str(msg + strlen(msg), &user);
 
