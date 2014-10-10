@@ -13,11 +13,12 @@ struct settings {
   uint8_t valid;
   uint8_t mac[6];
   char servername[SERVERNAMELEN];
-  int16_t port;
+  uint16_t port;
   int32_t nodeid; // are we calling this "node id" or "tool id"?
   uint8_t status; // 0 = out of service, 1 = in service
   char syslogserver[SERVERNAMELEN];
   char toolname[16];
+  uint32_t runtime; // total seconds the tool has run
   int8_t padding[1];
 };
 

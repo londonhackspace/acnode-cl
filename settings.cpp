@@ -2,6 +2,7 @@
 #include <Energia.h>
 #include "settings.h"
 #include "acnode.h"
+#include "utils.h"
 
 
 void init_settings(void) {
@@ -54,7 +55,7 @@ void dump_settings(settings acsettings) {
   }
 
   int i;
-  char tmp[3];
+  char tmp[10];
 
   Serial.print("Tool: ");
   Serial.println(acsettings.toolname);
@@ -97,6 +98,10 @@ void dump_settings(settings acsettings) {
   } else {
      Serial.println("!Invalid!");
   }
+
+  Serial.print("Total runtime: ");
+  duration_str(tmp, acsettings.runtime);
+  Serial.println(tmp);
 }
 
 
@@ -130,6 +135,7 @@ settings get_settings(void) {
   acsettings.nodeid = -1;
   acsettings.port = 1234;
   acsettings.status = 0;
+  acsettings.runtime = 0;
 
   return acsettings;
 }

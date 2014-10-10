@@ -133,6 +133,9 @@ void setup() {
     char tmp[42];
     snprintf(tmp, 42, "tool status: %s", status ? "in service" : "out of service");
     syslog.syslog(LOG_INFO, tmp);
+    snprintf(tmp, 42, "total runtime: ");
+    duration_str(tmp + strlen(tmp), acsettings.runtime);
+    syslog.syslog(LOG_INFO, tmp);
   }
 
   Serial.println("press enter for a prompt");

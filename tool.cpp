@@ -1,5 +1,6 @@
 #include "tool.h"
 #include "acnode.h"
+#include "utils.h"
 
 Tool::Tool(int pin) {
   _toolpin = pin;
@@ -46,32 +47,34 @@ void Tool::off(user user) {
   if (_toolon) {
     char msg[64];
 
+    // switch tool off here
+    digitalWrite(_toolpin, LOW);
+    // end
+
     unsigned long duration = (millis() - _start) / 1000;
 
     Serial.print("Tool off after: ");
     Serial.print(duration);
     Serial.println(" seconds");
 
-    int hours = 0, mins = 0;
-
-    if (duration > 3600) {
-      hours = duration / 3600;
-      duration -= hours * 3600;
-    }
-    if (duration > 60) {
-      mins = duration / 60;
-      duration -= mins * 60;
-    }
-
-    snprintf(msg, 64, "Tool off after running for %02d:%02d:%02d for ", hours, mins, (int)duration);
+    snprintf(msg, 64, "Tool off after running for ");
+    duration_str(msg + strlen(msg), duration);
+    snprintf(msg + strlen(msg), 64 - strlen(msg), " for ");
     uid_str(msg + strlen(msg), &user);
 
     Serial.println(msg);
     syslog.syslog(LOG_NOTICE, msg);
 
-    // switch tool off here
-    digitalWrite(_toolpin, LOW);
-    // end
+    // update how long the tool has run for.
+    acsettings.runtime += duration;
+    set_settings(acsettings);
+
+    snprintf(msg, 64, "Total run time now: ");
+    duration_str(msg + strlen(msg), duration);
+
+    Serial.println(msg);
+    syslog.syslog(LOG_NOTICE, msg);
+
     _toolon = false;
   }
 }
