@@ -66,12 +66,17 @@ void setup() {
   microrl_set_complete_callback (prl, mrlcomplete);
 
   // start the Ethernet connection:
-  if (Ethernet.begin(acsettings.mac) == 0) {
+  if (!Ethernet.begin(acsettings.mac)) {
     Serial.println("Failed to configure Ethernet using DHCP");
   } else {
     network = true;
     Ethernet.enableLinkLed();
     Ethernet.enableActivityLed();
+  }
+
+  if (Ethernet.localIP() == INADDR_NONE) {
+    Serial.println("Didn't get a valid ip");
+    network = false;
   }
 
   if (network) {
