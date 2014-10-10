@@ -2,7 +2,7 @@ How to get this running with a cooqrobot/elechouse pn532 breakout board:
 
 1. carefully unsolder the 0 ohm resistor jumper from the HIS0 connector, then resolder it (or just bridge the pads with solder) so that the '0' side is connected rather than the 1, this puts the reader in HSU mode.
 
-2. Solder headers onto 8 pin connector the board where the tx/rx pins are, you need at least tx,rx,3.3v,gnd.
+2. Solder headers onto the 8 pin connector on the board where the tx/rx pins are, you need at least tx,rx,3.3v,gnd. N.B. you can't use the SCL/SDA pins on the 4 pin connector cos they have pullups on them...
 
 2. Connect 3.3v and gnd to somewhere convient on the connected launchpad
 
@@ -16,7 +16,7 @@ N.B.: use energia-0101E0012, not energia-0101E0013, as 13 breaks things (i think
 
 You will need 2 libraries:
 
-syslog from here:
+Syslog from here:
 
 https://github.com/londonhackspace/Syslog
 
