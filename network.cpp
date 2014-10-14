@@ -1,9 +1,9 @@
 #include "network.h"
 #include "acnode.h"
+#include "user.h"
 
 int get_url(char * path) {
   int result = -1;
-  boolean first = true;
 
   Serial.print("Connecting to http://");
   Serial.print(acsettings.servername);
@@ -15,7 +15,8 @@ int get_url(char * path) {
     Serial.println("Querying");
 
     Serial.println(path);
-    client.println(path);
+    client.print(path);
+    client.println(" HTTP/1.0");
     client.print("Host: ");
     client.println(acsettings.servername);
     client.println();
@@ -35,11 +36,19 @@ int get_url(char * path) {
       char c;
       Serial.print("Got Response: >");
 
+      int newlines = 0;
+      boolean first = false;
+
       while (client.available()) {
         c = client.read();
         Serial.print(c);
         if (c == '\n') {
           Serial.print('\r');
+          newlines += 1;
+        } else {
+          if (c != '\r') {
+            newlines = 0;
+          }
         }
         // we only want the 1st char returned
         if (first) {
@@ -47,6 +56,9 @@ int get_url(char * path) {
             result = c - '0';
           }
           first = false;
+        }
+        if (newlines == 2) {
+          first = true;
         }
       }
 
@@ -107,5 +119,23 @@ bool networkCheckToolStatus()
   }
 
   return false;
+}
+
+void addNewUser(user card, user maintainer)
+{
+  int ret;
+
+  Serial.println("Adding card:");
+  // /<nodeid>/grant-to-card/<trainee card uid>/by-card/<maintainer card uid>
+  char url[64];
+  sprintf(url, "POST /%ld/grant-to-card/", acsettings.nodeid);
+  uid_str(url + strlen(url), &card);
+  sprintf(url + strlen(url), "/by-card/");
+  uid_str(url + strlen(url), &maintainer);
+  Serial.println(url);
+
+  ret = get_url(url);
+  Serial.print("Got: ");
+  Serial.println(ret);
 }
 

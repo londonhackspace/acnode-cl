@@ -29,11 +29,17 @@ PN532 nfc(pnhsu);
 
 settings acsettings;
 user cc; // current card on the reader
+
+// if we have a maintainer and they are adding a card keep track of who is doing the adding
+user maintainer;
+
 EthernetClient client;
 Syslog syslog;
 
 boolean network = false;
 Tool tool(PG_1);
+
+#define BUTTON (PF_1)
 
 void setup() {
   Serial.begin(9600);
@@ -50,6 +56,9 @@ void setup() {
   pinMode(D3_LED, OUTPUT);
   pinMode(D4_LED, OUTPUT);
 
+  pinMode(BUTTON, INPUT);
+  pinMode(BUTTON, INPUT_PULLUP);
+
   init_settings();
 
   acsettings = get_settings();
@@ -63,6 +72,7 @@ void setup() {
   microrl_set_complete_callback (prl, mrlcomplete);
 
   memset(&cc, 0, sizeof(user));
+  memset(&maintainer, 0, sizeof(user));
 
   // start the Ethernet connection:
   if (!Ethernet.begin(acsettings.mac)) {
@@ -159,6 +169,11 @@ void check_ser(void) {
 
 // current user
 user *cu = NULL;
+
+
+// true if we are adding a card
+boolean adding = false;
+
 // after the card is removed we have don't shut off the tool immediatly
 // some cards only read on alternate cycles, this means the tool stays on
 // on the missed reads
@@ -176,6 +191,16 @@ void loop() {
       if (cu->status == 1) {
         // this card is authorised to switch the tool on, so switch it on.
         tool.on(*cu);
+      }
+      if (cu->status == 1 && cu->maintainer == 1) {
+        // This user is a maintainer, check the button
+        if (digitalRead(BUTTON) == 0) {
+          // the button is pressed, copy our current card details to the maintainer block
+           memcpy(&maintainer, cu, sizeof(user));
+           // we are adding
+           adding = true;
+           Serial.println("*Adding*");
+        }
       }
     }
   }
@@ -210,8 +235,33 @@ void loop() {
 
       dump_user(nu);
 
+      if (!compare_uid(nu, &maintainer)) {
+        // are we adding the user?
+        if (adding) {
+          // check that the button is still being pressed
+          if (digitalRead(BUTTON) == 0) {
+            char tmp[128];
+
+            adding = false;
+
+            sprintf(tmp, "%s", "Maintainer ");
+            uid_str(tmp + strlen(tmp), &maintainer);
+            sprintf(tmp + strlen(tmp), " adding a card ");
+            uid_str(tmp + strlen(tmp), nu);
+            Serial.println(tmp);
+            syslog.syslog(LOG_NOTICE, tmp);
+
+            addNewUser(*nu, maintainer);
+          }
+        } else {
+          // not adding so nuke it.
+          memset(&maintainer, 0, sizeof(user));
+        }
+      }
+
       // we have a possibly new card, check it against the cache.
       tu = get_user(nu);
+
 
       // was it in the cache?
       if (tu != NULL && cu != NULL) {
@@ -315,6 +365,8 @@ void loop() {
           tool.off(*cu);
           delete cu;
           cu = NULL;
+          // nuke the maintainer just in case.
+          memset(&maintainer, 0, sizeof(user));
           grace_period = 0;
         }
       }

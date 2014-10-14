@@ -7,6 +7,6 @@
 int get_url(char * path);
 int querycard(user card);
 bool networkCheckToolStatus();
-
+void addNewUser(user card, user maintainer);
 
 #endif
