@@ -2,6 +2,13 @@
 #include "acnode.h"
 #include "user.h"
 
+// both 'url' and 'path' here are misleading
+// the string is actually "<method> <path>"
+// e.g.:
+//
+// "GET /fish"
+// "POST /wibble?foo=1"
+//
 int get_url(char * path) {
   int result = -1;
 
@@ -75,6 +82,7 @@ int get_url(char * path) {
   return result;
 }
 
+// https://wiki.london.hackspace.org.uk/view/Project:Tool_Access_Control/Solexious_Proposal#Get_card_permissions
 int querycard(user card)
 {
   char path[13 + 14 + 1];
@@ -103,6 +111,7 @@ int querycard(user card)
   return result;
 }
 
+// https://wiki.london.hackspace.org.uk/view/Project:Tool_Access_Control/Solexious_Proposal#Check_tool_status
 bool networkCheckToolStatus()
 {
   char path[13 + 2];
@@ -121,6 +130,25 @@ bool networkCheckToolStatus()
   return false;
 }
 
+// https://wiki.london.hackspace.org.uk/view/Project:Tool_Access_Control/Solexious_Proposal#Report_tool_status
+int setToolStatus(int status, user card) {
+  int ret = -1;
+  
+  Serial.println("Setting tool status:");
+  // /[nodeID]/status/[new_status]/by/[cardWithAdminPermissions]
+  char url[64];
+  sprintf(url, "POST /%ld/status/%d/by/", acsettings.nodeid, status);
+  uid_str(url + strlen(url), &card);
+  Serial.println(url);
+
+  ret = get_url(url);
+  Serial.print("Got: ");
+  Serial.println(ret);
+  
+  return ret;
+}
+
+// https://wiki.london.hackspace.org.uk/view/Project:Tool_Access_Control/Solexious_Proposal#Add_card
 void addNewUser(user card, user maintainer)
 {
   int ret;
@@ -138,4 +166,45 @@ void addNewUser(user card, user maintainer)
   Serial.print("Got: ");
   Serial.println(ret);
 }
+
+// https://wiki.london.hackspace.org.uk/view/Project:Tool_Access_Control/Solexious_Proposal#Tool_usage_.28live.29
+// status: 1 == in use, 0 == out of use.
+int toolUse(int status, user card) {
+  int ret = -1;
+
+  Serial.println("Updating tool Usage:");
+  //  /[nodeID]/tooluse/[status]/[cardID]
+  char url[64];
+  sprintf(url, "POST /%ld/tooluse/%d/", acsettings.nodeid, status);
+  uid_str(url + strlen(url), &card);
+  Serial.println(url);
+
+  ret = get_url(url);
+  Serial.print("Got: ");
+  Serial.println(ret);
+  
+  return ret;
+}
+
+// https://wiki.london.hackspace.org.uk/view/Project:Tool_Access_Control/Solexious_Proposal#Tool_usage_.28usage_time.29
+// is the time here in ms or Seconds?
+int toolUseTime(user card, int time) {
+  int ret = -1;
+
+  Serial.println("Setting tool status:");
+  // /[nodeID]/tooluse/time/for/[cardID]/[timeUsed]
+  char url[64];
+  sprintf(url, "POST /%ld/tooluse/time/for/", acsettings.nodeid);
+  uid_str(url + strlen(url), &card);
+  sprintf(url + strlen(url), "/%d", time);
+  
+  Serial.println(url);
+
+  ret = get_url(url);
+  Serial.print("Got: ");
+  Serial.println(ret);
+  
+  return ret;
+}
+
 
