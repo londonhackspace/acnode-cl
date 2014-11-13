@@ -19,6 +19,7 @@ ACNodeClient
 #include "tool.h"
 #include "network.h"
 #include "acnode.h"
+#include "rgb.h"
 
 // create microrl object and pointer on it
 microrl_t rl;
@@ -38,6 +39,8 @@ Syslog syslog;
 
 boolean network = false;
 Tool tool(PG_1);
+
+RGB rgb(PM_0, PM_1, PM_2);
 
 #define BUTTON (PF_1)
 
@@ -104,6 +107,8 @@ void setup() {
   syslog.syslog(LOG_NOTICE, "Starting up");
 
   tool.begin();
+  rgb.begin();
+  rgb.blue();
 
   Serial.println("Initialising PN532");
 
@@ -178,6 +183,7 @@ boolean adding = false;
 // some cards only read on alternate cycles, this means the tool stays on
 // on the missed reads
 int grace_period = 0;
+#define GRACE (1)
 
 void loop() {
   user *tu;
@@ -190,9 +196,13 @@ void loop() {
       // tool enable etc here.
       if (cu->status == 1) {
         // this card is authorised to switch the tool on, so switch it on.
+        rgb.green();
         tool.on(*cu);
+      } else {
+        rgb.orange();
       }
       if (cu->status == 1 && cu->maintainer == 1) {
+        rgb.yellow();
         // This user is a maintainer, check the button
         if (digitalRead(BUTTON) == 0) {
           // the button is pressed, copy our current card details to the maintainer block
@@ -270,7 +280,7 @@ void loop() {
           // card not changed
           // no need to check against the server.
           check = false;
-          grace_period = 3;
+          grace_period = GRACE;
         } else {
           Serial.println("card changed");
           dump_user(tu);
@@ -283,7 +293,7 @@ void loop() {
         if (compare_uid(cu, nu)) {
           // no need to check against the server, we've already got the card
           check = false;
-          grace_period = 3;
+          grace_period = GRACE;
         }
       }
 
@@ -351,7 +361,7 @@ void loop() {
       }
       cu = new user;
       memcpy(cu, nu, sizeof(user));
-      grace_period = 3;
+      grace_period = GRACE;
       delete nu;
     } else {
       // no card on the reader
@@ -378,6 +388,7 @@ void loop() {
     digitalWrite(D1_LED, LOW);
     digitalWrite(D2_LED, LOW);
     check_ser();
+    rgb.blue();
     delay(500);
     check_ser();
   }
