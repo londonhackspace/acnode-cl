@@ -20,6 +20,7 @@ ACNodeClient
 #include "network.h"
 #include "acnode.h"
 #include "rgb.h"
+#include "button.h"
 
 // create microrl object and pointer on it
 microrl_t rl;
@@ -42,7 +43,7 @@ Tool tool(PG_1);
 
 RGB rgb(PM_0, PM_1, PM_2);
 
-#define BUTTON (PF_1)
+Button button(PF_1);
 
 void setup() {
   Serial.begin(9600);
@@ -58,9 +59,6 @@ void setup() {
   // used for ethernet link and activity
   pinMode(D3_LED, OUTPUT);
   pinMode(D4_LED, OUTPUT);
-
-  pinMode(BUTTON, INPUT);
-  pinMode(BUTTON, INPUT_PULLUP);
 
   init_settings();
 
@@ -107,6 +105,7 @@ void setup() {
   syslog.syslog(LOG_NOTICE, "Starting up");
 
   tool.begin();
+  button.begin();
   rgb.begin();
   rgb.blue();
 
@@ -130,7 +129,8 @@ void setup() {
   // Set the max number of retry attempts to read from a card
   // This prevents us from waiting forever for a card, which is
   // the default behaviour of the PN532.
-  nfc.setPassiveActivationRetries(0xFF);
+  // set it even lower to just 16 retries.
+  nfc.setPassiveActivationRetries(0x10);
   
   // configure board to read RFID tags
   nfc.SAMConfig();
@@ -188,6 +188,19 @@ int grace_period = 0;
 void loop() {
   user *tu;
   boolean check = true;
+  int button_state = NO_PRESS;
+
+  button_state = button.poll();
+  if (button_state != NO_PRESS) {
+    Serial.print("Button: ");
+    Serial.println(button_state);
+  }
+
+  if (button_state == SHORT_PRESS) {
+    Serial.println("Button down");
+  } else if (button_state == LONG_PRESS) {
+    Serial.println("Long button press");
+  }
 
   if (!interactive) {
     if (cu != NULL) {
@@ -204,7 +217,7 @@ void loop() {
       if (cu->status == 1 && cu->maintainer == 1) {
         rgb.yellow();
         // This user is a maintainer, check the button
-        if (digitalRead(BUTTON) == 0) {
+        if (button_state == SHORT_PRESS) {
           // the button is pressed, copy our current card details to the maintainer block
            memcpy(&maintainer, cu, sizeof(user));
            // we are adding
@@ -249,7 +262,7 @@ void loop() {
         // are we adding the user?
         if (adding) {
           // check that the button is still being pressed
-          if (digitalRead(BUTTON) == 0) {
+          if (button_state == SHORT_PRESS) {
             char tmp[128];
 
             adding = false;
@@ -383,17 +396,12 @@ void loop() {
     }
     
     check_ser();
-    delay(500);
-    check_ser();
     digitalWrite(D1_LED, LOW);
     digitalWrite(D2_LED, LOW);
-    check_ser();
     rgb.blue();
-    delay(500);
-    check_ser();
   }
   // 10 second timeout
-  if (interactive && intstart + (1000 * 10) < millis()) {
+  if (interactive && intstart + (1000 * 1) < millis()) {
     interactive = false;
     intstart = 0;
   }
