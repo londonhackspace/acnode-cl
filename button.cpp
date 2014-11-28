@@ -26,7 +26,7 @@ int Button::poll() {
       // we are waiting to see what happens with the button, it's just gone
       // back up, so lets see how long it took
       state = WAITING;
-      Serial.println(millis() - start_millis);
+//      Serial.println(millis() - start_millis);
 
       // 600 here seems to be ok.
       // short presses are 120-180 ms or so.
