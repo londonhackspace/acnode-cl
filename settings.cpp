@@ -148,9 +148,7 @@ int set_settings(settings acsettings) {
     acsettings.valid = 42;
   }
 
-  Serial.println("About to write");
   ret = EEPROMProgram((uint32_t *)&acsettings, 0, sizeof(acsettings));
-  Serial.println("Done write");
 
   if (ret != 0) {
     Serial.print("Writeing problem: ");
