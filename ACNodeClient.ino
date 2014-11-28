@@ -21,11 +21,13 @@ ACNodeClient
 #include "acnode.h"
 #include "rgb.h"
 #include "button.h"
+#include "every.h"
 
 // create microrl object and pointer on it
 microrl_t rl;
 microrl_t * prl = &rl;
 
+// PN532_HSU pnhsu(Serial6, PD_2);
 PN532_HSU pnhsu(Serial6);
 PN532 nfc(pnhsu);
 
@@ -42,6 +44,11 @@ boolean network = false;
 Tool tool(PG_1);
 
 RGB rgb(PM_0, PM_1, PM_2);
+
+Every one_sec(1000);
+Every five_sec(5000);
+
+Every card_every(500);
 
 Button button(PF_1);
 
@@ -106,8 +113,10 @@ void setup() {
 
   tool.begin();
   button.begin();
+  one_sec.begin();
+  five_sec.begin();
+  card_every.begin();
   rgb.begin();
-  rgb.blue();
 
   Serial.println("Initialising PN532");
 
@@ -130,6 +139,13 @@ void setup() {
   // This prevents us from waiting forever for a card, which is
   // the default behaviour of the PN532.
   // set it even lower to just 16 retries.
+  //
+  // 0xbd works
+  // 0x9e works
+  // 0x7f dosn't
+  //
+  // with the powerdown thing we don't need a long timeout
+  // so use 16...
   nfc.setPassiveActivationRetries(0x10);
   
   // configure board to read RFID tags
@@ -151,6 +167,9 @@ void setup() {
     snprintf(tmp, 42, "total runtime: ");
     duration_str(tmp + strlen(tmp), acsettings.runtime);
     syslog.syslog(LOG_INFO, tmp);
+    rgb.blue();
+  } else {
+    rgb.orange();
   }
 
   Serial.println("press enter for a prompt");
@@ -183,7 +202,7 @@ boolean adding = false;
 // some cards only read on alternate cycles, this means the tool stays on
 // on the missed reads
 int grace_period = 0;
-#define GRACE (1)
+#define GRACE (3)
 
 void loop() {
   user *tu;
@@ -204,13 +223,17 @@ void loop() {
 
   if (!interactive) {
     if (cu != NULL) {
-      Serial.print("user active: ");
-      dump_user(cu);
+      if (one_sec.check()) {
+        Serial.print("user active: ");
+        dump_user(cu);
+      }
       // tool enable etc here.
       if (cu->status == 1) {
         // this card is authorised to switch the tool on, so switch it on.
-        rgb.green();
         tool.on(*cu);
+        if (cu->maintainer == 0) {
+          rgb.green();
+        }
       } else {
         rgb.orange();
       }
@@ -235,7 +258,9 @@ void loop() {
 
   if (!interactive) {
     // the 1 second delay looking for cards is annoying when trying to use the cli...
-    readcard();
+    if (card_every.check()) {
+      readcard();
+    }
     /*
      * we have to:
      *
@@ -254,9 +279,10 @@ void loop() {
       memset(nu, 0, sizeof(user));
       memcpy(nu, &cc, sizeof(user));
 
-      Serial.println("got a card");
-
-      dump_user(nu);
+      if (one_sec.check()) {
+        Serial.println("got a card");
+        dump_user(nu);
+      }
 
       if (!compare_uid(nu, &maintainer)) {
         // are we adding the user?
@@ -301,8 +327,9 @@ void loop() {
         delete tu;
       } else if (cu != NULL and tu == NULL) {
         // not in the cache.
-        dump_user(cu);
-        dump_user(nu);
+//        TRACE
+//        dump_user(cu);
+//        dump_user(nu);
         if (compare_uid(cu, nu)) {
           // no need to check against the server, we've already got the card
           check = false;
@@ -360,9 +387,12 @@ void loop() {
         }
       } else {
         // no network or no need to check, cached users only.
-        Serial.println("trying to find cached card");
+        if (one_sec.check()) {
+          Serial.println("trying to find cached card");
+        }
         tu = get_user(nu);
         if (tu != NULL) {
+          TRACE
           dump_user(tu);
           delete nu;
           nu = tu;
@@ -417,6 +447,8 @@ void readcard()
 {
   String mynum = "";
 
+//  pnhsu.intr_check();
+
   boolean success;
   uint8_t uid[] = { 0, 0, 0, 0, 0, 0, 0 };  // Buffer to store the returned UID
   uint8_t uidLength;                        // Length of the UID (4 or 7 bytes depending on ISO14443A card type)
@@ -453,6 +485,8 @@ void readcard()
       Serial.println(uidLength);
       break;
   }
+  
+  nfc.powerDown();
 }
 
 
