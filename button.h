@@ -16,7 +16,7 @@ class Button
   private:
     int _pin;
     int state;
-    unsigned int start_millis;
+    unsigned long start_millis;
 };
 
 #endif
