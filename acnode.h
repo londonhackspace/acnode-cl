@@ -18,5 +18,7 @@ extern Syslog syslog;
 
 */
 
+#define TRACE Serial.print(__FILE__); Serial.print(": "); Serial.println( __LINE__);
+
 #endif
 
