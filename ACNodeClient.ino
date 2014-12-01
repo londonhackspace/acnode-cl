@@ -48,9 +48,13 @@ RGB rgb(PM_0, PM_1, PM_2);
 Every one_sec(1000);
 Every five_sec(5000);
 
+Every heart_every(1000);
+boolean heartbeat = true;
+
 Every card_every(500);
 
 Button button(PF_1);
+
 
 void setup() {
   Serial.begin(9600);
@@ -116,6 +120,7 @@ void setup() {
   one_sec.begin();
   five_sec.begin();
   card_every.begin();
+  heart_every.begin();
   rgb.begin();
 
   Serial.println("Initialising PN532");
@@ -178,15 +183,8 @@ void setup() {
 // current user
 user *cu = NULL;
 
-
 // true if we are adding a card
 boolean adding = false;
-
-// after the card is removed we have don't shut off the tool immediatly
-// some cards only read on alternate cycles, this means the tool stays on
-// on the missed reads
-int grace_period = 0;
-#define GRACE (3)
 
 void loop() {
   user *tu;
@@ -200,9 +198,19 @@ void loop() {
   }
 
   if (button_state == SHORT_PRESS) {
-    Serial.println("Button down");
+    Serial.println("Short button down");
   } else if (button_state == LONG_PRESS) {
     Serial.println("Long button press");
+  }
+  
+  if (heart_every.check()) {
+    if (heartbeat) {
+      digitalWrite(D1_LED, HIGH);
+      heartbeat = false;
+    } else {
+      digitalWrite(D1_LED, LOW);
+      heartbeat = true;
+    }
   }
 
   if (cu != NULL) {
@@ -232,8 +240,6 @@ void loop() {
       }
     }
   }
-
-  digitalWrite(D1_LED, HIGH);
 
   if (card_every.check()) {
     readcard();
@@ -296,7 +302,6 @@ void loop() {
         // card not changed
         // no need to check against the server.
         check = false;
-        grace_period = GRACE;
       } else {
         Serial.println("card changed");
         dump_user(tu);
@@ -310,7 +315,6 @@ void loop() {
       if (compare_uid(cu, nu)) {
         // no need to check against the server, we've already got the card
         check = false;
-        grace_period = GRACE;
       }
     }
 
@@ -381,28 +385,19 @@ void loop() {
     }
     cu = new user;
     memcpy(cu, nu, sizeof(user));
-    grace_period = GRACE;
     delete nu;
   } else {
     // no card on the reader
     if (cu != NULL) {
-      // the "TEMP" card (uid 040957827B3280) is very wierd
-      // and only reads on alternate cycles, so allow a card to disappear for a bit.
-      if (grace_period > 0) {
-        grace_period--;
-      } else {
-        Serial.println("Card removed");
-        tool.off(*cu);
-        delete cu;
-        cu = NULL;
-        // nuke the maintainer just in case.
-        memset(&maintainer, 0, sizeof(user));
-        grace_period = 0;
-      }
+      Serial.println("Card removed");
+      tool.off(*cu);
+      delete cu;
+      cu = NULL;
+      // nuke the maintainer just in case.
+      memset(&maintainer, 0, sizeof(user));
     }
   }
     
-  digitalWrite(D1_LED, LOW);
   digitalWrite(D2_LED, LOW);
   rgb.blue();
 
