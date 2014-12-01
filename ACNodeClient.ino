@@ -228,168 +228,161 @@ void loop() {
   if (card_every.check()) {
     // does the actuall card reading, updates cc.
     readcard();
-  }
 
-  /*
-   * we have to:
-   *
-   * use the uid on the card to fill in the other info about the user
-   * if the card is in the cache start with the data there
-   * if we can get to the acserver update the data from there,
-   * and save it to the cache if needed
-   */
-  if (!cc.invalid) // we have a valid card?
-  {
-    int status;
-    digitalWrite(D2_LED, HIGH); // indicate that we have a card.
-    user *nu;
-    nu = new user;
-    memset(nu, 0, sizeof(user));
-    memcpy(nu, &cc, sizeof(user));
+    /*
+     * we have to:
+     *
+     * use the uid on the card to fill in the other info about the user
+     * if the card is in the cache start with the data there
+     * if we can get to the acserver update the data from there,
+     * and save it to the cache if needed
+     */
+    if (!cc.invalid) // we have a valid card?
+    {
+      int status;
+      digitalWrite(D2_LED, HIGH); // indicate that we have a card.
+      user *nu;
+      nu = new user;
+      memset(nu, 0, sizeof(user));
+      memcpy(nu, &cc, sizeof(user));
 
-    if (one_sec.check()) {
-      Serial.println("got a card");
-      dump_user(nu);
-    }
+//      Serial.print("got a card : ");
+//      dump_user(nu);
 
-    // is the new card different from the maintainer card?
-    if (!compare_uid(nu, &maintainer)) {
-      // are we adding a new user?
-      if (adding) {
-        char tmp[128];
+      // is the new card different from the maintainer card?
+      if (!compare_uid(nu, &maintainer)) {
+        // are we adding a new user?
+        if (adding) {
+          char tmp[128];
 
-        adding = false;
+          adding = false;
 
-        sprintf(tmp, "%s", "Maintainer ");
-        uid_str(tmp + strlen(tmp), &maintainer);
-        sprintf(tmp + strlen(tmp), " adding a card ");
-        uid_str(tmp + strlen(tmp), nu);
-        Serial.println(tmp);
-        syslog.syslog(LOG_NOTICE, tmp);
+          sprintf(tmp, "%s", "Maintainer ");
+          uid_str(tmp + strlen(tmp), &maintainer);
+          sprintf(tmp + strlen(tmp), " adding a card ");
+          uid_str(tmp + strlen(tmp), nu);
+          Serial.println(tmp);
+          syslog.syslog(LOG_NOTICE, tmp);
 
-        addNewUser(*nu, maintainer);
-        adding = false;
-        memset(&maintainer, 0, sizeof(user));
-      }
-    }
-
-    // we have a possibly new card, check it against the cache.
-    tu = get_user(nu);
-
-    // was it in the cache?
-    if (tu != NULL && cu != NULL) {
-      // same as current card?
-      if (compare_user(cu, tu)) {
-        // card not changed
-        // no need to check against the server.
-        check = false;
-      } else {
-        Serial.println("card changed : ");
-        dump_user(tu);
-      }
-      delete tu;
-    } else if (cu != NULL && tu == NULL) {
-        // not in the cache.
-//        TRACE
-//        dump_user(cu);
-//        dump_user(nu);
-      if (compare_uid(cu, nu)) {
-        // no need to check against the server, we've already got the card
-        check = false;
-      }
-    }
-
-    if (network && check) {
-      status = querycard(cc);
-      Serial.println(status);
-
-      if (status >= 0) {
-        nu->status = 1;
-        nu->invalid = 0;
-        nu->end = 0;
-        nu->maintainer = 0;
-
-        // maintainer?
-        if (status == 2) {
-          nu->maintainer = 1;
+          addNewUser(*nu, maintainer);
+          adding = false;
+          memset(&maintainer, 0, sizeof(user));
         }
+      }
 
-        // user exists but can't do anything
-        // so mark as invalid
-        if (status == 0) {
-          nu->status = 0;
-        }
+      // we have a possibly new card, check it against the cache.
+      tu = get_user(nu);
 
-        tu = get_user(nu);
-
-        if (tu != NULL) {
-          if (!compare_user(tu, nu)) {
-            Serial.println("user changed, updating cache");
-            if (status == 0) {
-              nu->invalid = 1;
-            }
-            store_user(nu);
-          }
-          delete tu;
+      // was it in the cache?
+      if (tu != NULL && cu != NULL) {
+        // same as current card?
+        if (compare_user(cu, tu)) {
+          // card not changed
+          // no need to check against the server.
+          check = false;
         } else {
-          // new user, so just store it.
-          if (nu-> status == 1) {
-            store_user(nu);
-          }
-        }
-      } else {
-        // network error
-        Serial.println("network error, trying to find cached card");
-        tu = get_user(nu);
-        if (tu != NULL) {
-          delete nu;
-          nu = tu;
-          Serial.print("Found cached user: ");
+          Serial.println("card changed : ");
           dump_user(tu);
         }
-      }
-    } else {
-      // no network or no need to check, cached users only.
-//      if (one_sec.check()) {
-        Serial.println("trying to find cached card");
-//      }
-      tu = get_user(nu);
-      if (tu != NULL) {
-        delete nu;
-        nu = tu;
-
-        if (!compare_user(cu, nu)) {
-          // I think this never happens?
-          Serial.println("cached user differs from current user: ");
-          TRACE
-          dump_user(nu);
+        delete tu;
+      } else if (cu != NULL && tu == NULL) {
+          // not in the cache.
+  //        TRACE
+  //        dump_user(cu);
+  //        dump_user(nu);
+        if (compare_uid(cu, nu)) {
+          // no need to check against the server, we've already got the card
+          check = false;
         }
       }
-    }
 
+      if (network && check) {
+        status = querycard(cc);
+        Serial.println(status);
 
-    // Now make our new user the current user.
-    if (cu != NULL) {
-      delete cu;
-    }
-    cu = new user;
-    memcpy(cu, nu, sizeof(user));
-    delete nu;
+        if (status >= 0) {
+          nu->status = 1;
+          nu->invalid = 0;
+          nu->end = 0;
+          nu->maintainer = 0;
 
-  } else {
-    // no card on the reader
-    if (cu != NULL) {
-      Serial.println("Card removed");
-      tool.off(*cu);
-      delete cu;
-      cu = NULL;
-      // nuke the maintainer just in case.
-      if (!adding) {
-        memset(&maintainer, 0, sizeof(user));
+          // maintainer?
+          if (status == 2) {
+            nu->maintainer = 1;
+          }
+
+          // user exists but can't do anything
+          // so mark as invalid
+          if (status == 0) {
+            nu->status = 0;
+          }
+
+          tu = get_user(nu);
+
+          if (tu != NULL) {
+            if (!compare_user(tu, nu)) {
+              Serial.println("user changed, updating cache");
+              if (status == 0) {
+                nu->invalid = 1;
+              }
+              store_user(nu);
+            }
+            delete tu;
+          } else {
+            // new user, so just store it.
+            if (nu-> status == 1) {
+              store_user(nu);
+            }
+          }
+        } else {
+          // network error
+          Serial.println("network error, trying to find cached card");
+          tu = get_user(nu);
+          if (tu != NULL) {
+            delete nu;
+            nu = tu;
+            Serial.print("Found cached user: ");
+            dump_user(tu);
+          }
+        }
+      } else {
+        // no network or no need to check, cached users only.
+        if (cu != NULL && !compare_uid(nu, cu)) {
+
+          Serial.println("trying to find cached card");
+
+          tu = get_user(nu);
+
+          if (tu != NULL) {
+            delete nu;
+            nu = tu;
+          }
+        }
       }
+
+      // Now make our new user the current user.
+      if (cu != NULL) {
+        delete cu;
+      }
+      cu = new user;
+      memcpy(cu, nu, sizeof(user));
+      delete nu;
+
+    } else {
+      // no card on the reader
+      if (cu != NULL) {
+        Serial.println("Card removed");
+        tool.off(*cu);
+        delete cu;
+        cu = NULL;
+        // nuke the maintainer just in case.
+        if (!adding) {
+          memset(&maintainer, 0, sizeof(user));
+        }
+      }
+      digitalWrite(D2_LED, LOW);
+      rgb.blue();
     }
-    digitalWrite(D2_LED, LOW);
-    rgb.blue();
   }
 
   // do we have a card? if so, do things with it.
@@ -397,7 +390,6 @@ void loop() {
     card_loop();
   }
 }
-
 
 // When we have a card on the reader go round this loop.
 void card_loop() {
