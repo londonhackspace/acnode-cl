@@ -212,6 +212,7 @@ void list_users(void) {
   Serial.print(count);
   Serial.println(" users");
   
+/*
   uint8_t data[16];
   address = 0;
   for (address = USERBASE; address < (USERBASE + (64 * 4)) ; address += 16) {
@@ -221,6 +222,7 @@ void list_users(void) {
     dumpHex(data, 16);
     Serial.println("");
   }
+  */
 }
 
 // clear the userdb, this marks the first entry as the end.
