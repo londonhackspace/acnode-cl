@@ -143,11 +143,6 @@ void setup() {
   // Set the max number of retry attempts to read from a card
   // This prevents us from waiting forever for a card, which is
   // the default behaviour of the PN532.
-  // set it even lower to just 16 retries.
-  //
-  // 0xbd works
-  // 0x9e works
-  // 0x7f dosn't
   //
   // with the powerdown thing we don't need a long timeout
   // so use 16...
@@ -185,24 +180,13 @@ user *cu = NULL;
 
 // true if we are adding a card
 boolean adding = false;
+unsigned long adding_timeout = 0;
 
 void loop() {
   user *tu;
   boolean check = true;
-  int button_state = NO_PRESS;
-
-  button_state = button.poll();
-  if (button_state != NO_PRESS) {
-    Serial.print("Button: ");
-    Serial.println(button_state);
-  }
-
-  if (button_state == SHORT_PRESS) {
-    Serial.println("Short button down");
-  } else if (button_state == LONG_PRESS) {
-    Serial.println("Long button press");
-  }
   
+  // some housekeeping stuff
   if (heart_every.check()) {
     if (heartbeat) {
       digitalWrite(D1_LED, HIGH);
@@ -213,37 +197,39 @@ void loop() {
     }
   }
 
-  if (cu != NULL) {
-    if (one_sec.check()) {
-      Serial.print("user active: ");
-      dump_user(cu);
-    }
-    // tool enable etc here.
-    if (cu->status == 1) {
-      // this card is authorised to switch the tool on, so switch it on.
-      tool.on(*cu);
-      if (cu->maintainer == 0) {
-        rgb.green();
-      }
-    } else {
-      rgb.orange();
-    }
-    if (cu->status == 1 && cu->maintainer == 1) {
-      rgb.yellow();
-      // This user is a maintainer, check the button
-      if (button_state == SHORT_PRESS) {
-        // the button is pressed, copy our current card details to the maintainer block
-        memcpy(&maintainer, cu, sizeof(user));
-        // we are adding
-        adding = true;
-        Serial.println("*Adding*");
-      }
+  // put received char from stdin to microrl lib
+  if (Serial.available()) {
+    char c;
+    c = Serial.read();
+    microrl_insert_char (prl, c);
+  }
+
+  /*
+   *
+   * State here:
+   *
+   * cc = the current card, updated from the card reader
+   * tu = temp user, used for working things out as we go alone
+   * nu = new user, in the process from going from cc -> cu
+   * cu = current user, i.e. the current card have been chaged against the db, and the users permissions etc obtained
+   * maintainer = if we have a maintainer store there details here.
+   *
+   */
+
+  // were we adding a card?
+  // if so did one actually get added?
+  if (adding) {
+    // 30 secs to add a card
+    if (adding_timeout < millis()) {
+      adding = false;
     }
   }
 
   if (card_every.check()) {
+    // does the actuall card reading, updates cc.
     readcard();
   }
+
   /*
    * we have to:
    *
@@ -251,12 +237,11 @@ void loop() {
    * if the card is in the cache start with the data there
    * if we can get to the acserver update the data from there,
    * and save it to the cache if needed
-   * if the user is allowed to run the tool switch it on.
    */
-  if (!cc.invalid) // we have a valid card
+  if (!cc.invalid) // we have a valid card?
   {
     int status;
-    digitalWrite(D2_LED, HIGH);
+    digitalWrite(D2_LED, HIGH); // indicate that we have a card.
     user *nu;
     nu = new user;
     memset(nu, 0, sizeof(user));
@@ -267,33 +252,29 @@ void loop() {
       dump_user(nu);
     }
 
+    // is the new card different from the maintainer card?
     if (!compare_uid(nu, &maintainer)) {
-      // are we adding the user?
+      // are we adding a new user?
       if (adding) {
-        // check that the button is still being pressed
-        if (button_state == SHORT_PRESS) {
-          char tmp[128];
+        char tmp[128];
 
-          adding = false;
+        adding = false;
 
-          sprintf(tmp, "%s", "Maintainer ");
-          uid_str(tmp + strlen(tmp), &maintainer);
-          sprintf(tmp + strlen(tmp), " adding a card ");
-          uid_str(tmp + strlen(tmp), nu);
-          Serial.println(tmp);
-          syslog.syslog(LOG_NOTICE, tmp);
+        sprintf(tmp, "%s", "Maintainer ");
+        uid_str(tmp + strlen(tmp), &maintainer);
+        sprintf(tmp + strlen(tmp), " adding a card ");
+        uid_str(tmp + strlen(tmp), nu);
+        Serial.println(tmp);
+        syslog.syslog(LOG_NOTICE, tmp);
 
-          addNewUser(*nu, maintainer);
-        }
-      } else {
-        // not adding so nuke it.
+        addNewUser(*nu, maintainer);
+        adding = false;
         memset(&maintainer, 0, sizeof(user));
       }
     }
 
     // we have a possibly new card, check it against the cache.
     tu = get_user(nu);
-
 
     // was it in the cache?
     if (tu != NULL && cu != NULL) {
@@ -303,11 +284,11 @@ void loop() {
         // no need to check against the server.
         check = false;
       } else {
-        Serial.println("card changed");
+        Serial.println("card changed : ");
         dump_user(tu);
       }
       delete tu;
-    } else if (cu != NULL and tu == NULL) {
+    } else if (cu != NULL && tu == NULL) {
         // not in the cache.
 //        TRACE
 //        dump_user(cu);
@@ -363,29 +344,38 @@ void loop() {
         if (tu != NULL) {
           delete nu;
           nu = tu;
+          Serial.print("Found cached user: ");
           dump_user(tu);
         }
       }
     } else {
       // no network or no need to check, cached users only.
-      if (one_sec.check()) {
+//      if (one_sec.check()) {
         Serial.println("trying to find cached card");
-      }
+//      }
       tu = get_user(nu);
       if (tu != NULL) {
-        TRACE
-        dump_user(tu);
         delete nu;
         nu = tu;
+
+        if (!compare_user(cu, nu)) {
+          // I think this never happens?
+          Serial.println("cached user differs from current user: ");
+          TRACE
+          dump_user(nu);
+        }
       }
     }
-      
+
+
+    // Now make our new user the current user.
     if (cu != NULL) {
       delete cu;
     }
     cu = new user;
     memcpy(cu, nu, sizeof(user));
     delete nu;
+
   } else {
     // no card on the reader
     if (cu != NULL) {
@@ -394,18 +384,66 @@ void loop() {
       delete cu;
       cu = NULL;
       // nuke the maintainer just in case.
-      memset(&maintainer, 0, sizeof(user));
+      if (!adding) {
+        memset(&maintainer, 0, sizeof(user));
+      }
     }
+    digitalWrite(D2_LED, LOW);
+    rgb.blue();
   }
-    
-  digitalWrite(D2_LED, LOW);
-  rgb.blue();
 
-  // put received char from stdin to microrl lib
-  if (Serial.available()) {
-    char c;
-    c = Serial.read();
-    microrl_insert_char (prl, c);
+  // do we have a card? if so, do things with it.
+  if (cu != NULL) {
+    card_loop();
+  }
+}
+
+
+// When we have a card on the reader go round this loop.
+void card_loop() {
+  int button_state = NO_PRESS;
+
+  button_state = button.poll();
+  if (button_state != NO_PRESS) {
+    Serial.print("Button: ");
+    Serial.println(button_state);
+  }
+
+  if (button_state == SHORT_PRESS) {
+    Serial.println("Short button down");
+  } else if (button_state == LONG_PRESS) {
+    Serial.println("Long button press");
+  }
+  
+  if (one_sec.check()) {
+    Serial.print("card on reader: ");
+    dump_user(cu);
+  }
+
+  // tool enable etc here.
+  if (cu->status == 1) {
+    // this card is authorised to switch the tool on, so switch it on.
+    tool.on(*cu);
+
+    if (cu->maintainer == 0) {
+      rgb.green();
+    } else {
+      // maintainer
+      rgb.yellow();
+      // This user is a maintainer, check the button
+      if (button_state == SHORT_PRESS) {
+        // the button is pressed, copy our current card details to the maintainer block
+        memcpy(&maintainer, cu, sizeof(user));
+        // we are adding
+        adding = true;
+        // 30 sec adding timeout
+        adding_timeout = millis() + (1000 * 30);
+        Serial.println("*Adding*");
+      }
+    }
+  } else {
+    // not a valid user.
+    rgb.orange();
   }
 }
 
