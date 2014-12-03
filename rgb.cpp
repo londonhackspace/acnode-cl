@@ -9,42 +9,67 @@ void RGB::begin() {
   pinMode(_r, OUTPUT);
   pinMode(_g, OUTPUT);
   pinMode(_b, OUTPUT);
+  colour = OFF;
 }
 
 void RGB::white() {
+  if (colour == WHITE)
+    return;
   analogWrite(_r, 64);
   analogWrite(_g, 0);
   analogWrite(_b, 64);
+  colour = WHITE;
 }
 
 void RGB::red() {
+  if (colour == RED)
+    return;
   off();
   analogWrite(_r, 0);
+  colour = RED;
 }
+
 void RGB::green() {
+  if (colour == GREEN)
+    return;
   off();
   analogWrite(_g, 0);
+  colour = GREEN;
 }
+
 void RGB::blue() {
+  if (colour == BLUE)
+    return;
   off();
   analogWrite(_b, 0);
+  colour = BLUE;
 }
 
 void RGB::yellow() {
+  if (colour == YELLOW)
+    return;
   off();
   analogWrite(_r, 0);
   analogWrite(_g, 0);
+  colour = YELLOW;
 }
+
 void RGB::orange() {
+  if (colour == ORANGE)
+    return;
   off();
   analogWrite(_r, 0);
   analogWrite(_g, 200);
+  colour = ORANGE;
 }
 
 void RGB::off() {
+  if (colour == OFF)
+    return;
   analogWrite(_r, 255);
   analogWrite(_g, 255);
   analogWrite(_b, 255);
+  colour = OFF;
 }
 
 void RGB::pretty () {
