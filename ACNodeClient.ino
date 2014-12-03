@@ -71,6 +71,13 @@ void setup() {
   pinMode(D3_LED, OUTPUT);
   pinMode(D4_LED, OUTPUT);
 
+  // start the tool early so it can be switched off(!?)
+  tool.begin();
+
+  // start the rgb early so we can get some feedback
+  rgb.begin();
+  rgb.yellow();
+
   init_settings();
 
   acsettings = get_settings();
@@ -111,17 +118,18 @@ void setup() {
     Serial.println();
   }
 
+  if (!network) {
+    syslog.offline();
+  }
 
   syslog.begin(acsettings.syslogserver, acsettings.toolname, LOG_LOCAL0);
   syslog.syslog(LOG_NOTICE, "Starting up");
 
-  tool.begin();
   button.begin();
   one_sec.begin();
   five_sec.begin();
   card_every.begin();
   heart_every.begin();
-  rgb.begin();
 
   Serial.println("Initialising PN532");
 
@@ -191,9 +199,15 @@ void loop() {
     if (heartbeat) {
       digitalWrite(D1_LED, HIGH);
       heartbeat = false;
+      if (!network && cu == NULL) {
+        rgb.orange();
+      }
     } else {
       digitalWrite(D1_LED, LOW);
       heartbeat = true;
+      if (cu == NULL) {
+        rgb.blue();
+      }
     }
   }
 
@@ -281,8 +295,10 @@ void loop() {
           // no need to check against the server.
           check = false;
         } else {
-          Serial.println("card changed : ");
+          Serial.println("card changed, tu: ");
           dump_user(tu);
+          Serial.println("cu: ");
+          dump_user(cu);
         }
         delete tu;
       } else if (cu != NULL && tu == NULL) {
@@ -295,6 +311,9 @@ void loop() {
           check = false;
         }
       }
+
+      Serial.print("check: ");
+      Serial.println(check);
 
       if (network && check) {
         status = querycard(cc);
@@ -337,13 +356,24 @@ void loop() {
         } else {
           // network error
           Serial.println("network error, trying to find cached card");
+
           tu = get_user(nu);
+
           if (tu != NULL) {
             delete nu;
             nu = tu;
             Serial.print("Found cached user: ");
             dump_user(tu);
           }
+        }
+      } else if (check) {
+        tu = get_user(nu);
+
+        if (tu != NULL) {
+          delete nu;
+          nu = tu;
+          Serial.print("Found cached user (check): ");
+          dump_user(tu);
         }
       } else {
         // no network or no need to check, cached users only.
@@ -360,14 +390,24 @@ void loop() {
         }
       }
 
-      // Now make our new user the current user.
-      if (cu != NULL) {
+      // we've checked the card, so update cu.
+      if (cu != NULL && check == true) {
+        Serial.println("deleting old cu:");
+        dump_user(cu);
         delete cu;
+        cu = NULL;
       }
-      cu = new user;
-      memcpy(cu, nu, sizeof(user));
-      delete nu;
 
+      // we had no current user, so set one up
+      if (cu == NULL) {
+        cu = new user;
+        memcpy(cu, nu, sizeof(user));
+        Serial.println("new cu:");
+        dump_user(cu);
+      }
+
+      delete nu;
+      nu = NULL;
     } else {
       // no card on the reader
       if (cu != NULL) {
