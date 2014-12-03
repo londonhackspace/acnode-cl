@@ -72,6 +72,32 @@ void RGB::off() {
   colour = OFF;
 }
 
+void RGB::set(Colour c) {
+  switch (c) {
+    case RED:
+      red();
+      break;
+    case GREEN:
+      green();
+      break;
+    case BLUE:
+      blue();
+      break;
+    case YELLOW:
+      yellow();
+      break;
+    case ORANGE:
+      orange();
+      break;
+    case WHITE:
+      white();
+      break;
+    case OFF:
+      off();
+      break;
+  }
+}
+
 void RGB::pretty () {
   const int leds[] = {_r, _g, _b};
 
