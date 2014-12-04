@@ -9,12 +9,12 @@ A card that does not exist in the system does not switch the tool on
 
 Check that card status changes correctly update the cache:
 
-no perms -> perm
+no perm -> perm
 no perm -> maintainer
 perm -> no perm
 perm -> maintainer
-maintainer -> perm
 maintainer -> no perm
+maintainer -> perm
 
 a maintainer can add a card
 a maintainer can take an in service tool out of service (and is cached)
@@ -26,15 +26,18 @@ check that tool in service/out of service works when the acnode is disconnected
 
 XXX what happend to tool status if we:
 
-are disconnected, a maintainer puts the tool out of service, the acnode is
+Are disconnected, a maintainer puts the tool out of service, the acnode is
 reconnected and rebooted - it will query the server, the server will tell
-the acnode that it should be 
+the acnode that it should be in service and the acnode will put it back into service,
+is that what we want?
+
+Is the acnode or the acserver the authoritive source of the in/out of service status?
 
 button colours:
 
 tool starting up: yellow
 tool in service, with net connection: blue
-tool in service, no net connection: flashing orange/blue (?)
+tool in service, no net connection: flashing orange/blue
 tool out of service: red
 
 Tool in service, and running: green
@@ -42,3 +45,14 @@ Tool in service, and running with a maintainer: yellow
 Tool in service, card with no permissions: orange
 tool in service, card not recognised: orange (would have to add more state
 to recognise this case)
+
+bugs:
+
+clear does not work? (or maybe we need to re-read the settings?).
+spams syslog if tool offline.
+  - we need a "new user detected function"
+the user stuff should be a class
+new/delete, pointers and references, malloc and free is all a bit crazy.
+
+  
+  

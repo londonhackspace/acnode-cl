@@ -17,6 +17,7 @@ class RGB
     void orange();
     void white();
     void off();
+    void set(Colour c);
     void pretty();
   private:
     int _r;

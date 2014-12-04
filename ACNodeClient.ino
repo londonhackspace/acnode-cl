@@ -190,6 +190,13 @@ user *cu = NULL;
 boolean adding = false;
 unsigned long adding_timeout = 0;
 
+// are we in a menu?
+enum MenuType {NOMENU, USER, MAINTAINER};
+enum MenuState {ADD, OFFLINE, ONLINE};
+
+MenuType menu = NOMENU;
+MenuState menu_state;
+
 void loop() {
   user *tu;
   boolean check = true;
@@ -199,14 +206,51 @@ void loop() {
     if (heartbeat) {
       digitalWrite(D1_LED, HIGH);
       heartbeat = false;
-      if (!network && cu == NULL) {
+
+      if (menu == NOMENU && !network && cu == NULL) {
         rgb.orange();
+      }
+
+      if (menu != NOMENU) {
+        Serial.println("Menu colour stuff");
+        switch (menu_state) {
+          case ADD:
+            // Amber for Adding
+            rgb.orange();
+            break;
+          case OFFLINE:
+            rgb.red();
+            break;
+          case ONLINE:
+            rgb.green();
+            break;
+        }
       }
     } else {
       digitalWrite(D1_LED, LOW);
       heartbeat = true;
       if (cu == NULL) {
-        rgb.blue();
+        if (acsettings.status) {
+          rgb.blue();
+        } else {
+          // offline
+          rgb.red();
+        }
+      } else {
+        // we have a user
+        if (cu->maintainer == 1) {
+          // maintainer
+          rgb.yellow();
+        } else {
+          if (cu->status == 1) {
+            if (acsettings.status) {
+              rgb.green();
+            } else {
+              // offline
+              rgb.red();
+            }
+          }
+        }
       }
     }
   }
@@ -311,9 +355,6 @@ void loop() {
           check = false;
         }
       }
-
-      Serial.print("check: ");
-      Serial.println(check);
 
       if (network && check) {
         status = querycard(cc);
@@ -428,24 +469,12 @@ void loop() {
   // do we have a card? if so, do things with it.
   if (cu != NULL) {
     card_loop();
+    menu_loop();
   }
 }
 
 // When we have a card on the reader go round this loop.
 void card_loop() {
-  int button_state = NO_PRESS;
-
-  button_state = button.poll();
-  if (button_state != NO_PRESS) {
-    Serial.print("Button: ");
-    Serial.println(button_state);
-  }
-
-  if (button_state == SHORT_PRESS) {
-    Serial.println("Short button down");
-  } else if (button_state == LONG_PRESS) {
-    Serial.println("Long button press");
-  }
   
   if (one_sec.check()) {
     Serial.print("card on reader: ");
@@ -457,13 +486,151 @@ void card_loop() {
     // this card is authorised to switch the tool on, so switch it on.
     tool.on(*cu);
 
-    if (cu->maintainer == 0) {
-      rgb.green();
-    } else {
-      // maintainer
-      rgb.yellow();
-      // This user is a maintainer, check the button
-      if (button_state == SHORT_PRESS) {
+  } else {
+    // not a valid user.
+    rgb.orange();
+  }
+}
+
+
+unsigned long menu_timeout;
+
+void menu_loop(void) {
+  int button_state = NO_PRESS;
+
+  button_state = button.poll();
+
+/*  if (button_state != NO_PRESS) {
+    Serial.print("Button: ");
+    Serial.println(button_state);
+  }*/
+
+  if (button_state == SHORT_PRESS) {
+    Serial.println("Short button down");
+  } else if (button_state == LONG_PRESS) {
+    Serial.println("Long button press");
+  }
+
+  if (button_state == NO_PRESS && menu == NOMENU) {
+    // nothing to do
+    return;
+  }
+  
+  if (menu == NOMENU) {
+    if (button_state == LONG_PRESS) {
+      // long press outside of a menu does nothing
+      return;
+    }
+    
+    if (button_state == SHORT_PRESS) {
+      // menu now activated
+      menu_timeout = millis() + (60 * 1000);
+
+      if (cu->status == 1 && cu->maintainer == 0) {
+        menu = USER;
+        // if we are a user the 1st item on the menu is OFFLINE
+        menu_state = OFFLINE;
+        // but if we are already offline don't do anything, normal users can't put us offline
+        if (acsettings.status == 0) {
+          char tmp[128];
+
+          sprintf(tmp, "%s", "User ");
+          uid_str(tmp + strlen(tmp), cu);
+          sprintf(tmp + strlen(tmp), " tried to use the menu when the tool is offline");
+          Serial.println(tmp);
+          syslog.syslog(LOG_NOTICE, tmp);
+
+          menu = NOMENU;
+        }
+      }
+      if (cu->maintainer == 1) {
+        menu = MAINTAINER;
+        // if we are on the maintainer menu, the 1st item is adding a user
+        menu_state = ADD;
+      }
+    }
+  } else {
+
+    // menu currently active
+    switch (menu) {
+      case MAINTAINER:
+        maintainer_menu(button_state);
+        break;
+      case USER:
+        user_menu(button_state);
+        break;
+      case NOMENU:
+        // we can't get here, but the compiler complains that we don't check this state, so put this in.
+        break;
+    }
+
+    if (menu_timeout < millis()) {
+      menu = NOMENU;
+    }
+  }
+}
+
+
+// these should probably be in tool.cpp
+void offline(void) {
+  acsettings.status = 0;
+  set_settings(acsettings);
+
+  char tmp[128];
+
+  sprintf(tmp, "%s", "User ");
+  uid_str(tmp + strlen(tmp), cu);
+  sprintf(tmp + strlen(tmp), " took the tool out of service.");
+  Serial.println(tmp);
+  syslog.syslog(LOG_WARNING, tmp);
+
+  int ret = toolUse(0, *cu);
+  Serial.print("After updating toolUse: ");
+  Serial.println(ret);
+}
+
+void online(void) {
+  acsettings.status = 1;
+  set_settings(acsettings);
+
+  char tmp[128];
+
+  sprintf(tmp, "%s", "User ");
+  uid_str(tmp + strlen(tmp), cu);
+  sprintf(tmp + strlen(tmp), " put the tool in service.");
+  Serial.println(tmp);
+  syslog.syslog(LOG_WARNING, tmp);
+
+  int ret = toolUse(1, *cu);
+  Serial.print("After updating toolUse: ");
+  Serial.println(ret);
+}
+
+void maintainer_menu(int press) {
+  // short presses change menu item
+  if (press == SHORT_PRESS) {
+    switch (menu_state) {
+      case ADD:
+        // are we in service?
+        if (acsettings.status) {
+          // if so offer to take us out of service
+          menu_state = OFFLINE;
+        } else {
+          menu_state = ONLINE;
+        }
+        break;
+      case ONLINE:
+      case OFFLINE:
+        // exit the menu
+        menu = NOMENU;
+        break;
+    }
+  }
+  // has a menu item bee activated?
+  if (press == LONG_PRESS) {
+    switch (menu_state) {
+      case ADD:
+        Serial.println("maintainer menu add selected");
         // the button is pressed, copy our current card details to the maintainer block
         memcpy(&maintainer, cu, sizeof(user));
         // we are adding
@@ -471,11 +638,36 @@ void card_loop() {
         // 30 sec adding timeout
         adding_timeout = millis() + (1000 * 30);
         Serial.println("*Adding*");
-      }
+
+        menu = NOMENU;
+
+        break;
+      case OFFLINE:
+        Serial.println("maintainer menu out of service selected");
+        offline();
+        menu = NOMENU;
+        break;
+      case ONLINE:
+        Serial.println("maintainer menu in service selected");
+        online();
+        menu = NOMENU;
+        break;
     }
-  } else {
-    // not a valid user.
-    rgb.orange();
+  }
+}
+
+void user_menu(int press) {
+  // exit the menu
+  if (press == SHORT_PRESS) {
+    Serial.println("Exiting the user menu");
+    menu = NOMENU;
+    return;
+  }
+
+  if (press == LONG_PRESS) {
+    // we can only go offline here
+    offline();
+    menu = NOMENU;
   }
 }
 
