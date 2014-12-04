@@ -53,7 +53,7 @@ and then `save` to save the settings.
 * In service, maintainer: yellow
 * Out of service, idle: flashing blue/red
 * Out of service, valid user: red (and the tool will be off)
-* Out of service, maintainer: yellow (and the tool will turn off)
+* Out of service, maintainer: yellow (and the tool will turn on)
 
 # To use the button menu:
 
