@@ -17,6 +17,7 @@ class Button
     int _pin;
     int state;
     unsigned long start_millis;
+    unsigned long last_sample;
 };
 
 #endif

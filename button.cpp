@@ -10,9 +10,17 @@ Button::Button(int pin) {
 void Button::begin() {
   pinMode(_pin, INPUT_PULLUP);
   state = WAITING;
+  last_sample = millis();
 }
 
 int Button::poll() {
+
+   // oh help yuck debouncing
+  if (last_sample + 20 > millis())
+    return NO_PRESS;
+  
+  last_sample = millis();
+  
   // pullup, so on by default.
   if (digitalRead(_pin) == 0) {
     if (state == WAITING) {
