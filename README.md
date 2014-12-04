@@ -61,6 +61,8 @@ A short press starts the menu and switches between items, a long press selects a
 
 For users the only menu item is to take the tool out of service - it's flashing red/green
 
+The menu also times out after 60 seconds.
+
 ## For maintainers the menu items are:
 
 * Add a user (flashing Amber)
@@ -70,22 +72,27 @@ For users the only menu item is to take the tool out of service - it's flashing 
 ## So for a user to take a tool out of service:
 
 Press the button once, quickly, the button will be flashing red/green.
+
 Hold the button down for a second or so and release.
+
 The button will go solid red and the tool will be out of service
 
 ## For a maintainer to access the menu and do nothing:
 
-press the button once, the button will flash Amber/yellow - the acnode is in add mode
+press the button once, the button will flash Amber/yellow - the acnode is in add mode.
+
 press the button again, the button will flash red/yellow - the menu is in take tool out of service mode.
-press the button again, the button will stop flashing, you have exited the menu
+
+press the button again, the button will stop flashing, you have exited the menu.
 
 ## For a maintainer to add a card:
 
 Press the button, it will flash Amber/yellow
+
 press the button for 1 sec or so and let it go, the button will go yellow
+
 remove the maintainer card. add the card to be added - the button will go orange (invalid card colour)
+
 remove the card.
+
 The new card should now be added.
-
-The menu also times out after 60 seconds.
-
