@@ -596,6 +596,9 @@ void offline(void) {
   int ret = setToolStatus(0, *cu);
   Serial.print("After setting ToolStatus: ");
   Serial.println(ret);
+
+  // and switch the tool off.
+  tool.off(*cu);
 }
 
 void online(void) {
@@ -613,6 +616,10 @@ void online(void) {
   int ret = setToolStatus(1, *cu);
   Serial.print("After setting ToolStatus: ");
   Serial.println(ret);
+
+  // this is redundant since users can't put a tool back in service, and the tool will be on for a maintainer.
+  // but leave it for completeness
+  tool.on(*cu);
 }
 
 void maintainer_menu(int press) {
