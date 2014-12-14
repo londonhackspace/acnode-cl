@@ -593,8 +593,8 @@ void offline(void) {
   Serial.println(tmp);
   syslog.syslog(LOG_WARNING, tmp);
 
-  int ret = toolUse(0, *cu);
-  Serial.print("After updating toolUse: ");
+  int ret = setToolStatus(0, *cu);
+  Serial.print("After setting ToolStatus: ");
   Serial.println(ret);
 }
 
@@ -610,8 +610,8 @@ void online(void) {
   Serial.println(tmp);
   syslog.syslog(LOG_WARNING, tmp);
 
-  int ret = toolUse(1, *cu);
-  Serial.print("After updating toolUse: ");
+  int ret = setToolStatus(1, *cu);
+  Serial.print("After setting ToolStatus: ");
   Serial.println(ret);
 }
 
