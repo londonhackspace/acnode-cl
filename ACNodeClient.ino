@@ -225,6 +225,13 @@ void loop() {
             rgb.green();
             break;
         }
+      } else {
+        if (cu == NULL) {
+          if (!acsettings.status) {
+            // offline
+            rgb.red();
+          }
+        }
       }
     } else {
       digitalWrite(D1_LED, LOW);
@@ -462,7 +469,9 @@ void loop() {
         }
       }
       digitalWrite(D2_LED, LOW);
-      rgb.blue();
+      if (acsettings.status) {
+        rgb.blue();
+      }
     }
   }
 
