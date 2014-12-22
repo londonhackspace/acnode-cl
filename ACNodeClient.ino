@@ -138,7 +138,7 @@ void setup() {
   uint32_t versiondata = nfc.getFirmwareVersion();
 
   if (! versiondata) {
-    Serial.print("Didn't find PN53x board");
+    Serial.println("Didn't find PN53x board");
     syslog.syslog(LOG_EMERG, "Couldn't find PN532 board");
     while (1); // halt
   }
@@ -179,6 +179,8 @@ void setup() {
   } else {
     rgb.orange();
   }
+
+  cc.invalid = 1;
 
   Serial.println("press enter for a prompt");
 }
