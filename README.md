@@ -1,4 +1,76 @@
-# How to get this running with a cooqrobot/elechouse pn532 breakout board:
+
+# parts list
+
+## for the transistor switch
+
+1 x NPN transistor, i used a 2N3904
+1 x 1K resistor
+1 x small bit (8 x 8 holes is fine) of vero board
+2 x C shaped crimp or solderable terminals for the relay
+2 x wires with female header socket ends (the other end dosn't matter, and
+will be cut off), one black, and one red.
+1 x black female to female header socket lead
+1 x grey female to female header socket lead
+
+## for the rest of the node:
+
+2 x crimp or solderable spade terminals for the microswitch on the arcade button
+2 x wires with female header socket ends (the other end dosn't matter, and
+will be cut off), one black & one white
+1 x PN532 based card reader
+1 x connected launpad
+1 x red  female to female header socket lead
+1 x blue female to female header socket lead
+1 x green female to female header socket lead
+1 x black female to female header socket lead
+
+##  Making the transistor switch
+
+* cut one end off the 2 wires with header socket ends, leaving as much wire
+as possible and the female ends
+
+* Strip the bare end crimp into the termainals - for the arcade button
+termainals use a white and black wire, and for the relay use red and black
+wires.
+
+* Attach the red wire to the+ side of the VDC connections on the SSR and the
+black one to the - side.
+
+* Attach the red female and to +5v heder pin on the launchpad
+
+* On some strip board solder the transistor on one edge with the flat side
+facing the rest of the board.
+
+* Cut the track connected to the middle (base) pin of the transistor in the
+middle of the board
+
+* Solder the 1K resistor over the hole you've cut
+
+* Solder a 3 pin header so the middle pin goes header -> 1k resistor ->
+middle (base) of the transistor, and the left and right pins are connected
+to the left and right pin of the transistor
+
+* with the header pins towards you looking edge on at the board (the flat
+side of the transistor should be facing you), the pins are, from left to
+right:
+
+1 connect to gnd on the connected launcpad with a black female to female lead.
+2 connect to PG_1 on the connected launchpad
+3 connect to - on the ssr VDC side with the black lead you made eairler
+
+## wireing in the arcade switch
+
+* make two spade terminal leads, one white and one black
+
+* connect the black one to the bottom of the microswitch on the button and the other end to a convient GND on the launchpad
+
+* connect the white end to the terminal labeled "NO" on the microswitch, and the other end to PF_1 on the launcpad
+
+* connect the white lead of the rgb led leads to +5V on the launchpad
+
+* the RGB red, green and blue leads go to PM0, PM1 and PM2
+
+## How to get this running with a cooqrobot/elechouse pn532 breakout board:
 
 1. carefully unsolder the 0 ohm resistor jumper from the HIS0 connector, then resolder it (or just bridge the pads with solder) so that the '0' side is connected rather than the 1, this puts the reader in HSU mode.
 
