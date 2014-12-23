@@ -9,7 +9,7 @@ Tool::Tool(int pin) {
 
 void Tool::begin() {
   pinMode(_toolpin, OUTPUT);
-  digitalWrite(_toolpin, HIGH);
+  digitalWrite(_toolpin, LOW);
 }
 
 void Tool::on(user user) {
@@ -37,7 +37,7 @@ void Tool::on(user user) {
     _start = millis();
 
     // switch tool on here.
-    digitalWrite(_toolpin, LOW);
+    digitalWrite(_toolpin, HIGH);
     // end 
     _toolon = true;
   }
@@ -49,7 +49,7 @@ void Tool::off(user user) {
     char msg[64];
 
     // switch tool off here
-    digitalWrite(_toolpin, HIGH);
+    digitalWrite(_toolpin, LOW);
     // end
 
     unsigned long duration = (millis() - _start) / 1000;
