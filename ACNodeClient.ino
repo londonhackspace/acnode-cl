@@ -494,9 +494,11 @@ void card_loop() {
 
   // tool enable etc here.
   if (cu->status == 1) {
-    // this card is authorised to switch the tool on, so switch it on.
-    tool.on(*cu);
-
+    // is the tool running
+    if (acsettings.status || cu->maintainer == 1) {
+      // this card is authorised to switch the tool on, so switch it on.
+      tool.on(*cu);
+    }
   } else {
     // not a valid user.
     rgb.orange();
