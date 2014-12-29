@@ -459,6 +459,12 @@ void loop() {
         memcpy(cu, nu, sizeof(user));
         Serial.println("new cu:");
         dump_user(cu);
+
+        if (cu->maintainer || cu->status) {
+          // tell the server this user has started using the tool.
+          reportToolUse(*cu, 1);
+        }
+
       }
 
       delete nu;
@@ -468,6 +474,12 @@ void loop() {
       if (cu != NULL) {
         Serial.println("Card removed");
         tool.off(*cu);
+
+        if (cu->maintainer || cu->status) {
+          // tell the server this user has stopped using the tool.
+          reportToolUse(*cu, 0);
+        }
+
         delete cu;
         cu = NULL;
         // nuke the maintainer just in case.

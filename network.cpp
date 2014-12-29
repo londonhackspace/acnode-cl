@@ -207,4 +207,22 @@ int toolUseTime(user card, int time) {
   return ret;
 }
 
+int reportToolUse(user card, int status) {
+  int ret = -1;
+
+  Serial.println("Setting tool usage:");
+  // /[nodeID]/tooluse/[status]/[cardID]
+
+  char url[64];
+  sprintf(url, "POST /%ld/tooluse/%d/", acsettings.nodeid, status);
+  uid_str(url + strlen(url), &card);
+
+  Serial.println(url);
+
+  ret = get_url(url);
+  Serial.print("Got: ");
+  Serial.println(ret);
+
+  return ret;
+}
 
