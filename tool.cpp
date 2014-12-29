@@ -1,6 +1,7 @@
 #include "tool.h"
 #include "acnode.h"
 #include "utils.h"
+#include "network.h"
 
 Tool::Tool(int pin) {
   _toolpin = pin;
@@ -103,6 +104,8 @@ void Tool::stoprunning() {
 
     Serial.println(msg);
     syslog.syslog(LOG_NOTICE, msg);
+
+    toolUseTime(tool_user, duration);
 }
 
 void Tool::on(user user) {
