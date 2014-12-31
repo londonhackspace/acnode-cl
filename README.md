@@ -50,6 +50,14 @@ middle of the board
 middle (base) of the transistor, and the left and right pins are connected
 to the left and right pin of the transistor
 
+pic of stripboard + transistor + header:
+
+https://pointless.net/photos/id/1419346624/
+
+pic of the bottom showing cut track:
+
+https://pointless.net/photos/id/1419346632/
+
 * with the header pins towards you looking edge on at the board (the flat
 side of the transistor should be facing you), the pins are, from left to
 right:
@@ -61,6 +69,10 @@ right:
 ## wireing in the arcade switch
 
 * make two spade terminal leads, one white and one black
+
+like this:
+
+https://pointless.net/photos/id/1419334749/
 
 * connect the black one to the bottom of the microswitch on the button and the other end to a convient GND on the launchpad
 
