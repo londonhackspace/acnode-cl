@@ -3,26 +3,24 @@
 
 ## for the transistor switch
 
-1 x NPN transistor, i used a 2N3904
-1 x 1K resistor
-1 x small bit (8 x 8 holes is fine) of vero board
-2 x C shaped crimp or solderable terminals for the relay
-2 x wires with female header socket ends (the other end dosn't matter, and
-will be cut off), one black, and one red.
-1 x black female to female header socket lead
-1 x grey female to female header socket lead
+* 1 x NPN transistor, i used a 2N3904
+* 1 x 1K resistor
+* 1 x small bit (8 x 8 holes is fine) of vero board
+* 2 x C shaped crimp or solderable terminals for the relay
+* 2 x wires with female header socket ends (the other end dosn't matter, and will be cut off), one black, and one red.
+* 1 x black female to female header socket lead
+* 1 x grey female to female header socket lead
 
 ## for the rest of the node:
 
-2 x crimp or solderable spade terminals for the microswitch on the arcade button
-2 x wires with female header socket ends (the other end dosn't matter, and
-will be cut off), one black & one white
-1 x PN532 based card reader
-1 x connected launpad
-1 x red  female to female header socket lead
-1 x blue female to female header socket lead
-1 x green female to female header socket lead
-1 x black female to female header socket lead
+* 2 x crimp or solderable spade terminals for the microswitch on the arcade button
+* 2 x wires with female header socket ends (the other end dosn't matter, and will be cut off), one black & one white
+* 1 x PN532 based card reader
+* 1 x connected launpad
+* 1 x red  female to female header socket lead
+* 1 x blue female to female header socket lead
+* 1 x green female to female header socket lead
+* 1 x black female to female header socket lead
 
 ##  Making the transistor switch
 
@@ -62,9 +60,9 @@ https://pointless.net/photos/id/1419346632/
 side of the transistor should be facing you), the pins are, from left to
 right:
 
-1 connect to gnd on the connected launcpad with a black female to female lead.
-2 connect to PG_1 on the connected launchpad
-3 connect to - on the ssr VDC side with the black lead you made eairler
+* 1 connect to gnd on the connected launcpad with a black female to female lead.
+* 2 connect to PG_1 on the connected launchpad
+* 3 connect to - on the ssr VDC side with the black lead you made eairler
 
 ## wireing in the arcade switch
 
