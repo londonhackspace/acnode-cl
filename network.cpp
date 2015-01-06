@@ -85,7 +85,7 @@ int get_url(char * path) {
 // https://wiki.london.hackspace.org.uk/view/Project:Tool_Access_Control/Solexious_Proposal#Get_card_permissions
 int querycard(user card)
 {
-  char path[13 + 14 + 1];
+  char path[11 + 10 + 14 + 1];
   int result = -1;
 
   if (card.invalid) {
@@ -114,7 +114,7 @@ int querycard(user card)
 // https://wiki.london.hackspace.org.uk/view/Project:Tool_Access_Control/Solexious_Proposal#Check_tool_status
 bool networkCheckToolStatus()
 {
-  char path[13 + 2];
+  char path[13 + 10 + 1];
   int result = -1;
   
   sprintf(path, "GET /%ld/status/", acsettings.nodeid);
