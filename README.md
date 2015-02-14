@@ -1,7 +1,7 @@
 
-# parts list
+# Parts list
 
-## for the transistor switch
+## For the transistor switch
 
 * 1 x NPN transistor, i used a 2N3904
 * 1 x 1K resistor
@@ -11,7 +11,7 @@
 * 1 x black female to female header socket lead
 * 1 x grey female to female header socket lead
 
-## for the rest of the node:
+## For the rest of the node:
 
 * 2 x crimp or solderable spade terminals for the microswitch on the arcade button
 * 2 x wires with female header socket ends (the other end dosn't matter, and will be cut off), one black & one white
@@ -27,8 +27,8 @@
 * cut one end off the 2 wires with header socket ends, leaving as much wire
 as possible and the female ends
 
-* Strip the bare end crimp into the termainals - for the arcade button
-termainals use a white and black wire, and for the relay use red and black
+* Strip the bare end crimp into the terminals - for the arcade button
+terminals use a white and black wire, and for the relay use red and black
 wires.
 
 * Attach the red wire to the+ side of the VDC connections on the SSR and the
@@ -60,11 +60,11 @@ https://pointless.net/photos/id/1419346632/
 side of the transistor should be facing you), the pins are, from left to
 right:
 
-* 1 connect to gnd on the connected launcpad with a black female to female lead.
+* 1 connect to gnd on the connected launchpad with a black female to female lead.
 * 2 connect to PG_1 on the connected launchpad
 * 3 connect to - on the ssr VDC side with the black lead you made eairler
 
-## wireing in the arcade switch
+## Wiring in the arcade switch
 
 * make two spade terminal leads, one white and one black
 
@@ -74,7 +74,7 @@ https://pointless.net/photos/id/1419334749/
 
 * connect the black one to the bottom of the microswitch on the button and the other end to a convient GND on the launchpad
 
-* connect the white end to the terminal labeled "NO" on the microswitch, and the other end to PF_1 on the launcpad
+* connect the white end to the terminal labeled "NO" on the microswitch, and the other end to PF_1 on the launchpad
 
 * connect the white lead of the rgb led leads to +5V on the launchpad
 
