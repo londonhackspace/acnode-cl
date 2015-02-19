@@ -137,6 +137,10 @@ settings get_settings(void) {
   acsettings.status = 0;
   acsettings.runtime = 0;
 
+  // save the settings since it's a new board.
+  acsettings.valid = 42;
+  set_settings(acsettings);
+
   return acsettings;
 }
 
@@ -165,7 +169,7 @@ int clear_settings(void) {
   Serial.println("Done clear");
 
   if (ret != 0) {
-    Serial.print("Writeing problem: ");
+    Serial.print("Writeing settings problem: ");
     Serial.println(ret, HEX);
   }
   return ret;  
