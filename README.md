@@ -90,6 +90,8 @@ https://pointless.net/photos/id/1419334749/
 
 4. This sketch uses Serial6 which uses PP0 and PP1, aka pins 43 and 44 on the connected launchpad, connect those too, PP0 goes to RX on the board and PP1 to TX.
 
+5. Check the labels on the card reader boards carefully, one cheap reader board has the pins for the ftdi cable pinouts *backwards* on the top (component) side of the board. Also some card readers label TX and RX the other way round...
+
 See here for the Connected Launchpad pinouts:
 
 http://energia.nu/pin-maps/guide_tm4c129launchpad/
