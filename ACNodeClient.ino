@@ -182,7 +182,7 @@ void setup() {
     }
 
     char tmp[42];
-    snprintf(tmp, 42, "tool status: %s", status ? "in service" : "out of service");
+    snprintf(tmp, 42, "tool status: %s", acsettings.status ? "in service" : "out of service");
     syslog.syslog(LOG_INFO, tmp);
     snprintf(tmp, 42, "total runtime: ");
     duration_str(tmp + strlen(tmp), acsettings.runtime);
@@ -525,12 +525,18 @@ void card_loop() {
     if (acsettings.status || cu->maintainer == 1) {
       // this card is authorised to switch the tool on, so switch it on.
       // check tool status against the acserver incase someone has set the tool out of service
-      if (networkCheckToolStatus()) {
+      int status = networkCheckToolStatus();
+      if (status == 1) {
         tool.on(*cu);
-      } else {
+      } else if (status == 0) {
         // tool out of service, so don't switch it on!
         acsettings.status = 0;
         set_settings(acsettings);
+      } else {
+        Serial.println("acserver error");
+        char tmp[42];
+        snprintf(tmp, 42, "unable to contact acserver");
+        syslog.syslog(LOG_ALERT, tmp);
       }
     }
   } else {

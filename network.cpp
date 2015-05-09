@@ -112,7 +112,7 @@ int querycard(user card)
 }
 
 // https://wiki.london.hackspace.org.uk/view/Project:Tool_Access_Control/Solexious_Proposal#Check_tool_status
-bool networkCheckToolStatus()
+int networkCheckToolStatus()
 {
   char path[13 + 10 + 1];
   int result = -1;
@@ -123,11 +123,7 @@ bool networkCheckToolStatus()
   Serial.print("Status: ");
   Serial.println(result);
   
-  if (result == 1) {
-    return true;
-  }
-
-  return false;
+  return result;
 }
 
 // https://wiki.london.hackspace.org.uk/view/Project:Tool_Access_Control/Solexious_Proposal#Report_tool_status
