@@ -10,6 +10,7 @@
 extern settings acsettings;
 extern EthernetClient client;
 extern Syslog syslog;
+extern boolean network;
 
 /*
       Serial.print(__FILE__);

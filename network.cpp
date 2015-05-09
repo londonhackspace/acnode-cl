@@ -15,7 +15,9 @@ int get_url(char * path) {
   Serial.print("Connecting to http://");
   Serial.print(acsettings.servername);
   Serial.print(":");
-  Serial.println(acsettings.port);
+  Serial.print(acsettings.port);
+  Serial.print(" // ");
+  Serial.println(path);
 
   if (client.connect(acsettings.servername, acsettings.port)) {
     Serial.println("Connected");

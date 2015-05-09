@@ -55,6 +55,8 @@ boolean heartbeat = true;
 
 Every card_every(500);
 
+Every tool_status_check(2000);
+
 Button button(PF_1);
 
 
@@ -132,6 +134,7 @@ void setup() {
   five_sec.begin();
   card_every.begin();
   heart_every.begin();
+  tool_status_check.begin();
 
   Serial.println("Initialising PN532");
 
@@ -167,6 +170,7 @@ void setup() {
     Serial.println(status);
 
     if (status == -1) {
+      network = false;
       Serial.println("acserver error");
       char tmp[42];
       snprintf(tmp, 42, "unable to contact acserver");
@@ -380,9 +384,15 @@ void loop() {
         }
       }
 
-      if (network && check) {
+      if (check) {
         status = querycard(cc);
         Serial.println(status);
+
+        // if we've lost contact with the acserver at some point
+        // we need to check and re-establish it, might as well use this as the test.
+        if (status >= 0) {
+          network = true;
+        }
 
         if (status >= 0) {
           nu->status = 1;
@@ -471,8 +481,11 @@ void loop() {
         dump_user(cu);
 
         if (cu->maintainer || cu->status) {
-          // tell the server this user has started using the tool.
-          reportToolUse(*cu, 1);
+          // only report tool usage if the network is ok.
+          if (network) {
+            // tell the server this user has started using the tool.
+            reportToolUse(*cu, 1);
+          }
         }
 
       }
@@ -486,8 +499,11 @@ void loop() {
         tool.off(*cu);
 
         if (cu->maintainer || cu->status) {
-          // tell the server this user has stopped using the tool.
-          reportToolUse(*cu, 0);
+          // only report tool usage if the network is ok.
+          if (network) {
+            // tell the server this user has stopped using the tool.
+            reportToolUse(*cu, 0);
+          }
         }
 
         delete cu;
@@ -525,8 +541,16 @@ void card_loop() {
     if (acsettings.status || cu->maintainer == 1) {
       // this card is authorised to switch the tool on, so switch it on.
       // check tool status against the acserver incase someone has set the tool out of service
-      int status = networkCheckToolStatus();
-      if (status == 1) {
+      int status = acsettings.status;
+
+      if (network) {
+        // only check every 2 seconds
+        if (tool_status_check.check()) {
+          status = networkCheckToolStatus();
+        }
+      }
+
+      if (status == 1 || cu->maintainer == 1) {
         tool.on(*cu);
       } else if (status == 0) {
         // tool out of service, so don't switch it on!
