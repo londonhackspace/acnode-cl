@@ -165,10 +165,20 @@ void setup() {
     Serial.println("Checking tool status");
     int status = networkCheckToolStatus();
     Serial.println(status);
-    if (acsettings.status != status) {
-      // update them if they have changed.
-      acsettings.status = status;
-      set_settings(acsettings);
+
+    if (status == -1) {
+      Serial.println("acserver error");
+      char tmp[42];
+      snprintf(tmp, 42, "unable to contact acserver");
+      syslog.syslog(LOG_ALERT, tmp);
+    }
+
+    if (status == 1 || status == 0) {
+      if (acsettings.status != status) {
+        // update them if they have changed.
+        acsettings.status = status;
+        set_settings(acsettings);
+      }
     }
 
     char tmp[42];
