@@ -397,6 +397,8 @@ void loop() {
         // we need to check and re-establish it, might as well use this as the test.
         if (status >= 0) {
           network = true;
+        } else {
+          network = false;
         }
 
         if (status >= 0) {

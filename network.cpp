@@ -107,8 +107,10 @@ int querycard(user card)
   // if it's 2 it's a maintainer.
   if (result == 1 || result == 2) {
     Serial.println("access granted");
-  } else {
+  } else if (result == 0){
     Serial.println("access denied");
+  } else {
+    Serial.println("Network or acserver error");
   }
   return result;
 }
