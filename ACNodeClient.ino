@@ -22,6 +22,7 @@ ACNodeClient
 #include "rgb.h"
 #include "button.h"
 #include "every.h"
+#include "version.h"
 
 // create microrl object and pointer on it
 microrl_t rl;
@@ -63,7 +64,9 @@ Button button(PF_1);
 void setup() {
   Serial.begin(9600);
   Serial.println("");
-  Serial.println("\n\nACNode Client Startup");
+  Serial.print("\n\nACNode Client version ");
+  Serial.print(ACVERSION);
+  Serial.println(" Startup.");
   // lets use all the LED's
   pinMode(D1_LED, OUTPUT);
   pinMode(D2_LED, OUTPUT);
@@ -127,7 +130,9 @@ void setup() {
   }
 
   syslog.begin(acsettings.syslogserver, acsettings.toolname, LOG_LOCAL0);
-  syslog.syslog(LOG_NOTICE, "Starting up");
+  char tmp[42];
+  snprintf(tmp, 42, "Starting up, version %s", ACVERSION);
+  syslog.syslog(LOG_NOTICE, tmp);
 
   button.begin();
   one_sec.begin();
