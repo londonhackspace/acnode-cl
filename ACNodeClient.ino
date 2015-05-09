@@ -514,7 +514,14 @@ void card_loop() {
     // is the tool running
     if (acsettings.status || cu->maintainer == 1) {
       // this card is authorised to switch the tool on, so switch it on.
-      tool.on(*cu);
+      // check tool status against the acserver incase someone has set the tool out of service
+      if (networkCheckToolStatus()) {
+        tool.on(*cu);
+      } else {
+        // tool out of service, so don't switch it on!
+        acsettings.status = 0;
+        set_settings(acsettings);
+      }
     }
   } else {
     // not a valid user.
