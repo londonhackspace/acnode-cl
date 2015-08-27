@@ -23,6 +23,7 @@ ACNodeClient
 #include "button.h"
 #include "every.h"
 #include "version.h"
+#include "door.h"
 
 // create microrl object and pointer on it
 microrl_t rl;
@@ -45,6 +46,7 @@ boolean network = false;
 
 // PG_1 to switch tool on, PE_4 is low when the tool is running
 Tool tool(PG_1, PE_4);
+Door door(PB_4);
 
 RGB rgb(PM_0, PM_1, PM_2);
 
@@ -221,9 +223,34 @@ MenuType menu = NOMENU;
 MenuState menu_state;
 
 void loop() {
-  user *tu;
-  boolean check = true;
+  // put received char from stdin to microrl lib
+  if (Serial.available()) {
+    char c;
+    c = Serial.read();
+    microrl_insert_char (prl, c);
+  }
+
+  if (doorbot()) {
+    doorbot_loop();
+  } else {
+    acnode_loop();
+  }
+}
+
+void doorbot_loop() {
+  if (one_sec.check()) {
+    if (door.maybe_close()) {
+      rgb.blue();
+    }
+  }
   
+  if (read_user() != NULL) {
+    rgb.green();
+    door.open();
+  }
+}
+
+void acnode_loop() {
   // some housekeeping stuff
   if (heart_every.check()) {
     if (heartbeat) {
@@ -285,13 +312,6 @@ void loop() {
     }
   }
 
-  // put received char from stdin to microrl lib
-  if (Serial.available()) {
-    char c;
-    c = Serial.read();
-    microrl_insert_char (prl, c);
-  }
-
   // used to check the tool on state via an ISR.
   tool.poll();
 
@@ -317,6 +337,20 @@ void loop() {
   }
 
   if (card_every.check()) {
+    cu = read_user();
+  }
+
+  // do we have a card? if so, do things with it.
+  if (cu != NULL) {
+    card_loop();
+    menu_loop();
+  }
+}
+
+user *read_user() {
+    user *tu;
+    boolean check = true;
+  
     // does the actuall card reading, updates cc.
     readcard();
 
@@ -416,6 +450,7 @@ void loop() {
           // so mark as invalid
           if (status == 0) {
             nu->status = 0;
+            return NULL;
           }
 
           tu = get_user(nu);
@@ -525,13 +560,7 @@ void loop() {
         rgb.blue();
       }
     }
-  }
-
-  // do we have a card? if so, do things with it.
-  if (cu != NULL) {
-    card_loop();
-    menu_loop();
-  }
+    return cu;
 }
 
 // When we have a card on the reader go round this loop.
@@ -810,4 +839,6 @@ void readcard()
   nfc.powerDown();
 }
 
-
+boolean doorbot() {
+  return acsettings.role == 1;
+}
