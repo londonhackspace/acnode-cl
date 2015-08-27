@@ -25,7 +25,6 @@ struct settings42 {
   char toolname[TOOLNAMELEN];
   uint32_t runtime; // total seconds the tool has run
   uint8_t minontime; // the minimum time the tool should be on for.
-  // 4 more bytes space
 };
 
 struct settings43 {
@@ -64,6 +63,7 @@ struct settings {
   uint32_t runtime; // total seconds the tool has run
   uint8_t minontime; // the minimum time the tool should be on for.
   char secret[KEYLEN + 1]; // API key to talk to the acserver
+  uint8_t role; // role of this acnode: 0 - regular tool; 1 - doorbot
 } __attribute__ ((packed));
 
 settings get_settings(void);

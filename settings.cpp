@@ -97,6 +97,18 @@ void dump_settings(settings acsettings) {
   Serial.print("Total runtime: ");
   duration_str(tmp, acsettings.runtime);
   Serial.println(tmp);
+  
+  Serial.print("role: ");
+  switch(acsettings.role) {
+    case 0:
+      Serial.println("regular acnode (0)");
+      break;
+    case 1:
+      Serial.println("doorbot (1)");
+      break;
+    default:
+      Serial.println("unknown");
+  }
 
   Serial.print("Minimum on time: ");
   Serial.println(acsettings.minontime);
@@ -132,7 +144,6 @@ void dump_settings(settings acsettings) {
 
 settings get_settings(void) {
   memset(&acsettings, 0, sizeof(acsettings));
-
   EEPROMRead((uint32_t *)&acsettings, 0, sizeof(acsettings));
 
   switch (acsettings.valid) {
@@ -162,6 +173,7 @@ settings get_settings(void) {
         // the laser signal is inverted
         acsettings.toolrunpin_activehigh = 0;
         acsettings.secret[0] = '\0';
+        acsettings.role = 0;
       }
 
       acsettings.valid = ACSETTINGSVALID;
@@ -188,6 +200,7 @@ settings get_settings(void) {
         acsettings.netverbose = osettings.netverbose;
         acsettings.toolonpin_activehigh = osettings.toolonpin_activehigh;
         acsettings.toolrunpin_activehigh = osettings.toolrunpin_activehigh;
+        acsettings.role = 0;
 
         acsettings.secret[0] = '\0';
 
@@ -223,6 +236,7 @@ settings get_settings(void) {
       acsettings.toolonpin_activehigh = 1;
       // the laser signal is inverted
       acsettings.toolrunpin_activehigh = 0;
+      acsettings.role = 0;
 
       acsettings.secret[0] = '\0';
 
