@@ -102,6 +102,18 @@ void dump_settings(settings acsettings) {
   Serial.print("Total runtime: ");
   duration_str(tmp, acsettings.runtime);
   Serial.println(tmp);
+  
+  Serial.print("role: ");
+  switch(acsettings.role) {
+    case 0:
+      Serial.println("regular acnode (0)");
+      break;
+    case 1:
+      Serial.println("doorbot (1)");
+      break;
+    default:
+      Serial.println("unknown");
+  }
 }
 
 
@@ -136,6 +148,7 @@ settings get_settings(void) {
   acsettings.port = 1234;
   acsettings.status = 0;
   acsettings.runtime = 0;
+  acsettings.role = 0;
 
   // save the settings since it's a new board.
   acsettings.valid = 42;

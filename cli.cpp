@@ -36,13 +36,14 @@ void mrlprint(const char * str) {
 #define _CMD_SYSLOG "syslog"
 #define _CMD_NAME   "name"
 #define _CMD_RTIME  "resetruntime"
+#define _CMD_ROLE   "role"
 
-#define _NUM_OF_CMD 15
+#define _NUM_OF_CMD 16
 #define _NUM_OF_VER_SCMD 2
 
 //available  commands
 const char *keyworld [] = {
-  _CMD_HELP, _CMD_SHOW, _CMD_MAC, _CMD_SERVER, _CMD_NODEID, _CMD_PORT, _CMD_VER, _CMD_SAVE, _CMD_CLEAR, _CMD_LIST, _CMD_REBOOT, _CMD_NUKE, _CMD_SYSLOG, _CMD_NAME, _CMD_RTIME};
+  _CMD_HELP, _CMD_SHOW, _CMD_MAC, _CMD_SERVER, _CMD_NODEID, _CMD_PORT, _CMD_VER, _CMD_SAVE, _CMD_CLEAR, _CMD_LIST, _CMD_REBOOT, _CMD_NUKE, _CMD_SYSLOG, _CMD_NAME, _CMD_RTIME, _CMD_ROLE};
 // version subcommands
 const char * ver_keyworld [] = {
   _SCMD_MRL, _SCMD_ACNODE};
@@ -60,6 +61,7 @@ void print_help ()
   Serial.println ("\tserver <hostname> - set acserver hostname");
   Serial.println ("\tnodeid <id> - set this node's id");
   Serial.println ("\tport <port> - set the port on the server to connect to");
+  Serial.println ("\trole <role_id> - set the role of this acnode");
   Serial.println ("\tsave - save the current settings");
   Serial.println ("\tclear - clear the current settings");
   Serial.println ("\tlist - list the cached users");
@@ -327,6 +329,21 @@ int mrlexecute (int argc, const char * const * argv)
       Serial.println("Resetting run time");
       acsettings.runtime = 0;
       set_settings(acsettings);
+    }
+    else if (strcmp (argv[i], _CMD_ROLE) == 0) {
+      if ((++i) < argc) {
+        int role = atoi(argv[i]);
+        if (role > 1) {
+          Serial.println("bad role");
+        } else {
+          Serial.print("new role: ");
+          Serial.println(role);
+          acsettings.role = role;
+          set_settings(acsettings);  
+        }
+      } else {
+        Serial.println("role <role_id>");
+      }
     }
     else {
       Serial.print ("command: '");
