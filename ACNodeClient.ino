@@ -24,6 +24,7 @@ ACNodeClient
 #include "every.h"
 #include "version.h"
 #include "door.h"
+#include "announcer.h"
 
 // create microrl object and pointer on it
 microrl_t rl;
@@ -47,6 +48,7 @@ boolean network = false;
 // PG_1 to switch tool on, PE_4 is low when the tool is running
 Tool tool(PG_1, PE_4);
 Door door(PB_4);
+Announcer *announcer;
 
 RGB rgb(PM_0, PM_1, PM_2);
 
@@ -205,6 +207,9 @@ void setup() {
 
   cc.invalid = 1;
 
+  announcer = new Announcer();
+  announcer->START();
+
   Serial.println("press enter for a prompt");
 }
 
@@ -238,15 +243,18 @@ void loop() {
 }
 
 void doorbot_loop() {
+  user *u;
+
   if (one_sec.check()) {
     if (door.maybe_close()) {
       rgb.blue();
     }
   }
   
-  if (read_user() != NULL) {
+  if (!door.opened() && (u = read_user())) {
     rgb.green();
     door.open();
+    announcer->RFID(u);
   }
 }
 
