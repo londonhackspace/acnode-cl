@@ -2,7 +2,7 @@
 #define _SETTINGS_H_
 
 #include <stdint.h>
-#include <driverlib/eeprom.h>
+#include <SD.h>
 
 // enough length for acserver.lan.london.hackspace.org.uk + 1 + 4 extra for luck.
 #define SERVERNAMELEN (36 + 1 + 4)

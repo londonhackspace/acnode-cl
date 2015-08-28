@@ -1,50 +1,20 @@
-
 #include <Energia.h>
 #include "settings.h"
 #include "acnode.h"
 #include "utils.h"
 
+#define SD_CS_PIN PC_7
+#define ACNODE_DIR "ACNODE"
+#define ACNODE_CFG "ACNODE/CONFIG"
 
 void init_settings(void) {
-    // must be a multiple of 4 cos our eeprom is
-  // read and written in 32 bit chunks.
-  if (sizeof(acsettings) % 4 != 0) {
-    Serial.print("acsettings wrong size, needs to be a multiple of 4: ");
-    Serial.println(sizeof(acsettings));
-    while (true) {
-      ;
-    }
+  if (SD.begin(SD_CS_PIN, SPI_HALF_SPEED, 2)) {
+    Serial.println("SD card is accessible");
+  } else {
+    Serial.println("SD card could not be accessed");
   }
-
-  if (sizeof(acsettings) > 128) {
-    Serial.print("acsettings wrong size, must be smaller than 128: ");
-    Serial.println(sizeof(acsettings));
-    while (true) {
-      ;
-    }
-  }
-
-  uint32_t ret, eesize, blocks;
-
-  ret = EEPROMInit();
-
-  if (ret != EEPROM_INIT_OK) {
-    Serial.print("EEprom init error: ");
-    Serial.println(ret);
-  }
-
-  eesize = EEPROMSizeGet();
-
-  Serial.print("EEPROM Size: ");
-  Serial.println(eesize);
-
-  blocks = EEPROMBlockCountGet();
-
-  Serial.print("EEPROM no. of blocks: ");
-  Serial.println(blocks);
-
-  Serial.print("EEPROM size of each block: ");
-  Serial.println(eesize / blocks);
+  
+  SD.mkdir(ACNODE_DIR);
 }
 
 void dump_settings(settings acsettings) {
@@ -107,8 +77,12 @@ void dump_settings(settings acsettings) {
 
 settings get_settings(void) {
   memset(&acsettings, 0, sizeof(acsettings));
-
-  EEPROMRead((uint32_t *)&acsettings, 0, sizeof(acsettings));
+  
+  if (SD.exists(ACNODE_CFG)) {
+    File f = SD.open(ACNODE_CFG, FILE_READ);
+    f.read(&acsettings, sizeof(acsettings));
+    f.close();
+  }
 
   if (acsettings.valid != 42) {
     Serial.println("Settings not valid, using defaults");
@@ -145,33 +119,17 @@ settings get_settings(void) {
 }
 
 int set_settings(settings acsettings) {
-  int ret;
-
   // hope they are actually valid!
   if (acsettings.valid != 42) {
     acsettings.valid = 42;
   }
-
-  ret = EEPROMProgram((uint32_t *)&acsettings, 0, sizeof(acsettings));
-
-  if (ret != 0) {
-    Serial.print("Writeing problem: ");
-    Serial.println(ret, HEX);
-  }
-  return ret;
+  
+  File f = SD.open(ACNODE_CFG, FILE_WRITE);
+  f.write(&acsettings, sizeof(acsettings));
+  f.close();
 }
 
 int clear_settings(void) {
-  int ret;
-  uint32_t no = 0;
-  Serial.println("About to clear");
-  ret = EEPROMProgram(&no, 0, sizeof(no));
-  Serial.println("Done clear");
-
-  if (ret != 0) {
-    Serial.print("Writeing settings problem: ");
-    Serial.println(ret, HEX);
-  }
-  return ret;  
+  SD.remove(ACNODE_CFG);
 }
 
