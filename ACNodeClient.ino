@@ -10,6 +10,8 @@ ACNodeClient
 #include <PN532_HSU.h>
 #include <PN532.h>
 #include <syslog.h>
+#include <SPI.h>
+#include <SD.h>
 
 #include "settings.h"
 #include "microrl.h"
