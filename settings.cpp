@@ -19,7 +19,7 @@ void init_settings(void) {
 
 void dump_settings(settings acsettings) {
   if (acsettings.valid) {
-    Serial.println("Using settings from eeprom");
+    Serial.println("Using settings from SD card");
   } else {
     Serial.println("Using default settings, please change!");
   }
@@ -124,9 +124,16 @@ int set_settings(settings acsettings) {
     acsettings.valid = 42;
   }
   
+  SD.remove(ACNODE_CFG);
   File f = SD.open(ACNODE_CFG, FILE_WRITE);
-  f.write(&acsettings, sizeof(acsettings));
+  f.write((uint8_t *)&acsettings, sizeof(acsettings));
   f.close();
+
+  if (SD.getErrorCode() != 0) {
+    Serial.print("SD Card Error: ");
+    Serial.println(SD.getErrorCode());
+  }
+  return 0;
 }
 
 int clear_settings(void) {
