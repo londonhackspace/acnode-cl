@@ -27,7 +27,6 @@ void uid_str(char *str, user *u);
 
 int find_free(void);
 void store_user(user *u);
-void write_user(const user *u, int address);
 void list_users(void);
 void nuke_users(void);
   

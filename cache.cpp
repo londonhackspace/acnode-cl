@@ -6,7 +6,6 @@ Cache::Cache(char *filename) {
 
 bool Cache::get(uint8_t *key, user *u) {
   if (!SD.exists(_filename)) return false;
-  
   File f = SD.open(_filename, FILE_READ);
   user user_entry;
   bool found = false;
@@ -39,6 +38,19 @@ void Cache::set(uint8_t *key, user *u) {
 
 void Cache::purge() {
   SD.remove(_filename);
+}
+
+int Cache::each(void(*callback)(user *u)) {
+  File f = SD.open(_filename, FILE_READ);
+  int counter = 0;
+  user user_entry;
+  while (f.available()) {
+    f.read(&user_entry, sizeof(struct user));
+    callback(&user_entry);
+    counter++;
+  }
+  f.close();
+  return counter;
 }
 
 bool Cache::compare(uint8_t *k1, uint8_t *k2) {
