@@ -12,6 +12,7 @@ ACNodeClient
 #include <syslog.h>
 #include <SPI.h>
 #include <SD.h>
+#include <DateTimeLibrary.h>
 
 #include "settings.h"
 #include "microrl.h"
@@ -42,6 +43,7 @@ user maintainer;
 
 EthernetClient client;
 Syslog syslog;
+DateTime rtc;
 
 boolean network = false;
 
@@ -125,6 +127,9 @@ void setup() {
       Serial.print(".");
     }
     Serial.println();
+    rtc.begin();
+    
+    settime(&rtc);
   }
 
   if (!network) {

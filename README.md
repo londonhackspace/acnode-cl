@@ -98,7 +98,7 @@ http://energia.nu/pin-maps/guide_tm4c129launchpad/
 
 N.B.: use energia-0101E0012, not energia-0101E0013, as 13 breaks things (i think it defines a function called wakeup which clashes with the one in the PN532 stuff).
 
-# You will need 2 libraries:
+# You will need these libraries:
 
 ## Syslog from here:
 
@@ -111,6 +111,12 @@ put it in the libraries folder under your energia sketches folder
 https://github.com/londonhackspace/PN532
 
 You'll need to copy or symlink PN532 and PN532_HSU into your energia-sketches libraries directory as well.
+
+## DateTimeLibrary
+
+https://github.com/rei-vilo/DateTimeLibrary
+
+Best to clone directly to your Energia libraries folder.
 
 # using the CLI
 

@@ -3,6 +3,7 @@
 
 #include <Energia.h>
 #include "user.h"
+#include <DateTimeLibrary.h>
 
 int get_url(char * path);
 int querycard(user card);
@@ -12,5 +13,6 @@ void addNewUser(user card, user maintainer);
 int toolUse(int status, user card);
 int toolUseTime(user card, int time);
 int reportToolUse(user card, int status);
+void settime(DateTime *);
 
 #endif
