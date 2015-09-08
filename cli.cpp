@@ -264,7 +264,7 @@ int mrlexecute (int argc, const char * const * argv)
       ret = set_settings(acsettings);
       if (ret == 0) {
         Serial.println("OK!");
-        acsettings.valid = 42;
+        acsettings.valid = ACSETTINGSVALID;
       } 
       else {
         Serial.print("Error: ");

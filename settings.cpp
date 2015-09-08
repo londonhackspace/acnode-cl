@@ -110,7 +110,7 @@ settings get_settings(void) {
 
   EEPROMRead((uint32_t *)&acsettings, 0, sizeof(acsettings));
 
-  if (acsettings.valid != 42) {
+  if (acsettings.valid != ACSETTINGSVALID) {
     Serial.println("Settings not valid, using defaults");
   } else {
     return acsettings;
@@ -138,7 +138,7 @@ settings get_settings(void) {
   acsettings.runtime = 0;
 
   // save the settings since it's a new board.
-  acsettings.valid = 42;
+  acsettings.valid = ACSETTINGSVALID;
   set_settings(acsettings);
 
   return acsettings;
@@ -148,8 +148,8 @@ int set_settings(settings acsettings) {
   int ret;
 
   // hope they are actually valid!
-  if (acsettings.valid != 42) {
-    acsettings.valid = 42;
+  if (acsettings.valid != ACSETTINGSVALID) {
+    acsettings.valid = ACSETTINGSVALID;
   }
 
   ret = EEPROMProgram((uint32_t *)&acsettings, 0, sizeof(acsettings));
