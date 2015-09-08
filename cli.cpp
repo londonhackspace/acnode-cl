@@ -36,13 +36,14 @@ void mrlprint(const char * str) {
 #define _CMD_SYSLOG "syslog"
 #define _CMD_NAME   "name"
 #define _CMD_RTIME  "resetruntime"
+#define _CMD_FILL   "fill"
 
-#define _NUM_OF_CMD 15
+#define _NUM_OF_CMD 16
 #define _NUM_OF_VER_SCMD 2
 
 //available  commands
 const char *keyworld [] = {
-  _CMD_HELP, _CMD_SHOW, _CMD_MAC, _CMD_SERVER, _CMD_NODEID, _CMD_PORT, _CMD_VER, _CMD_SAVE, _CMD_CLEAR, _CMD_LIST, _CMD_REBOOT, _CMD_NUKE, _CMD_SYSLOG, _CMD_NAME, _CMD_RTIME};
+  _CMD_HELP, _CMD_SHOW, _CMD_MAC, _CMD_SERVER, _CMD_NODEID, _CMD_PORT, _CMD_VER, _CMD_SAVE, _CMD_CLEAR, _CMD_LIST, _CMD_REBOOT, _CMD_NUKE, _CMD_SYSLOG, _CMD_NAME, _CMD_RTIME, _CMD_FILL};
 // version subcommands
 const char * ver_keyworld [] = {
   _SCMD_MRL, _SCMD_ACNODE};
@@ -68,6 +69,7 @@ void print_help ()
   Serial.println ("\tsyslog <hostname> - set the syslog server");
   Serial.println ("\tname <toolname> - unique name of the tool");
   Serial.println ("\tresetruntime - reset the total time the tool has been running to zero");
+  Serial.println ("\tfill - fill the card cache with test cards");
 }
 
 bool ishex(char c) {
@@ -327,6 +329,10 @@ int mrlexecute (int argc, const char * const * argv)
       Serial.println("Resetting run time");
       acsettings.runtime = 0;
       set_settings(acsettings);
+    }
+    else if (strcmp (argv[i], _CMD_FILL) == 0) {
+      Serial.println("Filling card cache");
+      fill_users();
     }
     else {
       Serial.print ("command: '");

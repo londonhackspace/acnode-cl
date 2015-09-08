@@ -3,6 +3,7 @@
 #include "settings.h"
 #include "acnode.h"
 #include "utils.h"
+#include "user.h"
 
 
 void init_settings(void) {
@@ -45,6 +46,13 @@ void init_settings(void) {
 
   Serial.print("EEPROM size of each block: ");
   Serial.println(eesize / blocks);
+
+  Serial.print("Space for cards: ");
+  Serial.println(eesize - USERBASE);
+
+  Serial.print("Can store ");
+  Serial.print((eesize - USERBASE) / sizeof(user));
+  Serial.println(" cards.");
 }
 
 void dump_settings(settings acsettings) {

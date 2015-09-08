@@ -30,6 +30,7 @@ void store_user(user *u);
 void write_user(const user *u, int address);
 void list_users(void);
 void nuke_users(void);
+void fill_users(void);
   
 #endif
 

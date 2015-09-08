@@ -1,6 +1,7 @@
 #include <Energia.h>
 #include "user.h"
 #include "utils.h"
+#include "acnode.h"
 
 // look up a uid in the eeprom and return a user struct
 // the returned user must be freed by the caller
@@ -176,8 +177,13 @@ void uid_str(char *str, user *u) {
 
 // look through the eeprom to find a free slot.
 int find_free(void) {
-  int address = USERBASE;
+  unsigned int address = USERBASE;
+  unsigned int eesize;
+
+  eesize = EEPROMSizeGet();
+
   user u;
+
   while (1) {
       EEPROMRead((uint32_t *)&u, address, sizeof(user));
       if (u.invalid == 1 && u.end == 0) {
@@ -187,9 +193,41 @@ int find_free(void) {
       if (u.end == 1) {
         break;
       }
-      address += sizeof(u);      
+      address += sizeof(u);
+
+      // the 2nd test here is if sizeof(u) is not a multiple of the space we have
+      // available and so there is only partial space at the end of the eeprom.
+      if (address >= eesize || (address + sizeof(u)) > eesize ) {
+        char msg[64];
+
+        // just overwrite the entry at the beginning if we are full.
+        address = USERBASE;
+
+        snprintf(msg, 64, "Have run out of space for cacheing cards!");
+        Serial.println(msg);
+        syslog.syslog(LOG_CRIT, msg);
+
+        break;
+      }
   }
   return address;
+}
+
+// fill the card cache with junk users to see how well we cope with runing out of space.
+void fill_users(void) {
+  int i;
+  user u;
+
+  u.uidlen = 0;
+  u.status = 1;
+  u.invalid = 0;
+  u.end = 0;
+
+  for (i = 0 ; i < 1000 ; i++) {
+    u.uid[0] = i & 0xff;
+    u.uid[1] = (i >> 8) & 0xff;
+    store_user(&u);
+  }
 }
 
 void list_users(void) {
