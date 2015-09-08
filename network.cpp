@@ -167,25 +167,6 @@ void addNewUser(user card, user maintainer)
   Serial.println(ret);
 }
 
-// https://wiki.london.hackspace.org.uk/view/Project:Tool_Access_Control/Solexious_Proposal#Tool_usage_.28live.29
-// status: 1 == in use, 0 == out of use.
-int toolUse(int status, user card) {
-  int ret = -1;
-
-  Serial.println("Updating tool Usage:");
-  //  /[nodeID]/tooluse/[status]/[cardID]
-  char url[64];
-  sprintf(url, "POST /%ld/tooluse/%d/", acsettings.nodeid, status);
-  uid_str(url + strlen(url), &card);
-  Serial.println(url);
-
-  ret = get_url(url);
-  Serial.print("Got: ");
-  Serial.println(ret);
-  
-  return ret;
-}
-
 // https://wiki.london.hackspace.org.uk/view/Project:Tool_Access_Control/Solexious_Proposal#Tool_usage_.28usage_time.29
 // is the time here in ms or Seconds?
 int toolUseTime(user card, int time) {
@@ -207,6 +188,8 @@ int toolUseTime(user card, int time) {
   return ret;
 }
 
+// https://wiki.london.hackspace.org.uk/view/Project:Tool_Access_Control/Solexious_Proposal#Tool_usage_.28live.29
+// status: 1 == in use, 0 == out of use.
 int reportToolUse(user card, int status) {
   int ret = -1;
 
