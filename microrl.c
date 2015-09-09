@@ -232,7 +232,7 @@ inline static void terminal_backspace (microrl_t * pThis)
 //*****************************************************************************
 inline static void terminal_newline (microrl_t * pThis)
 {
-	pThis->print (ENDL);
+	pThis->print ("\r\n");
 }
 
 #ifndef _USE_LIBC_STDIO
