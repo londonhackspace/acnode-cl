@@ -201,6 +201,11 @@ void setup() {
     rgb.orange();
   }
 
+  if (network) {
+    // verify the users in the cache against the acserver
+    verify_users();
+  }
+
   cc.invalid = 1;
 
   Serial.println("press enter for a prompt");

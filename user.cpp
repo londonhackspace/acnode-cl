@@ -2,6 +2,7 @@
 #include "user.h"
 #include "utils.h"
 #include "acnode.h"
+#include "network.h"
 
 // look up a uid in the eeprom and return a user struct
 // the returned user must be freed by the caller
@@ -270,5 +271,34 @@ void nuke_users(void) {
   u.invalid = 1;
   u.end = 1;
   write_user(&u, USERBASE);
+}
+
+// go through the cached users and check them against the acserver
+void verify_users(void) {
+  int address = USERBASE;
+  int count = 0;
+  user u;
+
+  while (1) {
+    EEPROMRead((uint32_t *)&u, address, sizeof(user));
+
+    if (u.end == 1) {
+      break;
+    }
+    if (u.invalid == 0) {
+      if (querycard(u) == 0) {
+        Serial.println("User no-longer valid: ");
+        dump_user(&u);
+        u.invalid = 1;
+        write_user(&u, address);
+      } else {
+        count++;
+      }
+    }
+    address += sizeof(user);
+  }
+  Serial.print("currently storing: ");
+  Serial.print(count);
+  Serial.println(" users");
 }
 
