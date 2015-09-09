@@ -20,8 +20,6 @@ int get_url(char * path) {
   Serial.println(path);
 
   if (client.connect(acsettings.servername, acsettings.port)) {
-    Serial.println("Connected");
-    Serial.println("Querying");
 
     Serial.println(path);
     client.print(path);
@@ -43,7 +41,8 @@ int get_url(char * path) {
 
     if (client.available()) {
       char c;
-      Serial.print("Got Response: >");
+      Serial.println("Got Response:");
+      Serial.print(">");
 
       int newlines = 0;
       boolean first = false;
@@ -72,7 +71,6 @@ int get_url(char * path) {
       }
 
       Serial.println("<");
-      Serial.println("Disconnecting");
       client.flush();
       client.stop();
     }
