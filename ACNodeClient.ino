@@ -243,8 +243,6 @@ void loop() {
 }
 
 void doorbot_loop() {
-  user *u;
-
   if (one_sec.check()) {
     if (door.maybe_close()) {
       rgb.blue();
@@ -253,51 +251,81 @@ void doorbot_loop() {
   
   if (!door.opened()) {
     readcard();
-    
+    user read_user;
+
     if (!cc.invalid) { // we have a card of some sort
       int result = querycard(cc);
-      if (result > -1) { // do we know of this card?
-        maybe_cache_card(result);
-
-        rgb.green();
-        door.open();
-        announcer->RFID(u);
-      } else { // card unknown
-        rgb.orange();
-        delay(1000);
+      switch (result) {
+        case 2:
+        case 1:
+        case 0:
+          // we know about these cards, let the user in
+          doorbot_maybe_cache_card(result, &read_user);
+          doorbot_open_door(&read_user);
+          break;
+        case -1:
+          // unknown card, go away
+          doorbot_maybe_cache_card(result, &read_user);
+          rgb.orange();
+          delay(1000);
+          break;
+        default:
+          // network error, have a look at the cache
+          user *found_user = doorbot_cache_get();
+          if (found_user && doorbot_has_access(found_user)) doorbot_open_door(found_user);
       }
     }
   }
 }
 
-void maybe_cache_card(int hint) {
-  user read_user;
-  memset(&read_user, 0, sizeof(user));
-  memcpy(&read_user, &cc, sizeof(user));
+void doorbot_maybe_cache_card(int hint, user *read_user) {
+  memset(read_user, 0, sizeof(user));
+  memcpy(read_user, &cc, sizeof(user));
 
-  user *found_user = get_user(&read_user);
+  user *found_user = get_user(read_user);
 
   switch (hint) {
     case 2:
-      read_user.maintainer = 1; // set and fall through (!)
+      read_user->maintainer = 1; // set and fall through (!)
     case 1:
     case 0:
-      read_user.status = 1;
+      read_user->status = 1;
+      break;
+    case -1:
+      read_user->invalid = 1;
   }
   
   if (found_user) {
     // user is in the cache
-    if (!compare_user(found_user, &read_user)) {
+    if (!compare_user(found_user, read_user)) {
       // user out of sync with cache
-      store_user(&read_user);
+      store_user(read_user);
     }
   } else {
     // user not in the cache
     if (hint > -1) {
       // store if we know of this card
-      store_user(&read_user);
+      store_user(read_user);
     }
   }
+}
+
+user* doorbot_cache_get() {
+  user read_user;
+  memset(&read_user, 0, sizeof(user));
+  memcpy(&read_user, &cc, sizeof(user));
+  
+  return get_user(&read_user);
+}
+
+boolean doorbot_has_access(user *u) {
+  return u->status;
+}
+
+void doorbot_open_door(user *u) {
+  rgb.green();
+  door.open();
+  announcer->RFID(u);
 }
 
 void acnode_loop() {
