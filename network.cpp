@@ -10,7 +10,7 @@
 // "POST /wibble?foo=1"
 //
 int get_url(char * path) {
-  int result = -1;
+  int result = -127;
   char outb[160];
   char ret[256];
   int retp = 0;
@@ -100,15 +100,19 @@ int get_url(char * path) {
             newlines = 0;
           }
         }
-        // we only want the 1st char returned
-        if (first) {
-          if (isdigit(c)) {
-            result = c - '0';
+        
+        if (newlines == 2) { // http content boundary found
+          char buffer[8];
+          memset(buffer, 0, 8);
+          int i = 0;
+          buffer[i++] = c; // read above already
+          while (client.available() && i < 7) {
+            c = client.read();
+            Serial.print(c);
+            buffer[i++] = c;
           }
-          first = false;
-        }
-        if (newlines == 2) {
-          first = true;
+          
+          result = atoi(buffer);
         }
       }
       if (acsettings.netverbose) {
@@ -140,21 +144,26 @@ int get_url(char * path) {
 int querycard(Card card)
 {
   char path[11 + 10 + 14 + 1];
-  int result = -1;
 
   sprintf(path, "GET /%d/card/", acsettings.nodeid);
 
   card.str(path + strlen(path));
 
-  result = get_url(path);
+  int result = get_url(path);
 
-  // if it's 2 it's a maintainer.
-  if (result == 1 || result == 2) {
-    Serial.println("access granted");
-  } else if (result == 0){
-    Serial.println("access denied");
-  } else {
-    Serial.println("Network or acserver error");
+  switch (result) {
+    case 2: // maintainer
+    case 1: // regular user
+      Serial.println("access granted");
+      break;
+    case 0:
+      Serial.println("card known, but unauthorized");
+      break;
+    case -1:
+      Serial.println("card unknown");
+      break;
+    default:
+      Serial.println("Network or acserver error");
   }
   return result;
 }

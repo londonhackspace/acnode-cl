@@ -327,10 +327,19 @@ void doorbot_loop() {
     }
   }
   
-  if (!door.opened() && (u = read_user())) {
-    rgb.green();
-    door.open();
-    announcer->RFID(u);
+  if (!door.opened()) {
+    readcard();
+    
+    if (!cc.invalid) { // we have a card of some sort
+      if (querycard(cc) > -1) { // do we know of this card?
+        rgb.green();
+        door.open();
+        announcer->RFID(u);
+      } else { // card unknown
+        rgb.orange();
+        delay(1000);
+      }
+    }
   }
 }
 
