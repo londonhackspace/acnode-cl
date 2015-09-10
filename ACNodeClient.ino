@@ -255,7 +255,10 @@ void doorbot_loop() {
     readcard();
     
     if (!cc.invalid) { // we have a card of some sort
-      if (querycard(cc) > -1) { // do we know of this card?
+      int result = querycard(cc);
+      if (result > -1) { // do we know of this card?
+        maybe_cache_card(result);
+
         rgb.green();
         door.open();
         announcer->RFID(u);
@@ -263,6 +266,36 @@ void doorbot_loop() {
         rgb.orange();
         delay(1000);
       }
+    }
+  }
+}
+
+void maybe_cache_card(int hint) {
+  user read_user;
+  memset(&read_user, 0, sizeof(user));
+  memcpy(&read_user, &cc, sizeof(user));
+
+  user *found_user = get_user(&read_user);
+
+  switch (hint) {
+    case 2:
+      read_user.maintainer = 1; // set and fall through (!)
+    case 1:
+    case 0:
+      read_user.status = 1;
+  }
+  
+  if (found_user) {
+    // user is in the cache
+    if (!compare_user(found_user, &read_user)) {
+      // user out of sync with cache
+      store_user(&read_user);
+    }
+  } else {
+    // user not in the cache
+    if (hint > -1) {
+      // store if we know of this card
+      store_user(&read_user);
     }
   }
 }
@@ -446,7 +479,7 @@ user *read_user() {
 
         // if we've lost contact with the acserver at some point
         // we need to check and re-establish it, might as well use this as the test.
-        if (status >= 0) {
+        if (status >= -1) {
           network = true;
         } else {
           network = false;
