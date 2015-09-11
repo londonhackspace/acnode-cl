@@ -68,7 +68,11 @@ void setup() {
   Serial.println("");
   Serial.print("\n\nACNode Client version ");
   Serial.print(ACVERSION);
-  Serial.println(" Startup.");
+  Serial.print(" built with Energia ");
+  Serial.print(ENERGIA);
+  Serial.print(", Arduino API version ");
+  Serial.println(ARDUINO);
+  Serial.println("Starting up.");
   // lets use all the LED's
   pinMode(D1_LED, OUTPUT);
   pinMode(D2_LED, OUTPUT);
