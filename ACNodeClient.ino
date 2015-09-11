@@ -23,6 +23,7 @@ ACNodeClient
 #include "button.h"
 #include "every.h"
 #include "version.h"
+#include "watchdog.h"
 
 // create microrl object and pointer on it
 microrl_t rl;
@@ -60,6 +61,7 @@ Every tool_status_check(2000);
 
 Button button(PF_1);
 
+Watchdog wdog;
 
 void setup() {
   Serial.begin(9600);
@@ -78,12 +80,17 @@ void setup() {
   pinMode(D3_LED, OUTPUT);
   pinMode(D4_LED, OUTPUT);
 
+  // start the watchdog early in case of hangs
+  wdog.begin();
+
   // start the tool early so it can be switched off(!?)
   tool.begin();
 
   // start the rgb early so we can get some feedback
   rgb.begin();
   rgb.yellow();
+
+  wdog.feed();
 
   init_settings();
 
@@ -100,7 +107,11 @@ void setup() {
   memset(&cc, 0, sizeof(user));
   memset(&maintainer, 0, sizeof(user));
 
-  // start the Ethernet connection:
+  wdog.feed();
+
+  // start the Ethernet connection. If the network is down this takes some time (60 secs?)
+  // so disable the watchdog while it's happening
+  wdog.disable();
   if (!Ethernet.begin(acsettings.mac)) {
     Serial.println("Failed to configure Ethernet using DHCP");
   } else {
@@ -108,6 +119,8 @@ void setup() {
     Ethernet.enableLinkLed();
     Ethernet.enableActivityLed();
   }
+  wdog.feed();
+  wdog.enable();
 
   if (Ethernet.localIP() == INADDR_NONE) {
     Serial.println("Didn't get a valid ip");
@@ -125,6 +138,8 @@ void setup() {
     Serial.println();
   }
 
+  wdog.feed();
+
   if (!network) {
     syslog.offline();
   }
@@ -134,12 +149,18 @@ void setup() {
   snprintf(tmp, 42, "Starting up, version %s", ACVERSION);
   syslog.syslog(LOG_NOTICE, tmp);
 
+  if (wdog.was_reset()) {
+    syslog.syslog(LOG_ALERT, "Alert! Was previously reset by the watchdog!");
+  }
+
   button.begin();
   one_sec.begin();
   five_sec.begin();
   card_every.begin();
   heart_every.begin();
   tool_status_check.begin();
+
+  wdog.feed();
 
   Serial.println("Initialising PN532");
 
@@ -169,6 +190,8 @@ void setup() {
   // configure board to read RFID tags
   nfc.SAMConfig();
 
+  wdog.feed();
+
   if (network) {
     Serial.println("Checking tool status");
     int status = networkCheckToolStatus();
@@ -190,6 +213,8 @@ void setup() {
       }
     }
 
+    wdog.feed();
+
     char tmp[42];
     snprintf(tmp, 42, "tool status: %s", acsettings.status ? "in service" : "out of service");
     syslog.syslog(LOG_INFO, tmp);
@@ -201,10 +226,14 @@ void setup() {
     rgb.orange();
   }
 
+  wdog.feed();
+
   if (network) {
     // verify the users in the cache against the acserver
     verify_users();
   }
+
+  wdog.feed();
 
   cc.invalid = 1;
 
@@ -231,6 +260,8 @@ void loop() {
   
   // some housekeeping stuff
   if (heart_every.check()) {
+    wdog.feed();
+
     if (heartbeat) {
       digitalWrite(D1_LED, HIGH);
       heartbeat = false;
