@@ -1,6 +1,7 @@
 #include "network.h"
 #include "acnode.h"
 #include "user.h"
+#include "version.h"
 
 // both 'url' and 'path' here are misleading
 // the string is actually "<method> <path>"
@@ -26,6 +27,11 @@ int get_url(char * path) {
     client.println(" HTTP/1.0");
     client.print("Host: ");
     client.println(acsettings.servername);
+    client.print("User-Agent: ");
+    client.print("ACNode ");
+    client.print(ACVERSION);
+    client.print(", Energia ");
+    client.println(ENERGIA);
     client.println();
 
     int timeout = 0;
