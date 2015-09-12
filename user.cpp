@@ -1,9 +1,9 @@
 #include <Energia.h>
 #include "user.h"
 #include "utils.h"
-#include "cache.h"
+#include "sdcache.h"
 
-Cache cache("CACHE");
+SDCache cache("CACHE");
 
 // look up a uid in the eeprom and return a user struct
 // the returned user must be freed by the caller

@@ -1,6 +1,8 @@
 #ifndef _USER_H_
 #define _USER_H_
 
+#include <Energia.h>
+
 #include <stdint.h>
 #include <driverlib/eeprom.h>
 

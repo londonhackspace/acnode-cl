@@ -1,21 +1,22 @@
 #ifndef _CACHE_H_
 #define _CACHE_H_
 
-#include <SPI.h>
-#include <SD.h>
 #include "user.h"
 
-class Cache {
+struct Cache {
   public:
-  Cache(char *filename);
+//    virtual Cache(char *filename) = 0;
+//    virtual Cache() = 0;
   
-  bool get(uint8_t *key, user *u);
-  void set(uint8_t *key, user *u);
-  void purge(void);
-  int each(void( *callback)(user *));  
-  static bool compare(uint8_t *k1, uint8_t *k2);
+    virtual boolean get(uint8_t *key, user *u) = 0;
+    virtual void set(uint8_t *key, user *u) = 0;
+    virtual void purge(void) = 0;
+    virtual int each(void( *callback)(user *)) = 0;
+    virtual boolean compare(uint8_t *k1, uint8_t *k2) = 0;
+
+  protected:
+    char *_filename;
   
-  char *_filename;
 };
 
 #endif
