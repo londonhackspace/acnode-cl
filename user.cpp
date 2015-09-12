@@ -223,11 +223,12 @@ void fill_users(void) {
   u.status = 1;
   u.invalid = 0;
   u.end = 0;
-
+  
   for (i = 0 ; i < 1000 ; i++) {
     u.uid[0] = i & 0xff;
     u.uid[1] = (i >> 8) & 0xff;
     store_user(&u);
+    wdog.feed();
   }
 }
 
@@ -280,6 +281,7 @@ void verify_users(void) {
   user u;
 
   while (1) {
+    wdog.feed();
     EEPROMRead((uint32_t *)&u, address, sizeof(user));
 
     if (u.end == 1) {
@@ -297,6 +299,7 @@ void verify_users(void) {
     }
     address += sizeof(user);
   }
+  
   Serial.print("currently storing: ");
   Serial.print(count);
   Serial.println(" users");

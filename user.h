@@ -3,6 +3,9 @@
 
 #include <stdint.h>
 #include <driverlib/eeprom.h>
+#include "watchdog.h"
+
+extern Watchdog wdog;
 
 struct user {
 unsigned int maintainer :1; // 1 if maintainer
