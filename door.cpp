@@ -7,11 +7,12 @@ unsigned long Door::_opened_at;
 Door::Door(int pin) {
   _pin = pin;
   _opened_at = 0;
-  digitalWrite(_pin, LOW);
+  pinMode(_pin, OUTPUT);
+  digitalWrite(_pin, HIGH);
 }
 
 void Door::open() {
-  digitalWrite(_pin, HIGH);
+  digitalWrite(_pin, LOW);
   _opened_at = millis();
 }
 
@@ -20,7 +21,7 @@ boolean Door::opened() {
 }
 
 void Door::close() {
-  digitalWrite(_pin, LOW);
+  digitalWrite(_pin, HIGH);
   _opened_at = 0;
 }
 
