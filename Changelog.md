@@ -20,6 +20,8 @@ startup messages.
 
 * Send a User-Agent: header with the ACNode and Energia versions.
 
+* Add minimum on time support
+
 * Tested with Energia 16
 
 # 0.7:

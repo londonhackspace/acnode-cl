@@ -7,7 +7,7 @@
 
 
 void init_settings(void) {
-    // must be a multiple of 4 cos our eeprom is
+  // must be a multiple of 4 cos our eeprom is
   // read and written in 32 bit chunks.
   if (sizeof(acsettings) % 4 != 0) {
     Serial.print("acsettings wrong size, needs to be a multiple of 4: ");
@@ -110,6 +110,9 @@ void dump_settings(settings acsettings) {
   Serial.print("Total runtime: ");
   duration_str(tmp, acsettings.runtime);
   Serial.println(tmp);
+
+  Serial.print("Minimum on time: ");
+  Serial.println(acsettings.minontime);
 }
 
 
@@ -121,6 +124,10 @@ settings get_settings(void) {
   if (acsettings.valid != ACSETTINGSVALID) {
     Serial.println("Settings not valid, using defaults");
   } else {
+    // set the minontime to something sensible
+    if (acsettings.minontime == 0xff) {
+      acsettings.minontime = 10;
+    }
     return acsettings;
   }
 
@@ -139,7 +146,7 @@ settings get_settings(void) {
 
   strncpy(acsettings.servername, "acserver.lan.london.hackspace.org.uk", SERVERNAMELEN);
   strncpy(acsettings.syslogserver, "syslog.lan.london.hackspace.org.uk", SERVERNAMELEN);
-  strncpy(acsettings.toolname, "ACNode", SERVERNAMELEN);
+  strncpy(acsettings.toolname, "ACNode", TOOLNAMELEN);
   acsettings.nodeid = -1;
   acsettings.port = 1234;
   acsettings.status = 0;
@@ -180,6 +187,6 @@ int clear_settings(void) {
     Serial.print("Writeing settings problem: ");
     Serial.println(ret, HEX);
   }
-  return ret;  
+  return ret;
 }
 
