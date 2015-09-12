@@ -106,7 +106,7 @@ https://github.com/londonhackspace/Syslog
 
 put it in the libraries folder under your energia sketches folder
 
-## and the PN532 libraries from here:
+## the PN532 libraries from here:
 
 https://github.com/londonhackspace/PN532
 
@@ -114,9 +114,17 @@ You'll need to copy or symlink PN532 and PN532_HSU into your energia-sketches li
 
 ## DateTimeLibrary
 
-https://github.com/rei-vilo/DateTimeLibrary
+https://github.com/jasiek/DateTimeLibrary
 
 Best to clone directly to your Energia libraries folder.
+
+You'll need to edit DateTimeLibrary.h to add defined(__TM4C1294NCPDT__) on line 35
+
+## SD Card Library
+
+https://github.com/rei-vilo/SD_TM4C
+
+(and rename it to 'SD').
 
 # using the CLI
 
