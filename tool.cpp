@@ -7,6 +7,7 @@ Tool::Tool(int pin) {
   _toolpin = pin;
   _toolon = false;
   _toolonpin = -1;
+  _turnoff = false;
 }
 
 volatile int tool_on_state = 0;
@@ -20,9 +21,12 @@ Tool::Tool(int pin, int onpin) {
   _toolonpin = onpin;
   tool_on_pin = onpin;
   memset(&tool_user, 0, sizeof(user));
+  _turnoff = false;
 }
 
 // not a member function since it's an ISR.
+// The tool can change (lower?) this pin to say when it running
+// useful for when we want to record laser cutter tube usage etc.
 void toolonisr() {
   int state = digitalRead(tool_on_pin);
 
@@ -45,6 +49,17 @@ void Tool::begin() {
 }
 
 void Tool::poll() {
+
+  if (_turnoff) {
+      unsigned long duration = (millis() - _ontime) / 1000;
+      // have we been running for more than the minimum on time?
+      if (duration > acsettings.minontime) {
+        // if so we can turn off now
+        _turnoff = false;
+        off();
+      }
+  }
+
   // do we need to run this?
   if (!_toolonpin) {
     return;
@@ -141,13 +156,38 @@ void Tool::on(user user) {
     digitalWrite(_toolpin, HIGH);
     // end 
     _toolon = true;
+    _ontime = millis();
     memcpy(&tool_user, &user, sizeof(user));
+  }
+
+  if (_turnoff) {
+    // we were asked to turn the tool off
+    // but are now being asked to turn it on again
+    // so don't turn it off.
+    _turnoff = false;
+    // looks as if we cope ok if the tool is turned on by a different user
   }
 }
 
-void Tool::off(user user) {
+void Tool::off() {
   // and switch it off here.
   if (_toolon) {
+
+    if (acsettings.minontime > 0) {
+      unsigned long duration = (millis() - _ontime) / 1000.0;
+      // have we been running for less than the minimum on time?
+      Serial.print("minimum on, ");
+      Serial.print("duration: ");
+      Serial.print(duration);
+      Serial.print(" minontime ");
+      Serial.println(acsettings.minontime);
+      if (duration < acsettings.minontime) {
+        // if so we need to turn the tool off in the future
+        _turnoff = true;
+        Serial.println("Not turning off yet");
+        return;
+      }
+    }
 
     // switch tool off here
     digitalWrite(_toolpin, LOW);
@@ -158,7 +198,12 @@ void Tool::off(user user) {
     }
 
     _toolon = false;
+    _turnoff = false;
   }
 }
 
+// used to turn the button green when the tool is powerd on.
+boolean Tool::status() {
+  return _toolon;
+}
 

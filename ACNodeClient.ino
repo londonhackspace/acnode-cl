@@ -301,7 +301,12 @@ void loop() {
       heartbeat = true;
       if (cu == NULL) {
         if (acsettings.status) {
-          rgb.blue();
+          // green if the tool is running, otherwise blue
+          if (tool.status()) {
+            rgb.green();
+          } else {
+            rgb.blue();
+          }
         } else {
           // offline
           rgb.red();
@@ -314,7 +319,12 @@ void loop() {
         } else {
           if (cu->status == 1) {
             if (acsettings.status) {
-              rgb.green();
+              if (tool.status()) {
+                // green if the tool is running, otherwise blue
+                rgb.green();
+              } else {
+                rgb.blue();
+              }
             } else {
               // offline
               rgb.red();
@@ -543,7 +553,7 @@ void loop() {
       // no card on the reader
       if (cu != NULL) {
         Serial.println("Card removed");
-        tool.off(*cu);
+        tool.off();
 
         if (cu->maintainer || cu->status) {
           // only report tool usage if the network is ok.
@@ -562,7 +572,12 @@ void loop() {
       }
       digitalWrite(D2_LED, LOW);
       if (acsettings.status) {
-        rgb.blue();
+        if (tool.status()) {
+          // green if the tool is running, otherwise blue
+          rgb.green();
+        } else {
+          rgb.blue();
+        }
       }
     }
   }
@@ -713,7 +728,7 @@ void offline(void) {
   Serial.println(ret);
 
   // and switch the tool off.
-  tool.off(*cu);
+  tool.off();
 }
 
 void online(void) {
