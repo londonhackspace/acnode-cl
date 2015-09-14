@@ -72,6 +72,7 @@ Every card_every(500);
 Every tool_status_check(2000);
 
 Button button(PF_1);
+Button bell_button(PM_3);
 
 Watchdog wdog;
 
@@ -199,6 +200,7 @@ void setup() {
   }
 
   button.begin();
+  bell_button.begin();
   one_sec.begin();
   five_sec.begin();
   card_every.begin();
@@ -318,7 +320,12 @@ void loop() {
   }
 }
 
-void doorbot_loop() {
+void doorbot_loop() { 
+  if(bell_button.poll() > 0) {
+    Serial.println("DING DONG. Someone rang the bell!");
+    announcer->BELL();
+  }
+
   if (one_sec.check()) {
     if (door.maybe_close()) {
       rgb.blue();
