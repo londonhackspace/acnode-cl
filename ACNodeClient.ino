@@ -207,7 +207,7 @@ void setup() {
 
   cc.invalid = 1;
 
-  announcer = new Announcer();
+  announcer = new Announcer(acsettings.announcer_port);
   announcer->START();
 
   Serial.println("press enter for a prompt");
@@ -261,7 +261,7 @@ void doorbot_loop() {
         case 0:
           // we know about these cards, let the user in
           doorbot_maybe_cache_card(result, &read_user);
-          doorbot_open_door(&read_user);
+          doorbot_open_door();
           break;
         case -1:
           // unknown card, go away
@@ -272,8 +272,10 @@ void doorbot_loop() {
         default:
           // network error, have a look at the cache
           user *found_user = doorbot_cache_get();
-          if (found_user && doorbot_has_access(found_user)) doorbot_open_door(found_user);
+          if (found_user && doorbot_has_access(found_user)) doorbot_open_door();
       }
+      // regardless of what happened, tell the world that we've scanned a card.
+      announcer->RFID(&read_user);
     }
   }
 }
@@ -322,10 +324,9 @@ boolean doorbot_has_access(user *u) {
   return u->status;
 }
 
-void doorbot_open_door(user *u) {
+void doorbot_open_door() {
   rgb.green();
   door.open();
-  announcer->RFID(u);
 }
 
 void acnode_loop() {

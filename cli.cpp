@@ -37,13 +37,14 @@ void mrlprint(const char * str) {
 #define _CMD_NAME   "name"
 #define _CMD_RTIME  "resetruntime"
 #define _CMD_ROLE   "role"
+#define _CMD_ANN_PORT "announcer_port"
 
-#define _NUM_OF_CMD 16
+#define _NUM_OF_CMD 17
 #define _NUM_OF_VER_SCMD 2
 
 //available  commands
 const char *keyworld [] = {
-  _CMD_HELP, _CMD_SHOW, _CMD_MAC, _CMD_SERVER, _CMD_NODEID, _CMD_PORT, _CMD_VER, _CMD_SAVE, _CMD_CLEAR, _CMD_LIST, _CMD_REBOOT, _CMD_NUKE, _CMD_SYSLOG, _CMD_NAME, _CMD_RTIME, _CMD_ROLE};
+  _CMD_HELP, _CMD_SHOW, _CMD_MAC, _CMD_SERVER, _CMD_NODEID, _CMD_PORT, _CMD_VER, _CMD_SAVE, _CMD_CLEAR, _CMD_LIST, _CMD_REBOOT, _CMD_NUKE, _CMD_SYSLOG, _CMD_NAME, _CMD_RTIME, _CMD_ROLE, _CMD_ANN_PORT};
 // version subcommands
 const char * ver_keyworld [] = {
   _SCMD_MRL, _SCMD_ACNODE};
@@ -62,6 +63,7 @@ void print_help ()
   Serial.println ("\tnodeid <id> - set this node's id");
   Serial.println ("\tport <port> - set the port on the server to connect to");
   Serial.println ("\trole <role_id> - set the role of this acnode");
+  Serial.println ("\tannouncer_port <port> - send announcements to this UDP port");
   Serial.println ("\tsave - save the current settings");
   Serial.println ("\tclear - clear the current settings");
   Serial.println ("\tlist - list the cached users");
@@ -343,6 +345,21 @@ int mrlexecute (int argc, const char * const * argv)
         }
       } else {
         Serial.println("role <role_id>");
+      }
+    }
+    else if (strcmp (argv[i], _CMD_ANN_PORT) == 0) {
+      if ((++i) < argc) {
+        int port = atoi(argv[i]);
+        if (port > 0) {
+          Serial.print("new announcer_port: ");
+          Serial.println(port);
+          acsettings.announcer_port = port;
+          set_settings(acsettings);
+        } else {
+          Serial.println("bad port number");
+        }
+      } else {
+        Serial.println("announcer_port <port>");
       }
     }
     else {

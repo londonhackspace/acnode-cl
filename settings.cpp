@@ -114,6 +114,9 @@ void dump_settings(settings acsettings) {
     default:
       Serial.println("unknown");
   }
+  
+  Serial.print("announcer_port: ");
+  Serial.println(acsettings.announcer_port);
 }
 
 
@@ -149,6 +152,7 @@ settings get_settings(void) {
   acsettings.status = 0;
   acsettings.runtime = 0;
   acsettings.role = 0;
+  acsettings.announcer_port = 0;
 
   // save the settings since it's a new board.
   acsettings.valid = 42;

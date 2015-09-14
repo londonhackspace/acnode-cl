@@ -6,9 +6,9 @@ EthernetUDP Announcer::_udp;
 IPAddress Announcer::_host;
 int Announcer::_port;
 
-Announcer::Announcer() {
+Announcer::Announcer(int port) {
   _host = IPAddress(255, 255, 255, 255);
-  _port = 50000;
+  _port = port;
   _udp.begin(8888);
 }
 

@@ -19,8 +19,8 @@ struct settings {
   char syslogserver[SERVERNAMELEN];
   char toolname[16];
   uint32_t runtime; // total seconds the tool has run
-  int8_t padding[1];
   int8_t role; // role of this acnode: 0 - regular tool; 1 - doorbot
+  uint16_t announcer_port; // which port to send notifications to
 };
 
 
