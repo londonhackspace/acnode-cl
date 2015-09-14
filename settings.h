@@ -6,6 +6,9 @@
 
 // enough length for acserver.lan.london.hackspace.org.uk + 1 + 4 extra for luck.
 #define SERVERNAMELEN (36 + 1 + 4)
+
+#define TOOLNAMELEN (16)
+
 // when we read our settings we check this to see if we have valid settings.
 #define ACSETTINGSVALID (42)
 
@@ -17,9 +20,10 @@ struct settings {
   int32_t nodeid; // are we calling this "node id" or "tool id"?
   uint8_t status; // 0 = out of service, 1 = in service
   char syslogserver[SERVERNAMELEN];
-  char toolname[16];
+  char toolname[TOOLNAMELEN];
   uint32_t runtime; // total seconds the tool has run
-  int8_t padding[1];
+  uint8_t minontime; // the minimum time the tool should be on for.
+  // 4 more bytes space
 };
 
 

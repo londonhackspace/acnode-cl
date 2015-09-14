@@ -2,19 +2,20 @@
 #include "user.h"
 #include "utils.h"
 #include "sdcache.h"
+#include "acnode.h"
 
-SDCache cache("CACHE");
 
 // look up a uid in the eeprom and return a user struct
 // the returned user must be freed by the caller
 user *get_user(user *u) {
   user *found = new user;
-  if (cache.get(u->uid, found)) {
+  if (cache->get(u->uid, found)) {
     return found;
   } else {
     free(found);
     return NULL;
   }
+  return NULL;
 }
 
 // returns true if the uid is the same
@@ -49,10 +50,10 @@ boolean compare_user(user *u1, user *u2) {
 }
 
 void store_user(user *u) {
-    cache.set(u->uid, u);
+    cache->set(u);
 }
 
-void dump_user(user * u) {
+void dump_user(const user * u) {
   Serial.print("UID: ");
   if (u->uidlen) {
     dumpHex(u->uid, 7);
@@ -88,17 +89,4 @@ void list_users_callback(user *u) {
   dump_user(u);
 }
 
-void list_users(void) {
-  int count = cache.each(list_users_callback);
-  
-  Serial.print("currently storing: ");
-  Serial.print(count);
-  Serial.println(" users");
-
-}
-
-// clear the userdb, this marks the first entry as the end.
-void nuke_users(void) {
-  cache.purge();
-}
 

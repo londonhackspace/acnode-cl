@@ -1,6 +1,7 @@
 #include "network.h"
 #include "acnode.h"
 #include "user.h"
+#include "version.h"
 
 // both 'url' and 'path' here are misleading
 // the string is actually "<method> <path>"
@@ -20,14 +21,17 @@ int get_url(char * path) {
   Serial.println(path);
 
   if (client.connect(acsettings.servername, acsettings.port)) {
-    Serial.println("Connected");
-    Serial.println("Querying");
 
     Serial.println(path);
     client.print(path);
     client.println(" HTTP/1.0");
     client.print("Host: ");
     client.println(acsettings.servername);
+    client.print("User-Agent: ");
+    client.print("ACNode ");
+    client.print(ACVERSION);
+    client.print(", Energia ");
+    client.println(ENERGIA);
     client.println();
 
     int timeout = 0;
@@ -43,7 +47,8 @@ int get_url(char * path) {
 
     if (client.available()) {
       char c;
-      Serial.print("Got Response: >");
+      Serial.println("Got Response:");
+      Serial.print(">");
 
       int newlines = 0;
       boolean first = false;
@@ -72,7 +77,6 @@ int get_url(char * path) {
       }
 
       Serial.println("<");
-      Serial.println("Disconnecting");
       client.flush();
       client.stop();
     }
@@ -167,25 +171,6 @@ void addNewUser(user card, user maintainer)
   Serial.println(ret);
 }
 
-// https://wiki.london.hackspace.org.uk/view/Project:Tool_Access_Control/Solexious_Proposal#Tool_usage_.28live.29
-// status: 1 == in use, 0 == out of use.
-int toolUse(int status, user card) {
-  int ret = -1;
-
-  Serial.println("Updating tool Usage:");
-  //  /[nodeID]/tooluse/[status]/[cardID]
-  char url[64];
-  sprintf(url, "POST /%ld/tooluse/%d/", acsettings.nodeid, status);
-  uid_str(url + strlen(url), &card);
-  Serial.println(url);
-
-  ret = get_url(url);
-  Serial.print("Got: ");
-  Serial.println(ret);
-  
-  return ret;
-}
-
 // https://wiki.london.hackspace.org.uk/view/Project:Tool_Access_Control/Solexious_Proposal#Tool_usage_.28usage_time.29
 // is the time here in ms or Seconds?
 int toolUseTime(user card, int time) {
@@ -207,6 +192,8 @@ int toolUseTime(user card, int time) {
   return ret;
 }
 
+// https://wiki.london.hackspace.org.uk/view/Project:Tool_Access_Control/Solexious_Proposal#Tool_usage_.28live.29
+// status: 1 == in use, 0 == out of use.
 int reportToolUse(user card, int status) {
   int ret = -1;
 

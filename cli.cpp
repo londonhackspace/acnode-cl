@@ -9,6 +9,7 @@
 #include "user.h"
 #include "version.h"
 #include "microrl.h"
+#include "acnode.h"
 
 extern settings acsettings;
 
@@ -36,13 +37,16 @@ void mrlprint(const char * str) {
 #define _CMD_SYSLOG "syslog"
 #define _CMD_NAME   "name"
 #define _CMD_RTIME  "resetruntime"
+#define _CMD_FILL   "fill"
+#define _CMD_VERIFY "verify"
+#define _CMD_MINONTIME "minontime"
 
-#define _NUM_OF_CMD 15
+#define _NUM_OF_CMD 18
 #define _NUM_OF_VER_SCMD 2
 
 //available  commands
 const char *keyworld [] = {
-  _CMD_HELP, _CMD_SHOW, _CMD_MAC, _CMD_SERVER, _CMD_NODEID, _CMD_PORT, _CMD_VER, _CMD_SAVE, _CMD_CLEAR, _CMD_LIST, _CMD_REBOOT, _CMD_NUKE, _CMD_SYSLOG, _CMD_NAME, _CMD_RTIME};
+  _CMD_HELP, _CMD_SHOW, _CMD_MAC, _CMD_SERVER, _CMD_NODEID, _CMD_PORT, _CMD_VER, _CMD_SAVE, _CMD_CLEAR, _CMD_LIST, _CMD_REBOOT, _CMD_NUKE, _CMD_SYSLOG, _CMD_NAME, _CMD_RTIME, _CMD_FILL, _CMD_VERIFY, _CMD_MINONTIME};
 // version subcommands
 const char * ver_keyworld [] = {
   _SCMD_MRL, _SCMD_ACNODE};
@@ -68,6 +72,9 @@ void print_help ()
   Serial.println ("\tsyslog <hostname> - set the syslog server");
   Serial.println ("\tname <toolname> - unique name of the tool");
   Serial.println ("\tresetruntime - reset the total time the tool has been running to zero");
+  Serial.println ("\tfill - fill the card cache with test cards");
+  Serial.println ("\tverify - verify the card cache contents against the acserver");
+  Serial.println ("\tminontime <time> - minimum time in seconds to keep the tool on for, up to 254 seconds");
 }
 
 bool ishex(char c) {
@@ -264,7 +271,7 @@ int mrlexecute (int argc, const char * const * argv)
       ret = set_settings(acsettings);
       if (ret == 0) {
         Serial.println("OK!");
-        acsettings.valid = 42;
+        acsettings.valid = ACSETTINGSVALID;
       } 
       else {
         Serial.print("Error: ");
@@ -285,7 +292,7 @@ int mrlexecute (int argc, const char * const * argv)
     }
     else if (strcmp (argv[i], _CMD_LIST) == 0) {
       Serial.println("Listing cached users... ");
-      list_users();
+      cache->list();
     }
     else if (strcmp (argv[i], _CMD_REBOOT) == 0) {
       Serial.print("Rebooting...!");
@@ -293,7 +300,7 @@ int mrlexecute (int argc, const char * const * argv)
     }
     else if (strcmp (argv[i], _CMD_NUKE) == 0) {
       Serial.println("Nukeing cached users... ");
-      nuke_users();
+      cache->purge();
     }
     else if (strcmp (argv[i], _CMD_SYSLOG) == 0) {
       if ((++i) < argc) { // if value preset
@@ -327,6 +334,54 @@ int mrlexecute (int argc, const char * const * argv)
       Serial.println("Resetting run time");
       acsettings.runtime = 0;
       set_settings(acsettings);
+    }
+    else if (strcmp (argv[i], _CMD_FILL) == 0) {
+      Serial.println("Filling card cache");
+      cache->fill();
+    }
+    else if (strcmp (argv[i], _CMD_VERIFY) == 0) {
+      Serial.println("Verifying card cache");
+      cache->verify();
+    }
+    else if (strcmp (argv[i], _CMD_MINONTIME) == 0) {
+      if ((++i) < argc) { // if value preset
+        // not likely to want to have a min on time > 254, and
+        // it's a uint8_t anyway.
+        if ( strlen(argv[i]) < 4) {
+          Serial.print("new minontime: ");
+          Serial.println(argv[i]);
+          errno = 0;
+          unsigned int ret;
+          char *end;
+          boolean ok = true;
+          ret = strtoul(argv[i], &end, 10);
+
+          if ((errno == ERANGE && (ret == LONG_MAX || ret == LONG_MIN))
+                   || (errno != 0 && ret == 0)) {
+            perror("strtol");
+            ok = false;
+          }
+
+          if (end == argv[i]) {
+            fprintf(stderr, "No digits were found\n");
+            ok = false;
+          }
+
+          if (ret < 0 || ret > 254) {
+            ok = false;
+          }
+
+          if (ok) {
+            acsettings.minontime = ret;
+          } else {
+            Serial.println("invalid minontime");
+          }
+        } else {
+          Serial.println("minontime too big");
+        }
+      } else {
+        Serial.println("minontime <time>");
+      }
     }
     else {
       Serial.print ("command: '");

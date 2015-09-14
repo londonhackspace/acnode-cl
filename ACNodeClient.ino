@@ -26,6 +26,10 @@ ACNodeClient
 #include "button.h"
 #include "every.h"
 #include "version.h"
+#include "watchdog.h"
+#include "cache.h"
+#include "sdcache.h"
+#include "eepromcache.h"
 
 // create microrl object and pointer on it
 microrl_t rl;
@@ -64,13 +68,23 @@ Every tool_status_check(2000);
 
 Button button(PF_1);
 
+Watchdog wdog;
+
+Cache *cache = NULL;
+
+#define SD_CS_PIN PC_7
+#define ACNODE_DIR "ACNODE"
 
 void setup() {
   Serial.begin(9600);
   Serial.println("");
   Serial.print("\n\nACNode Client version ");
   Serial.print(ACVERSION);
-  Serial.println(" Startup.");
+  Serial.print(" built with Energia ");
+  Serial.print(ENERGIA);
+  Serial.print(", Arduino API version ");
+  Serial.println(ARDUINO);
+  Serial.println("Starting up.");
   // lets use all the LED's
   pinMode(D1_LED, OUTPUT);
   pinMode(D2_LED, OUTPUT);
@@ -82,6 +96,9 @@ void setup() {
   pinMode(D3_LED, OUTPUT);
   pinMode(D4_LED, OUTPUT);
 
+  // start the watchdog early in case of hangs
+  wdog.begin();
+
   // start the tool early so it can be switched off(!?)
   tool.begin();
 
@@ -89,10 +106,24 @@ void setup() {
   rgb.begin();
   rgb.yellow();
 
+  wdog.feed();
+
   init_settings();
 
   acsettings = get_settings();
   dump_settings(acsettings);
+
+//  if (acsettings.sdcache) {
+  if (true) {
+    if (SD.begin(SD_CS_PIN, SPI_HALF_SPEED, 2)) {
+      Serial.println("SD card is accessible");
+      SD.mkdir(ACNODE_DIR);
+      cache = new SDCache("CACHE");
+    } else {
+      Serial.println("SD card could not be accessed");
+      cache = new EEPromCache();
+    }
+  }
 
   microrl_init (prl, mrlprint);
   // set callback for execute
@@ -104,7 +135,11 @@ void setup() {
   memset(&cc, 0, sizeof(user));
   memset(&maintainer, 0, sizeof(user));
 
-  // start the Ethernet connection:
+  wdog.feed();
+
+  // start the Ethernet connection. If the network is down this takes some time (60 secs?)
+  // so disable the watchdog while it's happening
+  wdog.disable();
   if (!Ethernet.begin(acsettings.mac)) {
     Serial.println("Failed to configure Ethernet using DHCP");
   } else {
@@ -112,6 +147,8 @@ void setup() {
     Ethernet.enableLinkLed();
     Ethernet.enableActivityLed();
   }
+  wdog.feed();
+  wdog.enable();
 
   if (Ethernet.localIP() == INADDR_NONE) {
     Serial.println("Didn't get a valid ip");
@@ -132,6 +169,8 @@ void setup() {
     settime(&rtc);
   }
 
+  wdog.feed();
+
   if (!network) {
     syslog.offline();
   }
@@ -141,12 +180,18 @@ void setup() {
   snprintf(tmp, 42, "Starting up, version %s", ACVERSION);
   syslog.syslog(LOG_NOTICE, tmp);
 
+  if (wdog.was_reset()) {
+    syslog.syslog(LOG_ALERT, "Alert! Was previously reset by the watchdog!");
+  }
+
   button.begin();
   one_sec.begin();
   five_sec.begin();
   card_every.begin();
   heart_every.begin();
   tool_status_check.begin();
+
+  wdog.feed();
 
   Serial.println("Initialising PN532");
 
@@ -176,6 +221,8 @@ void setup() {
   // configure board to read RFID tags
   nfc.SAMConfig();
 
+  wdog.feed();
+
   if (network) {
     Serial.println("Checking tool status");
     int status = networkCheckToolStatus();
@@ -197,6 +244,8 @@ void setup() {
       }
     }
 
+    wdog.feed();
+
     char tmp[42];
     snprintf(tmp, 42, "tool status: %s", acsettings.status ? "in service" : "out of service");
     syslog.syslog(LOG_INFO, tmp);
@@ -207,6 +256,15 @@ void setup() {
   } else {
     rgb.orange();
   }
+
+  wdog.feed();
+
+  if (network) {
+    // verify the users in the cache against the acserver
+    cache->verify();
+  }
+
+  wdog.feed();
 
   cc.invalid = 1;
 
@@ -233,6 +291,8 @@ void loop() {
   
   // some housekeeping stuff
   if (heart_every.check()) {
+    wdog.feed();
+
     if (heartbeat) {
       digitalWrite(D1_LED, HIGH);
       heartbeat = false;
@@ -268,7 +328,12 @@ void loop() {
       heartbeat = true;
       if (cu == NULL) {
         if (acsettings.status) {
-          rgb.blue();
+          // green if the tool is running, otherwise blue
+          if (tool.status()) {
+            rgb.green();
+          } else {
+            rgb.blue();
+          }
         } else {
           // offline
           rgb.red();
@@ -281,7 +346,12 @@ void loop() {
         } else {
           if (cu->status == 1) {
             if (acsettings.status) {
-              rgb.green();
+              if (tool.status()) {
+                // green if the tool is running, otherwise blue
+                rgb.green();
+              } else {
+                rgb.blue();
+              }
             } else {
               // offline
               rgb.red();
@@ -433,13 +503,13 @@ void loop() {
               if (status == 0) {
                 nu->invalid = 1;
               }
-              store_user(nu);
+              cache->set(nu);
             }
             delete tu;
           } else {
             // new user, so just store it.
             if (nu-> status == 1) {
-              store_user(nu);
+              cache->set(nu);
             }
           }
         } else {
@@ -510,7 +580,7 @@ void loop() {
       // no card on the reader
       if (cu != NULL) {
         Serial.println("Card removed");
-        tool.off(*cu);
+        tool.off();
 
         if (cu->maintainer || cu->status) {
           // only report tool usage if the network is ok.
@@ -529,7 +599,12 @@ void loop() {
       }
       digitalWrite(D2_LED, LOW);
       if (acsettings.status) {
-        rgb.blue();
+        if (tool.status()) {
+          // green if the tool is running, otherwise blue
+          rgb.green();
+        } else {
+          rgb.blue();
+        }
       }
     }
   }
@@ -680,7 +755,7 @@ void offline(void) {
   Serial.println(ret);
 
   // and switch the tool off.
-  tool.off(*cu);
+  tool.off();
 }
 
 void online(void) {

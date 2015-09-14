@@ -25,12 +25,12 @@ boolean SDCache::get(uint8_t *key, user *u) {
   return found;
 }
 
-void SDCache::set(uint8_t *key, user *u) {
+void SDCache::set(const user *u) {
   File f = SD.open(_filename, FILE_APPEND);
   user user_entry;
   while (f.available()) {
     f.read(&user_entry, sizeof(struct user));
-    if (compare(user_entry.uid, key)) {
+    if (compare(user_entry.uid, u->uid)) {
       f.seek(-sizeof(struct user));
       break;
     }
@@ -56,11 +56,20 @@ int SDCache::each(void(*callback)(user *u)) {
   return counter;
 }
 
-boolean SDCache::compare(uint8_t *k1, uint8_t *k2) {
+boolean SDCache::compare(const uint8_t *k1, const uint8_t *k2) {
   int i = 0;
   while (i++ < 7) {
     if (k1[i] != k2[i]) return false;
   }
   return true;
+}
+
+void SDCache::fill(void) {
+}
+
+void SDCache::list(void) {
+}
+
+void SDCache::verify(void) {
 }
 

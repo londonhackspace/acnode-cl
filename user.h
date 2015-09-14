@@ -16,21 +16,15 @@ unsigned int            :3; // pad to a whole byte
   uint8_t uid[7];
 };
 
-// the base address (begining of 3rd block)
-#define USERBASE (128)
 
 user *get_user(user *u);
-int find_user(user *u);
 boolean compare_user(user *u1, user *u2);
 boolean compare_uid(user *u1, user *u2);
 
-void dump_user(user * u);
+void dump_user(const user * u);
 void uid_str(char *str, user *u);
 
-int find_free(void);
-void store_user(user *u);
-void list_users(void);
-void nuke_users(void);
+
   
 #endif
 
