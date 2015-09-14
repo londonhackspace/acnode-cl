@@ -49,6 +49,7 @@ void mrlprint(const char * str) {
 #define _SCMD_LOW       "low"
 #define _CMD_SECRET   "secret"
 #define _CMD_ROLE   "role"
+#define _CMD_ANN_PORT "announcer_port"
 
 #define _NUM_OF_CMD 24
 #define _NUM_OF_VER_SCMD 2
@@ -86,6 +87,7 @@ void print_help ()
   Serial.println ("\tnodeid <id> - set this node's id");
   Serial.println ("\tport <port> - set the port on the server to connect to");
   Serial.println ("\trole <role_id> - set the role of this acnode");
+  Serial.println ("\tannouncer_port <port> - send announcements to this UDP port");
   Serial.println ("\tsave - save the current settings");
   Serial.println ("\tclear - clear the current settings");
   Serial.println ("\tlist - list the cached users");
@@ -512,6 +514,21 @@ int mrlexecute (int argc, const char * const * argv)
         }
       } else {
         Serial.println("role <role_id>");
+      }
+    }
+    else if (strcmp (argv[i], _CMD_ANN_PORT) == 0) {
+      if ((++i) < argc) {
+        int port = atoi(argv[i]);
+        if (port > 0) {
+          Serial.print("new announcer_port: ");
+          Serial.println(port);
+          acsettings.announcer_port = port;
+          set_settings(acsettings);
+        } else {
+          Serial.println("bad port number");
+        }
+      } else {
+        Serial.println("announcer_port <port>");
       }
     }
     else {

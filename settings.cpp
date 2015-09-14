@@ -109,6 +109,9 @@ void dump_settings(settings acsettings) {
     default:
       Serial.println("unknown");
   }
+  
+  Serial.print("announcer_port: ");
+  Serial.println(acsettings.announcer_port);
 
   Serial.print("Minimum on time: ");
   Serial.println(acsettings.minontime);
@@ -174,6 +177,7 @@ settings get_settings(void) {
         acsettings.toolrunpin_activehigh = 0;
         acsettings.secret[0] = '\0';
         acsettings.role = 0;
+        acsettings.announcer_port = 0;
       }
 
       acsettings.valid = ACSETTINGSVALID;
@@ -201,6 +205,7 @@ settings get_settings(void) {
         acsettings.toolonpin_activehigh = osettings.toolonpin_activehigh;
         acsettings.toolrunpin_activehigh = osettings.toolrunpin_activehigh;
         acsettings.role = 0;
+        acsettings.announcer_port = 0;
 
         acsettings.secret[0] = '\0';
 
@@ -237,6 +242,7 @@ settings get_settings(void) {
       // the laser signal is inverted
       acsettings.toolrunpin_activehigh = 0;
       acsettings.role = 0;
+      acsettings.announcer_port = 0;
 
       acsettings.secret[0] = '\0';
 

@@ -25,6 +25,8 @@ struct settings42 {
   char toolname[TOOLNAMELEN];
   uint32_t runtime; // total seconds the tool has run
   uint8_t minontime; // the minimum time the tool should be on for.
+  uint8_t role; // role of this acnode: 0 - regular tool; 1 - doorbot
+  uint16_t announcer_port; // which port to send notifications to
 };
 
 struct settings43 {

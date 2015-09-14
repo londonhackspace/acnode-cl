@@ -13,7 +13,7 @@ class Announcer {
   static IPAddress _host;
   static int _port;
 
-  Announcer();
+  Announcer(int);
   static void RFID(user *);
   static void START();
   static void BELL(); 
