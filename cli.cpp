@@ -6,7 +6,6 @@
 #include <driverlib/sysctl.h>
 
 #include "settings.h"
-#include "user.h"
 #include "version.h"
 #include "microrl.h"
 #include "acnode.h"

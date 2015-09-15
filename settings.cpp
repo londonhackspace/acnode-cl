@@ -1,10 +1,7 @@
-
 #include <Energia.h>
 #include "settings.h"
 #include "acnode.h"
 #include "utils.h"
-#include "user.h"
-
 
 void init_settings(void) {
   // must be a multiple of 4 cos our eeprom is

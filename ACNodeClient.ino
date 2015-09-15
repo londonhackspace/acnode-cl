@@ -17,7 +17,7 @@ ACNodeClient
 #include "settings.h"
 #include "microrl.h"
 #include "cli.h"
-#include "user.h"
+#include "card.h"
 #include "utils.h"
 #include "tool.h"
 #include "network.h"
@@ -439,7 +439,7 @@ void loop() {
       }
 
       // we have a possibly new card, check it against the cache.
-      tu = get_user(nu);
+      tu = cache->get(nu);
 
       // was it in the cache?
       if (tu != NULL && cu != NULL) {
@@ -495,7 +495,7 @@ void loop() {
             nu->status = 0;
           }
 
-          tu = get_user(nu);
+          tu = cache->get(nu);
 
           if (tu != NULL) {
             if (!compare_user(tu, nu)) {
@@ -516,7 +516,7 @@ void loop() {
           // network error
           Serial.println("network error, trying to find cached card");
 
-          tu = get_user(nu);
+          tu = cache->get(nu);
 
           if (tu != NULL) {
             delete nu;
@@ -526,7 +526,7 @@ void loop() {
           }
         }
       } else if (check) {
-        tu = get_user(nu);
+        tu = cache->get(nu);
 
         if (tu != NULL) {
           delete nu;
@@ -540,7 +540,7 @@ void loop() {
 
           Serial.println("trying to find cached card");
 
-          tu = get_user(nu);
+          tu = cache->get(nu);
 
           if (tu != NULL) {
             delete nu;

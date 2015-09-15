@@ -20,8 +20,9 @@ class SDCache: public Cache {
   public:
     SDCache(char *filename);
     SDCache();
-  
-    virtual boolean get(uint8_t *key, user *u);
+
+    // caller needs to free returned user
+    virtual user *get(user *u);
     virtual void set(const user *u);
     virtual void purge(void);
     virtual int each(void( *callback)(user *));

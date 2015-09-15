@@ -1,6 +1,5 @@
 #include "network.h"
 #include "acnode.h"
-#include "user.h"
 #include "version.h"
 
 // both 'url' and 'path' here are misleading

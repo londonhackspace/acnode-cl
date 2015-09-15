@@ -4,7 +4,7 @@
 #include <Ethernet.h>
 #include <syslog.h>
 #include "settings.h"
-#include "user.h"
+#include "card.h"
 #include "watchdog.h"
 #include "cache.h"
 

@@ -15,7 +15,6 @@ EEPromCache::EEPromCache() {
 void write_user(const user *u, int address);
 int find_user(const user *u);
 int find_free(void);
-void store_user(user *u);
 
 /*
 
@@ -59,20 +58,19 @@ uid_str
 
 */
 
-// gah, fix function signature
-boolean EEPromCache::get(uint8_t *key, user *u) {
+// the returned user must be freed by the caller
+user *EEPromCache::get(user *u) {
   int address = find_user(u);
 
   if (address < 0) {
-    u = NULL;
-    return false;
+    return NULL;
   }
 
   user *nu = new user;
   EEPROMRead((uint32_t *)nu, address, sizeof(user));
-  u = nu;
-  return true; //nu;
+  return nu;
 }
+
 
 /*
  * 3 ways we could want to store a user:

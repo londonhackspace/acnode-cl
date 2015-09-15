@@ -16,14 +16,32 @@ unsigned int            :3; // pad to a whole byte
   uint8_t uid[7];
 };
 
+class Card {
+  public:
+    Card(const uint8_t *uid, boolean uidlen, boolean status, boolean maintainer);
+    Card(struct user *u);
+    Card();
+    // copy
+    // operator =
+    boolean operator==(const Card& other);
+    boolean operator!=(const Card& other){return !(*this == other);}
+    boolean compare_uid(const Card& other);
+    void dump(void);
+    void str(char *str);
+  private:
+    int _uidlen;
+    uint8_t _uid[7];
+    boolean _maintainer;
+    boolean _status;
+};
 
-user *get_user(user *u);
+// cache->get();
+//user *get_user(user *u);
 boolean compare_user(user *u1, user *u2);
 boolean compare_uid(user *u1, user *u2);
 
 void dump_user(const user * u);
 void uid_str(char *str, user *u);
-
 
   
 #endif

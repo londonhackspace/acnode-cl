@@ -2,7 +2,7 @@
 #define _NETWORK_H_
 
 #include <Energia.h>
-#include "user.h"
+#include "card.h"
 #include <DateTimeLibrary.h>
 
 int get_url(char * path);

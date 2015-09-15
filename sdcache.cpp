@@ -7,22 +7,31 @@ SDCache::SDCache(char *filename) {
   _filename = filename;
 }
 
-boolean SDCache::get(uint8_t *key, user *u) {
-  if (!SD.exists(_filename)) return false;
+// caller needs to free returned user
+user * SDCache::get(user *u) {
+  if (!SD.exists(_filename)) return NULL;
+
   File f = SD.open(_filename, FILE_READ);
-  user user_entry;
+  user *user_entry = new user;
+
   bool found = false;
   while (f.available()) {
-    f.read(&user_entry, sizeof(struct user));
-    if (compare(user_entry.uid, key)) {
+    f.read(user_entry, sizeof(struct user));
+    if (compare(user_entry->uid, u->uid)) {
       found = true;
       break;
     }
   }
 
-  if (found) memcpy(u, &user_entry, sizeof(struct user));
+//  if (found)
+//    memcpy(ret, &user_entry, sizeof(struct user));
   f.close();
-  return found;
+  
+  if (!found) {
+    return NULL;
+  }
+  
+  return user_entry; 
 }
 
 void SDCache::set(const user *u) {

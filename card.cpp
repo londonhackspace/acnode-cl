@@ -1,22 +1,86 @@
 #include <Energia.h>
-#include "user.h"
+#include "card.h"
 #include "utils.h"
-#include "sdcache.h"
+#include "cache.h"
 #include "acnode.h"
 
-
-// look up a uid in the eeprom and return a user struct
-// the returned user must be freed by the caller
-user *get_user(user *u) {
-  user *found = new user;
-  if (cache->get(u->uid, found)) {
-    return found;
-  } else {
-    free(found);
-    return NULL;
-  }
-  return NULL;
+Card::Card(const uint8_t *uid, boolean uidlen, boolean status, boolean maintainer) {
+  _status = status;
+  _maintainer = maintainer;
+  _uidlen = uidlen;
+  memcpy(_uid, uid, uidlen ? 7 : 4);
 }
+
+Card::Card(struct user *u) {
+  _status = u->status;
+  _maintainer = u->maintainer;
+  _uidlen = u->uidlen;
+  memcpy(_uid, u->uid, u->uidlen ? 7 : 4);
+}
+
+Card::Card() {
+  _status = false;
+  _maintainer = false;
+  _uidlen = 0;
+  memset(_uid, '\0', 7);
+}
+
+// compare everything
+boolean Card::operator==(const Card& other) {
+  if (!compare_uid(other)) {
+    return false;
+  }
+  if (_maintainer != other._maintainer) {
+    return false;
+  }
+  if (_status != other._status) {
+    return false;
+  }
+//  if (invalid != other->invalid) {
+//    return false;
+//  }
+  return true;
+}
+
+// just compare the uid
+boolean Card::compare_uid(const Card& other) {
+  if (_uidlen != other._uidlen) {
+    return false;
+  }
+  if (memcmp(_uid, other._uid, _uidlen ? 7 : 4) != 0) {
+    return false;
+  }
+  return true;
+}
+
+void Card::dump(void) {
+  Serial.print("UID: ");
+  if (_uidlen) {
+    dumpHex(_uid, 7);
+  } else {
+    dumpHex(_uid, 4);
+    Serial.print("      ");
+  }
+  Serial.print(" Maintainer:");
+  Serial.print(_maintainer);
+  Serial.print(" Status:");
+  Serial.print(_status);
+}
+
+// the string pointer needs to have at 9 or 15 bytes of space
+void Card::str(char *str) {
+  int len;
+
+  len = _uidlen ? 7 : 4;
+
+  for(int i = 0; i < len; i++) {
+    sprintf(str, "%02X", _uid[i]);
+    str[2] = 0;
+    str = str + 2;
+  }
+  str[0] = 0;
+}
+
 
 // returns true if the uid is the same
 boolean compare_uid(user *u1, user *u2) {
@@ -49,10 +113,6 @@ boolean compare_user(user *u1, user *u2) {
   return true;
 }
 
-void store_user(user *u) {
-    cache->set(u);
-}
-
 void dump_user(const user * u) {
   Serial.print("UID: ");
   if (u->uidlen) {
@@ -83,10 +143,6 @@ void uid_str(char *str, user *u) {
     str = str + 2;
   }
   str[0] = 0;
-}
-
-void list_users_callback(user *u) {
-  dump_user(u);
 }
 
 

@@ -2,7 +2,7 @@
 #define _TOOL_H_
 
 #include <Energia.h>
-#include "user.h"
+#include "card.h"
 
 
 class Tool

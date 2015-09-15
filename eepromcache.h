@@ -10,7 +10,8 @@ class EEPromCache: public Cache {
   public:
     EEPromCache();
 
-    virtual boolean get(uint8_t *key, user *u);
+    // the returned user must be freed by the caller
+    virtual user *get(user *u);
     virtual void set(const user *u);
     virtual void purge(void);
     virtual int each(void( *callback)(user *));
