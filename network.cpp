@@ -93,20 +93,7 @@ int querycard(Card card)
   char path[11 + 10 + 14 + 1];
   int result = -1;
 
-/*
-  if (card.invalid) {
-    return -1;
-  }
-*/
   sprintf(path, "GET /%ld/card/", acsettings.nodeid);
-
-/*
-  int len = card.uidlen ? 7 : 4;
-
-  for(byte i=0; i < len; i++) {
-    sprintf(path + strlen(path), "%02X", card.uid[i]);
-  }
-*/
 
   card.str(path + strlen(path));
 

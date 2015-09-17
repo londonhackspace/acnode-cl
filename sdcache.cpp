@@ -15,7 +15,7 @@ Card SDCache::get(Card u) {
   user user_entry, tu;
   memset(tu.uid, 0, 7);
   u.get_uid(tu.uid);
-  
+
   bool found = false;
   while (f.available()) {
     f.read(&user_entry, sizeof(struct user));

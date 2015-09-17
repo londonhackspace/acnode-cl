@@ -45,9 +45,9 @@ Card EEPromCache::get(Card u) {
   }
 
   user nu;
-  
+
   EEPROMRead((uint32_t *)&nu, address, sizeof(user));
-  
+
   return struct_to_card(nu);
 }
 
@@ -94,12 +94,6 @@ int EEPromCache::each(void( *callback)(user *)) {
   return -1;
 }
 
-/*
-boolean EEPromCache::compare(const uint8_t *k1, const uint8_t *k2) {
-    return false;
-}
-*/
-
 // fill the card cache with junk users to see how well we cope with runing out of space.
 void EEPromCache::fill(void) {
   int i;
@@ -109,7 +103,7 @@ void EEPromCache::fill(void) {
     uid[0] = i & 0xff;
     uid[1] = (i >> 8) & 0xff;
     Card u(uid, 0, 1, 0);
-    
+
     set(u);
     wdog.feed();
   }
@@ -285,7 +279,7 @@ int EEPromCache::find_free(void) {
 
 user EEPromCache::card_to_struct(const Card u) {
   user nu;
-  
+
   nu.status = u.is_user();
   nu.maintainer = u.is_maintainer();
   if (u.get_longuid()) {
@@ -293,7 +287,7 @@ user EEPromCache::card_to_struct(const Card u) {
   } else {
     nu.uidlen = 0;
   }
-  
+
   u.get_uid(nu.uid);
   return nu;
 }

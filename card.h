@@ -10,10 +10,7 @@
 class Card {
   public:
     Card(const uint8_t *uid, boolean uidlen, boolean status, boolean maintainer);
-//    Card(struct user *u);
     Card();
-    // copy
-    // operator =
     boolean operator==(const Card& other);
     boolean operator!=(const Card& other){return !(*this == other);}
     boolean compare_uid(const Card& other) const;
@@ -42,15 +39,6 @@ class Card {
     boolean _status;
     boolean _valid;
 };
-
-// cache->get();
-//user *get_user(user *u);
-//boolean compare_user(user *u1, user *u2);
-//boolean compare_uid(user *u1, user *u2);
-
-//void dump_user(const user * u);
-//void uid_str(char *str, user *u);
-
   
 #endif
 

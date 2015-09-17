@@ -8,7 +8,7 @@ unsigned int maintainer :1; // 1 if maintainer
 unsigned int uidlen     :1; // 1 if 7, otherwise 4
 unsigned int status     :1; // 1 if enabled
 unsigned int invalid    :1; // 0 if valid - by default the eeprom is set to 0xff
-unsigned int end        :1; // 1 if after the last valid uid 
+unsigned int end        :1; // 1 if after the last valid uid
 unsigned int            :3; // pad to a whole byte
   uint8_t uid[7];
 };

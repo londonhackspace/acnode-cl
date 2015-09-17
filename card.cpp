@@ -12,15 +12,6 @@ Card::Card(const uint8_t *uid, boolean uidlen, boolean status, boolean maintaine
   _valid = true;
 }
 
-/*
-Card::Card(struct user *u) {
-  _status = u->status;
-  _maintainer = u->maintainer;
-  _uidlen = u->uidlen;
-  memcpy(_uid, u->uid, u->uidlen ? 7 : 4);
-}
-*/
-
 Card::Card() {
   _status = false;
   _maintainer = false;
@@ -40,9 +31,9 @@ boolean Card::operator==(const Card& other) {
   if (_status != other._status) {
     return false;
   }
-//  if (invalid != other->invalid) {
-//    return false;
-//  }
+  if (_valid != other._valid) {
+    return false;
+  }
   return true;
 }
 
@@ -96,7 +87,7 @@ int Card::get_longuid() const {
 // fill *uid with the uid
 void Card::get_uid(uint8_t *uid) const {
   int i;
-  
+
   for (i =0 ; i < (_uidlen ? 7 : 4); i++) {
     uid[i] = _uid[i];
   }
@@ -144,70 +135,4 @@ void Card::str(char *str) {
   str[0] = 0;
 }
 
-/*
-
-// returns true if the uid is the same
-boolean compare_uid(user *u1, user *u2) {
-  if (u1->uidlen != u2->uidlen) {
-    return false;
-  }
-  if (memcmp(u1->uid, u2->uid, u1->uidlen ? 7 : 4) != 0) {
-    return false;
-  }
-  return true;
-}
-
-// returns true if the users are the same
-boolean compare_user(user *u1, user *u2) {
-  if (u1->uidlen != u2->uidlen) {
-    return false;
-  }
-  if (memcmp(u1->uid, u2->uid, u1->uidlen ? 7 : 4) != 0) {
-    return false;
-  }
-  if (u1->maintainer != u2->maintainer) {
-    return false;
-  }
-  if (u1->status != u2->status) {
-    return false;
-  }
-  if (u1->invalid != u2->invalid) {
-    return false;
-  }
-  return true;
-}
-
-void dump_user(const user * u) {
-  Serial.print("UID: ");
-  if (u->uidlen) {
-    dumpHex(u->uid, 7);
-  } else {
-    dumpHex(u->uid, 4);
-    Serial.print("      ");
-  }
-  Serial.print(" Maintainer:");
-  Serial.print(u->maintainer);
-  Serial.print(" Status:");
-  Serial.print(u->status);
-  Serial.print(" invalid:");
-  Serial.print(u->invalid);
-  Serial.print(" end:");
-  Serial.println(u->end);
-}
-
-// assumes that we have room in the string
-void uid_str(char *str, user *u) {
-  int len;
-
-  len = u->uidlen ? 7 : 4;
-
-  for(int i = 0; i < len; i++) {
-    sprintf(str, "%02X", u->uid[i]);
-    str[2] = 0;
-    str = str + 2;
-  }
-  str[0] = 0;
-}
-
-*/
 
