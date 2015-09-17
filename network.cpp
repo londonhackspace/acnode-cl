@@ -88,22 +88,27 @@ int get_url(char * path) {
 }
 
 // https://wiki.london.hackspace.org.uk/view/Project:Tool_Access_Control/Solexious_Proposal#Get_card_permissions
-int querycard(user card)
+int querycard(Card card)
 {
   char path[11 + 10 + 14 + 1];
   int result = -1;
 
+/*
   if (card.invalid) {
     return -1;
   }
-  
+*/
   sprintf(path, "GET /%ld/card/", acsettings.nodeid);
 
+/*
   int len = card.uidlen ? 7 : 4;
 
   for(byte i=0; i < len; i++) {
     sprintf(path + strlen(path), "%02X", card.uid[i]);
   }
+*/
+
+  card.str(path + strlen(path));
 
   result = get_url(path);
 
@@ -134,14 +139,14 @@ int networkCheckToolStatus()
 }
 
 // https://wiki.london.hackspace.org.uk/view/Project:Tool_Access_Control/Solexious_Proposal#Report_tool_status
-int setToolStatus(int status, user card) {
+int setToolStatus(int status, Card card) {
   int ret = -1;
   
   Serial.println("Setting tool status:");
   // /[nodeID]/status/[new_status]/by/[cardWithAdminPermissions]
   char url[64];
   sprintf(url, "POST /%ld/status/%d/by/", acsettings.nodeid, status);
-  uid_str(url + strlen(url), &card);
+  card.str(url + strlen(url));
   Serial.println(url);
 
   ret = get_url(url);
@@ -152,7 +157,7 @@ int setToolStatus(int status, user card) {
 }
 
 // https://wiki.london.hackspace.org.uk/view/Project:Tool_Access_Control/Solexious_Proposal#Add_card
-void addNewUser(user card, user maintainer)
+void addNewUser(Card card, Card maintainer)
 {
   int ret;
 
@@ -160,9 +165,9 @@ void addNewUser(user card, user maintainer)
   // /<nodeid>/grant-to-card/<trainee card uid>/by-card/<maintainer card uid>
   char url[64];
   sprintf(url, "POST /%ld/grant-to-card/", acsettings.nodeid);
-  uid_str(url + strlen(url), &card);
+  card.str(url + strlen(url));
   sprintf(url + strlen(url), "/by-card/");
-  uid_str(url + strlen(url), &maintainer);
+  maintainer.str(url + strlen(url));
   Serial.println(url);
 
   ret = get_url(url);
@@ -172,14 +177,14 @@ void addNewUser(user card, user maintainer)
 
 // https://wiki.london.hackspace.org.uk/view/Project:Tool_Access_Control/Solexious_Proposal#Tool_usage_.28usage_time.29
 // is the time here in ms or Seconds?
-int toolUseTime(user card, int time) {
+int toolUseTime(Card card, int time) {
   int ret = -1;
 
   Serial.println("Setting tool status:");
   // /[nodeID]/tooluse/time/for/[cardID]/[timeUsed]
   char url[64];
   sprintf(url, "POST /%ld/tooluse/time/for/", acsettings.nodeid);
-  uid_str(url + strlen(url), &card);
+  card.str(url + strlen(url));
   sprintf(url + strlen(url), "/%d", time);
   
   Serial.println(url);
@@ -193,7 +198,7 @@ int toolUseTime(user card, int time) {
 
 // https://wiki.london.hackspace.org.uk/view/Project:Tool_Access_Control/Solexious_Proposal#Tool_usage_.28live.29
 // status: 1 == in use, 0 == out of use.
-int reportToolUse(user card, int status) {
+int reportToolUse(Card card, int status) {
   int ret = -1;
 
   Serial.println("Setting tool usage:");
@@ -201,7 +206,7 @@ int reportToolUse(user card, int status) {
 
   char url[64];
   sprintf(url, "POST /%ld/tooluse/%d/", acsettings.nodeid, status);
-  uid_str(url + strlen(url), &card);
+  card.str(url + strlen(url));
 
   Serial.println(url);
 

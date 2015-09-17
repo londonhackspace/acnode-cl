@@ -105,7 +105,7 @@ void Tool::stoprunning() {
     snprintf(msg, 64, "Tool off after running for ");
     duration_str(msg + strlen(msg), duration);
     snprintf(msg + strlen(msg), 64 - strlen(msg), " for ");
-    uid_str(msg + strlen(msg), &tool_user);
+    tool_user.str(msg + strlen(msg));
 
     Serial.println(msg);
     syslog.syslog(LOG_NOTICE, msg);
@@ -125,13 +125,13 @@ void Tool::stoprunning() {
     }
 }
 
-void Tool::on(user user) {
+void Tool::on(Card user) {
   if (!_toolon) {
     char msg[64];
-    if (acsettings.status == 0 && !user.maintainer) {
+    if (acsettings.status == 0 && !user.is_maintainer()) {
       // if the tool is disabled only maintainers can switch it on.
       sprintf(msg, "Tool out of service, ignoring user ");
-      uid_str(msg + strlen(msg), &user);
+      user.str(msg + strlen(msg));
 
       Serial.println(msg);
       syslog.syslog(LOG_NOTICE, msg);
@@ -139,9 +139,9 @@ void Tool::on(user user) {
     }
 
     sprintf(msg, "Tool switched on for ");
-    uid_str(msg + strlen(msg), &user);
+    user.str(msg + strlen(msg));
 
-    if (user.maintainer) {
+    if (user.is_maintainer()) {
       sprintf(msg + strlen(msg), " (Maintainer)");
     }
 
@@ -157,7 +157,7 @@ void Tool::on(user user) {
     // end 
     _toolon = true;
     _ontime = millis();
-    memcpy(&tool_user, &user, sizeof(user));
+    tool_user = user;
   }
 
   if (_turnoff) {

@@ -9,20 +9,24 @@ Card::Card(const uint8_t *uid, boolean uidlen, boolean status, boolean maintaine
   _maintainer = maintainer;
   _uidlen = uidlen;
   memcpy(_uid, uid, uidlen ? 7 : 4);
+  _valid = true;
 }
 
+/*
 Card::Card(struct user *u) {
   _status = u->status;
   _maintainer = u->maintainer;
   _uidlen = u->uidlen;
   memcpy(_uid, u->uid, u->uidlen ? 7 : 4);
 }
+*/
 
 Card::Card() {
   _status = false;
   _maintainer = false;
   _uidlen = 0;
   memset(_uid, '\0', 7);
+  _valid = false;
 }
 
 // compare everything
@@ -43,7 +47,7 @@ boolean Card::operator==(const Card& other) {
 }
 
 // just compare the uid
-boolean Card::compare_uid(const Card& other) {
+boolean Card::compare_uid(const Card& other) const {
   if (_uidlen != other._uidlen) {
     return false;
   }
@@ -53,7 +57,64 @@ boolean Card::compare_uid(const Card& other) {
   return true;
 }
 
-void Card::dump(void) {
+// can this card use the tool?
+boolean Card::is_user() const {
+  if (!_valid) {
+    return false;
+  }
+  if (_status || _maintainer) {
+    return true;
+  }
+  return false;
+}
+
+// are they a maintainer?
+boolean Card::is_maintainer() const {
+  if (!_valid) {
+    return false;
+  }
+  return _maintainer;
+}
+
+// set maintainer status
+void Card::set_maintainer(boolean m) {
+  _maintainer = m;
+  _valid = true;
+}
+
+// set user status
+void Card::set_user(boolean u) {
+  _status = u;
+  _valid = true;
+}
+
+// get the length of the uid
+int Card::get_longuid() const {
+  return (_uidlen ? 7 : 4);
+}
+
+// fill *uid with the uid
+void Card::get_uid(uint8_t *uid) const {
+  int i;
+  
+  for (i =0 ; i < (_uidlen ? 7 : 4); i++) {
+    uid[i] = _uid[i];
+  }
+}
+
+boolean Card::is_valid(void) const {
+  return _valid;
+}
+
+void Card::set_valid(boolean v) {
+  _valid = v;
+  if (!_valid) {
+    _status = false;
+    _maintainer = false;
+  }
+}
+
+void Card::dump(void) const {
   Serial.print("UID: ");
   if (_uidlen) {
     dumpHex(_uid, 7);
@@ -63,8 +124,10 @@ void Card::dump(void) {
   }
   Serial.print(" Maintainer:");
   Serial.print(_maintainer);
+  Serial.print(" valid:");
+  Serial.print(_valid);
   Serial.print(" Status:");
-  Serial.print(_status);
+  Serial.println(_status);
 }
 
 // the string pointer needs to have at 9 or 15 bytes of space
@@ -81,6 +144,7 @@ void Card::str(char *str) {
   str[0] = 0;
 }
 
+/*
 
 // returns true if the uid is the same
 boolean compare_uid(user *u1, user *u2) {
@@ -145,4 +209,5 @@ void uid_str(char *str, user *u) {
   str[0] = 0;
 }
 
+*/
 

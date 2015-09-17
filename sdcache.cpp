@@ -8,16 +8,19 @@ SDCache::SDCache(char *filename) {
 }
 
 // caller needs to free returned user
-user * SDCache::get(user *u) {
-  if (!SD.exists(_filename)) return NULL;
+Card SDCache::get(Card u) {
+  if (!SD.exists(_filename)) return Card();
 
   File f = SD.open(_filename, FILE_READ);
-  user *user_entry = new user;
-
+  user user_entry, tu;
+  memset(tu.uid, 0, 7);
+  u.get_uid(tu.uid);
+  
   bool found = false;
   while (f.available()) {
-    f.read(user_entry, sizeof(struct user));
-    if (compare(user_entry->uid, u->uid)) {
+    f.read(&user_entry, sizeof(struct user));
+
+    if (compare(user_entry.uid, tu.uid)) {
       found = true;
       break;
     }
@@ -28,23 +31,33 @@ user * SDCache::get(user *u) {
   f.close();
   
   if (!found) {
-    return NULL;
+    return Card();
   }
-  
-  return user_entry; 
+
+  Card nc(user_entry.uid, user_entry.uidlen, user_entry.status, user_entry.maintainer);
+
+  return nc;
 }
 
-void SDCache::set(const user *u) {
+void SDCache::set(const Card u) {
   File f = SD.open(_filename, FILE_APPEND);
-  user user_entry;
+  user user_entry, nu;
+
+  memset(nu.uid, 0, 7);
+  u.get_uid(nu.uid);
+
+  nu.status = u.is_user();
+  nu.maintainer = u.is_maintainer();
+  nu.uidlen = u.get_longuid();
+
   while (f.available()) {
     f.read(&user_entry, sizeof(struct user));
-    if (compare(user_entry.uid, u->uid)) {
+    if (compare(user_entry.uid, nu.uid)) {
       f.seek(-sizeof(struct user));
       break;
     }
   }
-  f.write((uint8_t *)u, sizeof(struct user));
+  f.write((uint8_t *)&nu, sizeof(struct user));
   f.close();
 }
 

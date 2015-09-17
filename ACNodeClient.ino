@@ -28,6 +28,7 @@ ACNodeClient
 #include "version.h"
 #include "watchdog.h"
 #include "cache.h"
+#include "card.h"
 #include "sdcache.h"
 #include "eepromcache.h"
 
@@ -40,10 +41,10 @@ PN532_HSU pnhsu(Serial6);
 PN532 nfc(pnhsu);
 
 settings acsettings;
-user cc; // current card on the reader
+Card cc; // current card on the reader
 
 // if we have a maintainer and they are adding a card keep track of who is doing the adding
-user maintainer;
+Card maintainer;
 
 EthernetClient client;
 Syslog syslog;
@@ -131,9 +132,6 @@ void setup() {
 
   // set callback for completion
   microrl_set_complete_callback (prl, mrlcomplete);
-
-  memset(&cc, 0, sizeof(user));
-  memset(&maintainer, 0, sizeof(user));
 
   wdog.feed();
 
@@ -266,13 +264,15 @@ void setup() {
 
   wdog.feed();
 
-  cc.invalid = 1;
+  cc.set_valid(false);
+  maintainer.set_valid(false);
 
   Serial.println("press enter for a prompt");
 }
 
 // current user
-user *cu = NULL;
+Card cu;
+boolean card_on_reader = false;
 
 // true if we are adding a card
 boolean adding = false;
@@ -286,7 +286,7 @@ MenuType menu = NOMENU;
 MenuState menu_state;
 
 void loop() {
-  user *tu;
+  Card tu;
   boolean check = true;
   
   // some housekeeping stuff
@@ -297,7 +297,7 @@ void loop() {
       digitalWrite(D1_LED, HIGH);
       heartbeat = false;
 
-      if (menu == NOMENU && !network && cu == NULL) {
+      if (menu == NOMENU && !network && !card_on_reader) {
         rgb.orange();
       }
 
@@ -316,7 +316,7 @@ void loop() {
             break;
         }
       } else {
-        if (cu == NULL) {
+        if (!card_on_reader) {
           if (!acsettings.status) {
             // offline
             rgb.red();
@@ -326,7 +326,7 @@ void loop() {
     } else {
       digitalWrite(D1_LED, LOW);
       heartbeat = true;
-      if (cu == NULL) {
+      if (!card_on_reader) {
         if (acsettings.status) {
           // green if the tool is running, otherwise blue
           if (tool.status()) {
@@ -340,11 +340,11 @@ void loop() {
         }
       } else {
         // we have a user
-        if (cu->maintainer == 1) {
+        if (cu.is_maintainer()) {
           // maintainer
           rgb.yellow();
         } else {
-          if (cu->status == 1) {
+          if (cu.is_user()) {
             if (acsettings.status) {
               if (tool.status()) {
                 // green if the tool is running, otherwise blue
@@ -356,6 +356,8 @@ void loop() {
               // offline
               rgb.red();
             }
+          } else {
+            rgb.orange();
           }
         }
       }
@@ -379,8 +381,8 @@ void loop() {
    * cc = the current card, updated from the card reader
    * tu = temp user, used for working things out as we go alone
    * nu = new user, in the process from going from cc -> cu
-   * cu = current user, i.e. the current card have been chaged against the db, and the users permissions etc obtained
-   * maintainer = if we have a maintainer store there details here.
+   * cu = current user, i.e. the current card has been checked against the db, and the users permissions etc obtained
+   * maintainer = if we have a maintainer store there details here - we need it when adding a new card.
    *
    */
 
@@ -395,7 +397,7 @@ void loop() {
 
   if (card_every.check()) {
     // does the actuall card reading, updates cc.
-    readcard();
+    cc = readcard();
 
     /*
      * we have to:
@@ -405,20 +407,17 @@ void loop() {
      * if we can get to the acserver update the data from there,
      * and save it to the cache if needed
      */
-    if (!cc.invalid) // we have a valid card?
+    if (card_on_reader) // we have a valid card?
     {
       int status;
       digitalWrite(D2_LED, HIGH); // indicate that we have a card.
-      user *nu;
-      nu = new user;
-      memset(nu, 0, sizeof(user));
-      memcpy(nu, &cc, sizeof(user));
+      Card nu = cc;
 
 //      Serial.print("got a card : ");
 //      dump_user(nu);
 
       // is the new card different from the maintainer card?
-      if (!compare_uid(nu, &maintainer)) {
+      if (maintainer.is_valid() && !(nu == maintainer)) {
         // are we adding a new user?
         if (adding) {
           char tmp[128];
@@ -426,15 +425,14 @@ void loop() {
           adding = false;
 
           sprintf(tmp, "%s", "Maintainer ");
-          uid_str(tmp + strlen(tmp), &maintainer);
+          maintainer.str(tmp + strlen(tmp));
           sprintf(tmp + strlen(tmp), " adding a card ");
-          uid_str(tmp + strlen(tmp), nu);
+          nu.str(tmp + strlen(tmp));
           Serial.println(tmp);
           syslog.syslog(LOG_NOTICE, tmp);
 
-          addNewUser(*nu, maintainer);
+          addNewUser(nu, maintainer);
           adding = false;
-          memset(&maintainer, 0, sizeof(user));
         }
       }
 
@@ -442,25 +440,24 @@ void loop() {
       tu = cache->get(nu);
 
       // was it in the cache?
-      if (tu != NULL && cu != NULL) {
+      if (tu.is_valid() && cu.is_valid()) {
         // same as current card?
-        if (compare_user(cu, tu)) {
+        if (cu == tu) {
           // card not changed
           // no need to check against the server.
           check = false;
         } else {
           Serial.println("card changed, tu: ");
-          dump_user(tu);
+          tu.dump();
           Serial.println("cu: ");
-          dump_user(cu);
+          cu.dump();
         }
-        delete tu;
-      } else if (cu != NULL && tu == NULL) {
+      } else if (cu.is_valid() && !tu.is_valid()) {
           // not in the cache.
   //        TRACE
   //        dump_user(cu);
   //        dump_user(nu);
-        if (compare_uid(cu, nu)) {
+        if (cu.compare_uid(nu)) {
           // no need to check against the server, we've already got the card
           check = false;
         }
@@ -479,36 +476,29 @@ void loop() {
         }
 
         if (status >= 0) {
-          nu->status = 1;
-          nu->invalid = 0;
-          nu->end = 0;
-          nu->maintainer = 0;
+          nu.set_user(true);
 
           // maintainer?
           if (status == 2) {
-            nu->maintainer = 1;
+            nu.set_maintainer(true);
           }
 
           // user exists but can't do anything
           // so mark as invalid
           if (status == 0) {
-            nu->status = 0;
+            nu.set_valid(false);
           }
 
           tu = cache->get(nu);
 
-          if (tu != NULL) {
-            if (!compare_user(tu, nu)) {
+          if (tu.is_valid()) {
+            if (tu != nu) {
               Serial.println("user changed, updating cache");
-              if (status == 0) {
-                nu->invalid = 1;
-              }
               cache->set(nu);
             }
-            delete tu;
           } else {
             // new user, so just store it.
-            if (nu-> status == 1) {
+            if (nu.is_user()) {
               cache->set(nu);
             }
           }
@@ -518,83 +508,86 @@ void loop() {
 
           tu = cache->get(nu);
 
-          if (tu != NULL) {
-            delete nu;
+          if (tu.is_valid()) {
             nu = tu;
             Serial.print("Found cached user: ");
-            dump_user(tu);
+            tu.dump();
           }
         }
       } else if (check) {
         tu = cache->get(nu);
 
-        if (tu != NULL) {
-          delete nu;
+        if (tu.is_valid()) {
           nu = tu;
           Serial.print("Found cached user (check): ");
-          dump_user(tu);
+          tu.dump();
         }
       } else {
         // no network or no need to check, cached users only.
-        if (cu != NULL && !compare_uid(nu, cu)) {
+        if (cu.is_valid() && !nu.compare_uid(cu)) {
 
           Serial.println("trying to find cached card");
 
           tu = cache->get(nu);
 
-          if (tu != NULL) {
-            delete nu;
+          if (tu.is_valid()) {
             nu = tu;
           }
         }
       }
 
       // we've checked the card, so update cu.
-      if (cu != NULL && check == true) {
+      if (cu.is_valid() && check == true) {
         Serial.println("deleting old cu:");
-        dump_user(cu);
-        delete cu;
-        cu = NULL;
+        cu.dump();
+        cu.set_valid(false);
       }
 
       // we had no current user, so set one up
-      if (cu == NULL) {
-        cu = new user;
-        memcpy(cu, nu, sizeof(user));
+      if (!cu.is_valid()) {
+        cu = nu;
         Serial.println("new cu:");
-        dump_user(cu);
+        cu.dump();
 
-        if (cu->maintainer || cu->status) {
+        if (cu.is_valid()) {
+          if (cu.is_user() && !cu.is_maintainer()) {
+            rgb.green();
+          } else if (cu.is_maintainer()) {
+            rgb.yellow();
+          }
+        } else {
+          rgb.orange();
+        }
+
+        if (cu.is_user()) {
           // only report tool usage if the network is ok.
           if (network) {
             // tell the server this user has started using the tool.
-            reportToolUse(*cu, 1);
+            reportToolUse(cu, 1);
           }
         }
 
       }
 
-      delete nu;
-      nu = NULL;
+      nu.set_valid(false);
     } else {
       // no card on the reader
-      if (cu != NULL) {
+      if (cu.is_valid()) {
         Serial.println("Card removed");
         tool.off();
 
-        if (cu->maintainer || cu->status) {
+        if (cu.is_user()) {
           // only report tool usage if the network is ok.
           if (network) {
             // tell the server this user has stopped using the tool.
-            reportToolUse(*cu, 0);
+            reportToolUse(cu, 0);
           }
         }
 
-        delete cu;
-        cu = NULL;
+        cu.set_valid(false);
         // nuke the maintainer just in case.
         if (!adding) {
-          memset(&maintainer, 0, sizeof(user));
+          maintainer.set_valid(false);
         }
       }
       digitalWrite(D2_LED, LOW);
@@ -610,7 +603,7 @@ void loop() {
   }
 
   // do we have a card? if so, do things with it.
-  if (cu != NULL) {
+  if (cu.is_valid()) {
     card_loop();
     menu_loop();
   }
@@ -621,13 +614,13 @@ void card_loop() {
   
   if (one_sec.check()) {
     Serial.print("card on reader: ");
-    dump_user(cu);
+    cu.dump();
   }
 
   // tool enable etc here.
-  if (cu->status == 1) {
+  if (cu.is_user()) {
     // is the tool running
-    if (acsettings.status || cu->maintainer == 1) {
+    if (acsettings.status || cu.is_maintainer()) {
       // this card is authorised to switch the tool on, so switch it on.
       // check tool status against the acserver incase someone has set the tool out of service
       int status = acsettings.status;
@@ -639,8 +632,8 @@ void card_loop() {
         }
       }
 
-      if (status == 1 || cu->maintainer == 1) {
-        tool.on(*cu);
+      if (status == 1 || cu.is_maintainer()) {
+        tool.on(cu);
       } else if (status == 0) {
         // tool out of service, so don't switch it on!
         acsettings.status = 0;
@@ -692,7 +685,7 @@ void menu_loop(void) {
       // menu now activated
       menu_timeout = millis() + (60 * 1000);
 
-      if (cu->status == 1 && cu->maintainer == 0) {
+      if (cu.is_user() && !cu.is_maintainer()) {
         menu = USER;
         // if we are a user the 1st item on the menu is OFFLINE
         menu_state = OFFLINE;
@@ -701,7 +694,7 @@ void menu_loop(void) {
           char tmp[128];
 
           sprintf(tmp, "%s", "User ");
-          uid_str(tmp + strlen(tmp), cu);
+          cu.str(tmp + strlen(tmp));
           sprintf(tmp + strlen(tmp), " tried to use the menu when the tool is offline");
           Serial.println(tmp);
           syslog.syslog(LOG_NOTICE, tmp);
@@ -709,7 +702,7 @@ void menu_loop(void) {
           menu = NOMENU;
         }
       }
-      if (cu->maintainer == 1) {
+      if (cu.is_maintainer()) {
         menu = MAINTAINER;
         // if we are on the maintainer menu, the 1st item is adding a user
         menu_state = ADD;
@@ -745,12 +738,12 @@ void offline(void) {
   char tmp[128];
 
   sprintf(tmp, "%s", "User ");
-  uid_str(tmp + strlen(tmp), cu);
+  cu.str(tmp + strlen(tmp));
   sprintf(tmp + strlen(tmp), " took the tool out of service.");
   Serial.println(tmp);
   syslog.syslog(LOG_WARNING, tmp);
 
-  int ret = setToolStatus(0, *cu);
+  int ret = setToolStatus(0, cu);
   Serial.print("After setting ToolStatus: ");
   Serial.println(ret);
 
@@ -765,18 +758,18 @@ void online(void) {
   char tmp[128];
 
   sprintf(tmp, "%s", "User ");
-  uid_str(tmp + strlen(tmp), cu);
+  cu.str(tmp + strlen(tmp));
   sprintf(tmp + strlen(tmp), " put the tool in service.");
   Serial.println(tmp);
   syslog.syslog(LOG_WARNING, tmp);
 
-  int ret = setToolStatus(1, *cu);
+  int ret = setToolStatus(1, cu);
   Serial.print("After setting ToolStatus: ");
   Serial.println(ret);
 
   // this is redundant since users can't put a tool back in service, and the tool will be on for a maintainer.
   // but leave it for completeness
-  tool.on(*cu);
+  tool.on(cu);
 }
 
 void maintainer_menu(int press) {
@@ -805,7 +798,7 @@ void maintainer_menu(int press) {
       case ADD:
         Serial.println("maintainer menu add selected");
         // the button is pressed, copy our current card details to the maintainer block
-        memcpy(&maintainer, cu, sizeof(user));
+        maintainer = cu;
         // we are adding
         adding = true;
         // 30 sec adding timeout
@@ -844,7 +837,7 @@ void user_menu(int press) {
   }
 }
 
-void readcard()
+Card readcard()
 {
   String mynum = "";
 
@@ -858,11 +851,13 @@ void readcard()
   // 'uid' will be populated with the UID, and uidLength will indicate
   // if the uid is 4 bytes (Mifare Classic) or 7 bytes (Mifare Ultralight)
   success = nfc.readPassiveTargetID(PN532_MIFARE_ISO14443A, &uid[0], &uidLength);
+
+  nfc.powerDown();
   
   if (!success)
   {
-    cc.invalid = 1;
-    return;
+    card_on_reader = false;
+    return Card();
   }
 
 /*
@@ -873,23 +868,20 @@ void readcard()
 
   switch (uidLength) {
     case 4:
-      memcpy(cc.uid, uid, 4);
-      cc.uidlen = 0;
-      cc.invalid = 0;
+      card_on_reader = true;
+      return Card(uid, 0, 0, 0);
       break;
     case 7:
-      memcpy(cc.uid, uid, 7);
-      cc.uidlen = 1;
-      cc.invalid = 0;
+      card_on_reader = true;
+      return Card(uid, 1, 0, 0);
       break;
     default:
       Serial.print("Odd card length?: ");
-      cc.invalid = 1;
+      card_on_reader = false;
       Serial.println(uidLength);
       break;
   }
-  
-  nfc.powerDown();
+  card_on_reader = false;
+  return Card();
 }
-
 

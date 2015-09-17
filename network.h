@@ -6,12 +6,12 @@
 #include <DateTimeLibrary.h>
 
 int get_url(char * path);
-int querycard(user card);
+int querycard(Card card);
 int networkCheckToolStatus();
-int setToolStatus(int status, user card);
-void addNewUser(user card, user maintainer);
-int toolUseTime(user card, int time);
-int reportToolUse(user card, int status);
+int setToolStatus(int status, Card card);
+void addNewUser(Card card, Card maintainer);
+int toolUseTime(Card card, int time);
+int reportToolUse(Card card, int status);
 void settime(DateTime *);
 
 #endif

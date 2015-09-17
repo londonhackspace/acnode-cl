@@ -12,15 +12,9 @@
 EEPromCache::EEPromCache() {
 }
 
-void write_user(const user *u, int address);
-int find_user(const user *u);
-int find_free(void);
-
 /*
 
 cache needs:
-
-get needs to return a user, not modify a pointer
 
 fill -> finish in SDCache
 
@@ -40,35 +34,21 @@ https://github.com/rei-vilo/SD_TM4C
 
 ^-- consider const char* for functions
 
-user -> class Card
-
-Card needs:
-
-packed struct card for saving, same as existing one.
-
-ctor, with uid and flags
-ctor, nothing
-ctor, struct card
-copy
-compare
-compare_uid
-dump
-uid_str
-
-
 */
 
 // the returned user must be freed by the caller
-user *EEPromCache::get(user *u) {
+Card EEPromCache::get(Card u) {
   int address = find_user(u);
 
   if (address < 0) {
-    return NULL;
+    return Card();
   }
 
-  user *nu = new user;
-  EEPROMRead((uint32_t *)nu, address, sizeof(user));
-  return nu;
+  user nu;
+  
+  EEPROMRead((uint32_t *)&nu, address, sizeof(user));
+  
+  return struct_to_card(nu);
 }
 
 
@@ -82,12 +62,11 @@ user *EEPromCache::get(user *u) {
  */
 
 // store a user in the eeprom
-void EEPromCache::set(const user *u) {
+void EEPromCache::set(const Card u) {
   int address;
 
   Serial.println("Storeing user: ");
-  dump_user(u);
-//  u->end = 0;
+  u.dump();
 
   // the user might already exists, don't store it more then once...
   address = find_user(u);
@@ -98,7 +77,8 @@ void EEPromCache::set(const user *u) {
 
   Serial.print("Will save at: ");
   Serial.println(address);
-  write_user(u, address);
+  user nu = card_to_struct(u);
+  write_user(nu, address);
 }
 
 // clear the userdb, this marks the first entry as the end.
@@ -107,29 +87,30 @@ void EEPromCache::purge(void) {
   memset(&u, 0xff, sizeof(user));
   u.invalid = 1;
   u.end = 1;
-  write_user(&u, USERBASE);
+  write_user(u, USERBASE);
 }
 
 int EEPromCache::each(void( *callback)(user *)) {
+  return -1;
 }
 
+/*
 boolean EEPromCache::compare(const uint8_t *k1, const uint8_t *k2) {
+    return false;
 }
+*/
 
 // fill the card cache with junk users to see how well we cope with runing out of space.
 void EEPromCache::fill(void) {
   int i;
-  user u;
-
-  u.uidlen = 0;
-  u.status = 1;
-  u.invalid = 0;
-  u.end = 0;
+  uint8_t uid[7];
 
   for (i = 0 ; i < 1000 ; i++) {
-    u.uid[0] = i & 0xff;
-    u.uid[1] = (i >> 8) & 0xff;
-    set(&u);
+    uid[0] = i & 0xff;
+    uid[1] = (i >> 8) & 0xff;
+    Card u(uid, 0, 1, 0);
+    
+    set(u);
     wdog.feed();
   }
 }
@@ -138,6 +119,7 @@ void EEPromCache::list(void) {
   int address = USERBASE;
   int count = 0;
   user u;
+
   while (1) {
     EEPROMRead((uint32_t *)&u, address, sizeof(user));
 
@@ -145,7 +127,8 @@ void EEPromCache::list(void) {
       break;
     }
     if (u.invalid == 0) {
-      dump_user(&u);
+      Card t(u.uid, u.uidlen, u.status, u.maintainer);
+      t.dump();
       count++;
     }
     address += sizeof(user);
@@ -181,11 +164,12 @@ void EEPromCache::verify(void) {
       break;
     }
     if (u.invalid == 0) {
-      if (querycard(u) == 0) {
+      Card tc(u.uid, u.uidlen, u.status, u.maintainer);
+      if (querycard(tc) == 0) {
         Serial.println("User no-longer valid: ");
-        dump_user(&u);
+        tc.dump();
         u.invalid = 1;
-        write_user(&u, address);
+        write_user(u, address);
       } else {
         count++;
       }
@@ -198,7 +182,7 @@ void EEPromCache::verify(void) {
 }
 
 // find a user and return it's address
-int find_user(const user *u) {
+int EEPromCache::find_user(const Card u) {
   int address = USERBASE;
   boolean found = false;
   user tu; // this user
@@ -216,11 +200,11 @@ int find_user(const user *u) {
         break;
       }
 
-      if (tu.uidlen == u->uidlen) {
-        if (memcmp(tu.uid, u->uid, u->uidlen ? 7 : 4) == 0) {
-          found = true;
-          break;
-        }
+      Card tc(tu.uid, tu.uidlen, tu.status, tu.maintainer);
+
+      if (u.compare_uid(tc)) {
+        found = true;
+        break;
       }
       address += sizeof(user);
   }
@@ -231,7 +215,7 @@ int find_user(const user *u) {
   return -1;
 }
 
-void write_user(const user *u, int address) {
+void EEPromCache::write_user(const user u, int address) {
   user ou;
   int ret;
 
@@ -249,9 +233,9 @@ void write_user(const user *u, int address) {
       Serial.println(ret, HEX);
     }
   }
-  dumpHex((uint8_t *)u, sizeof(user));
+  dumpHex((uint8_t *)&u, sizeof(user));
   Serial.println();
-  ret = EEPROMProgram((uint32_t *)u, address, sizeof(user));
+  ret = EEPROMProgram((uint32_t *)&u, address, sizeof(user));
   Serial.print("written at: ");
   Serial.println(address);
 
@@ -262,7 +246,7 @@ void write_user(const user *u, int address) {
 }
 
 // look through the eeprom to find a free slot.
-int find_free(void) {
+int EEPromCache::find_free(void) {
   unsigned int address = USERBASE;
   unsigned int eesize;
 
@@ -299,4 +283,23 @@ int find_free(void) {
   return address;
 }
 
+user EEPromCache::card_to_struct(const Card u) {
+  user nu;
+  
+  nu.status = u.is_user();
+  nu.maintainer = u.is_maintainer();
+  if (u.get_longuid()) {
+    nu.uidlen = 1;
+  } else {
+    nu.uidlen = 0;
+  }
+  
+  u.get_uid(nu.uid);
+  return nu;
+}
+
+Card EEPromCache::struct_to_card(const user u) {
+  Card nc(u.uid, u.uidlen, u.status, u.maintainer);
+  return nc;
+}
 

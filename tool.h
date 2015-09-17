@@ -13,7 +13,7 @@ class Tool
     void poll();
     void startrunning();
     void stoprunning();
-    void on(user user);
+    void on(Card user);
     void off();
     void begin();
     boolean status(); // true if the tool has been switched on
@@ -24,7 +24,7 @@ class Tool
     boolean _turnoff;
     unsigned long _start;  // used the runtime as detected by the _toolonpin
     unsigned long _ontime; // used for when we switch the tool on
-    user tool_user;
+    Card tool_user;
 };
 
 #endif

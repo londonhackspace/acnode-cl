@@ -6,42 +6,50 @@
 #include <stdint.h>
 #include <driverlib/eeprom.h>
 
-struct user {
-unsigned int maintainer :1; // 1 if maintainer
-unsigned int uidlen     :1; // 1 if 7, otherwise 4
-unsigned int status     :1; // 1 if enabled
-unsigned int invalid    :1; // 0 if valid - by default the eeprom is set to 0xff
-unsigned int end        :1; // 1 if after the last valid uid 
-unsigned int            :3; // pad to a whole byte
-  uint8_t uid[7];
-};
 
 class Card {
   public:
     Card(const uint8_t *uid, boolean uidlen, boolean status, boolean maintainer);
-    Card(struct user *u);
+//    Card(struct user *u);
     Card();
     // copy
     // operator =
     boolean operator==(const Card& other);
     boolean operator!=(const Card& other){return !(*this == other);}
-    boolean compare_uid(const Card& other);
-    void dump(void);
+    boolean compare_uid(const Card& other) const;
+    // can this card use the tool?
+    boolean is_user() const;
+    // are they a maintainer?
+    boolean is_maintainer() const;
+    // set maintainer status
+    void set_maintainer(boolean m);
+    // set user status
+    void set_user(boolean u);
+    // true if its a 7 byte uid.
+    int get_longuid() const;
+    // fill *uid with the uid
+    void get_uid(uint8_t *uid) const;
+    // is it a valid card?
+    boolean is_valid() const;
+    // is it valid or not?
+    void set_valid(boolean v);
+    void dump(void) const;
     void str(char *str);
   private:
-    int _uidlen;
+    boolean _uidlen;
     uint8_t _uid[7];
     boolean _maintainer;
     boolean _status;
+    boolean _valid;
 };
 
 // cache->get();
 //user *get_user(user *u);
-boolean compare_user(user *u1, user *u2);
-boolean compare_uid(user *u1, user *u2);
+//boolean compare_user(user *u1, user *u2);
+//boolean compare_uid(user *u1, user *u2);
 
-void dump_user(const user * u);
-void uid_str(char *str, user *u);
+//void dump_user(const user * u);
+//void uid_str(char *str, user *u);
 
   
 #endif
