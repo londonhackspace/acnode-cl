@@ -16,9 +16,7 @@ class EEPromCache: public Cache {
     virtual Card get(const Card u);
     virtual void set(const Card u);
     virtual void purge(void);
-    virtual int each(void( *callback)(user *));
-    virtual void fill(void);
-    virtual void list(void);
+    virtual int each(void( *callback)(Card c));
     virtual void verify(void);
 
   private:

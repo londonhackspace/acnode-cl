@@ -15,12 +15,11 @@ EEPromCache::EEPromCache() {
 /*
 
 less verbose network
+list can hit the watchdog!
+something wrong with verify and 4 byte uid cards
 
 cache needs:
 
-fill -> finish in SDCache
-
-list -> finish in SDCache
 
 verify -> finish in SDCache
 
@@ -109,26 +108,7 @@ void EEPromCache::purge(void) {
   write_user(u, USERBASE);
 }
 
-int EEPromCache::each(void( *callback)(user *)) {
-  return -1;
-}
-
-// fill the card cache with junk users to see how well we cope with runing out of space.
-void EEPromCache::fill(void) {
-  int i;
-  uint8_t uid[7];
-
-  for (i = 0 ; i < 1000 ; i++) {
-    uid[0] = i & 0xff;
-    uid[1] = (i >> 8) & 0xff;
-    Card u(uid, 0, 1, 0);
-
-    set(u);
-    wdog.feed();
-  }
-}
-
-void EEPromCache::list(void) {
+int EEPromCache::each(void( *callback)(Card u)) {
   int address = USERBASE;
   int count = 0;
   user u;
@@ -141,26 +121,12 @@ void EEPromCache::list(void) {
     }
     if (u.invalid == 0) {
       Card t(u.uid, u.uidlen, u.status, u.maintainer);
-      t.dump();
+      callback(t);
       count++;
     }
     address += sizeof(user);
   }
-  Serial.print("currently storing: ");
-  Serial.print(count);
-  Serial.println(" users");
-
-/*
-  uint8_t data[16];
-  address = 0;
-  for (address = USERBASE; address < (USERBASE + (64 * 4)) ; address += 16) {
-    Serial.print(address);
-    Serial.print(": ");
-    EEPROMRead((uint32_t *)data, address, 16);
-    dumpHex(data, 16);
-    Serial.println("");
-  }
-  */
+  return count;
 }
 
 // go through the cached users and check them against the acserver

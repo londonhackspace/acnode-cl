@@ -24,9 +24,7 @@ class SDCache: public Cache {
     virtual Card get(Card u);
     virtual void set(const Card u);
     virtual void purge(void);
-    virtual int each(void( *callback)(user *));
-    virtual void fill(void);
-    virtual void list(void);
+    virtual int each(void( *callback)(Card c));
     virtual void verify(void);
 
   private:

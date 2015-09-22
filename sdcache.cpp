@@ -68,13 +68,14 @@ void SDCache::purge() {
   SD.remove(_filename);
 }
 
-int SDCache::each(void(*callback)(user *u)) {
+int SDCache::each(void(*callback)(Card u)) {
   File f = SD.open(_filename, FILE_READ);
   int counter = 0;
-  user user_entry;
+  user u;
   while (f.available()) {
-    f.read(&user_entry, sizeof(struct user));
-    callback(&user_entry);
+    f.read(&u, sizeof(struct user));
+    Card t(u.uid, u.uidlen, u.status, u.maintainer);
+    callback(t);
     counter++;
   }
   f.close();
@@ -87,12 +88,6 @@ boolean SDCache::compare(const uint8_t *k1, const uint8_t *k2) {
     if (k1[i] != k2[i]) return false;
   }
   return true;
-}
-
-void SDCache::fill(void) {
-}
-
-void SDCache::list(void) {
 }
 
 void SDCache::verify(void) {

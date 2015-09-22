@@ -28,13 +28,14 @@ struct Cache {
     virtual void purge(void) = 0;
 
     // iterate through the cache
-    virtual int each(void( *callback)(user *)) = 0;
+    virtual int each(void( *callback)(Card u)) = 0;
 
     // fill up the cache with test entries
-    virtual void fill(void) = 0;
+    void fill(void);
+    void fill(int count);
 
     // list the contents of the cache
-    virtual void list(void) = 0;
+    void list(void);
 
     // verify each entry in the cache against the acserver
     virtual void verify(void) = 0;
