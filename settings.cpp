@@ -22,7 +22,7 @@ void init_settings(void) {
     }
   }
 
-  uint32_t ret, eesize, blocks;
+  uint32_t ret;
 
   ret = EEPROMInit();
 
@@ -30,26 +30,6 @@ void init_settings(void) {
     Serial.print("EEprom init error: ");
     Serial.println(ret);
   }
-
-  eesize = EEPROMSizeGet();
-
-  Serial.print("EEPROM Size: ");
-  Serial.println(eesize);
-
-  blocks = EEPROMBlockCountGet();
-
-  Serial.print("EEPROM no. of blocks: ");
-  Serial.println(blocks);
-
-  Serial.print("EEPROM size of each block: ");
-  Serial.println(eesize / blocks);
-
-  Serial.print("Space for cards: ");
-  Serial.println(eesize - USERBASE);
-
-  Serial.print("Can store ");
-  Serial.print((eesize - USERBASE) / sizeof(user));
-  Serial.println(" cards.");
 }
 
 void dump_settings(settings acsettings) {
@@ -110,6 +90,14 @@ void dump_settings(settings acsettings) {
 
   Serial.print("Minimum on time: ");
   Serial.println(acsettings.minontime);
+
+  Serial.print("Using ");
+  if (acsettings.sdcache) {
+    Serial.print("a SD Card");
+  } else {
+    Serial.print("the internal eeprom");
+  }
+  Serial.println(" to cache cards.");
 }
 
 settings get_settings(void) {
@@ -117,40 +105,59 @@ settings get_settings(void) {
 
   EEPROMRead((uint32_t *)&acsettings, 0, sizeof(acsettings));
 
-  if (acsettings.valid != ACSETTINGSVALID) {
-    Serial.println("Settings not valid, using defaults");
-  } else {
-    // set the minontime to something sensible
-    if (acsettings.minontime == 0xff) {
-      acsettings.minontime = 10;
-    }
-    return acsettings;
+  switch (acsettings.valid) {
+    case ACSETTINGSVALID:
+      // nothing to do
+      break;
+    case ACSETTINGS42:
+      // upgrade the settings
+      Serial.println("Old settings found, upgrading");
+      settings42 osettings;
+      memset(&osettings, 0, sizeof(osettings));
+      EEPROMRead((uint32_t *)&osettings, 0, sizeof(osettings));
+
+      memcpy(acsettings.mac, osettings.mac, 6);
+      memcpy(acsettings.servername, osettings.servername, SERVERNAMELEN);
+      memcpy(acsettings.syslogserver, osettings.syslogserver, SERVERNAMELEN);
+      memcpy(acsettings.toolname, osettings.toolname, TOOLNAMELEN);
+      acsettings.port = osettings.port;
+      acsettings.nodeid = osettings.nodeid;
+      acsettings.status = osettings.status;
+      acsettings.runtime = osettings.runtime;
+      acsettings.minontime = 5;
+      acsettings.sdcache = 0;
+      acsettings.valid = ACSETTINGSVALID;
+      set_settings(acsettings);
+      break;
+    default:
+      Serial.println("Settings not valid, using defaults");
+      acsettings.valid = 0;
+
+      uint32_t ui32User0, ui32User1;
+
+      ROM_FlashUserGet(&ui32User0, &ui32User1);
+
+      acsettings.mac[0] = ((ui32User0 >> 0) & 0xff);
+      acsettings.mac[1] = ((ui32User0 >> 8) & 0xff);
+      acsettings.mac[2] = ((ui32User0 >> 16) & 0xff);
+      acsettings.mac[3] = ((ui32User1 >> 0) & 0xff);
+      acsettings.mac[4] = ((ui32User1 >> 8) & 0xff);
+      acsettings.mac[5] = ((ui32User1 >> 16) & 0xff);
+
+      strncpy(acsettings.servername, "acserver.lan.london.hackspace.org.uk", SERVERNAMELEN);
+      strncpy(acsettings.syslogserver, "syslog.lan.london.hackspace.org.uk", SERVERNAMELEN);
+      strncpy(acsettings.toolname, "ACNode", TOOLNAMELEN);
+      acsettings.nodeid = -1;
+      acsettings.port = 1234;
+      acsettings.status = 0;
+      acsettings.runtime = 0;
+      acsettings.sdcache = 0;
+      acsettings.minontime = 5;
+
+      // save the settings since it's a new board.
+      acsettings.valid = ACSETTINGSVALID;
+      set_settings(acsettings);
   }
-
-  acsettings.valid = 0;
-
-  uint32_t ui32User0, ui32User1;
-
-  ROM_FlashUserGet(&ui32User0, &ui32User1);
-
-  acsettings.mac[0] = ((ui32User0 >> 0) & 0xff);
-  acsettings.mac[1] = ((ui32User0 >> 8) & 0xff);
-  acsettings.mac[2] = ((ui32User0 >> 16) & 0xff);
-  acsettings.mac[3] = ((ui32User1 >> 0) & 0xff);
-  acsettings.mac[4] = ((ui32User1 >> 8) & 0xff);
-  acsettings.mac[5] = ((ui32User1 >> 16) & 0xff);
-
-  strncpy(acsettings.servername, "acserver.lan.london.hackspace.org.uk", SERVERNAMELEN);
-  strncpy(acsettings.syslogserver, "syslog.lan.london.hackspace.org.uk", SERVERNAMELEN);
-  strncpy(acsettings.toolname, "ACNode", TOOLNAMELEN);
-  acsettings.nodeid = -1;
-  acsettings.port = 1234;
-  acsettings.status = 0;
-  acsettings.runtime = 0;
-
-  // save the settings since it's a new board.
-  acsettings.valid = ACSETTINGSVALID;
-  set_settings(acsettings);
 
   return acsettings;
 }

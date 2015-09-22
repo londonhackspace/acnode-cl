@@ -20,8 +20,7 @@ class SDCache: public Cache {
   public:
     SDCache(char *filename);
     SDCache();
-
-    // caller needs to free returned user
+    virtual void begin();
     virtual Card get(Card u);
     virtual void set(const Card u);
     virtual void purge(void);

@@ -14,6 +14,8 @@ EEPromCache::EEPromCache() {
 
 /*
 
+less verbose network
+
 cache needs:
 
 fill -> finish in SDCache
@@ -36,7 +38,24 @@ https://github.com/rei-vilo/SD_TM4C
 
 */
 
-// the returned user must be freed by the caller
+void EEPromCache::begin() {
+  // N.B. settings.cpp actually inits the eeprom
+  uint32_t eesize;
+
+  eesize = EEPROMSizeGet();
+
+  Serial.print("EEPROM Size: ");
+  Serial.println(eesize);
+
+  Serial.print("Space for cards: ");
+  Serial.println(eesize - USERBASE);
+
+  Serial.print("Can store ");
+  Serial.print((eesize - USERBASE) / sizeof(user));
+  Serial.println(" cards.");
+}
+
+
 Card EEPromCache::get(Card u) {
   int address = find_user(u);
 

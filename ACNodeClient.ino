@@ -114,17 +114,23 @@ void setup() {
   acsettings = get_settings();
   dump_settings(acsettings);
 
-//  if (acsettings.sdcache) {
-  if (true) {
+  if (acsettings.sdcache) {
     if (SD.begin(SD_CS_PIN, SPI_HALF_SPEED, 2)) {
       Serial.println("SD card is accessible");
       SD.mkdir(ACNODE_DIR);
       cache = new SDCache("CACHE");
+      Serial.println("Using the SD Card to cache cards");
     } else {
       Serial.println("SD card could not be accessed");
-      cache = new EEPromCache();
+      Serial.println("Please fix the SD card and try again.");
+      rgb.red();
+      while (1) {;}
     }
+  } else {
+      Serial.println("Using the eeprom to cache cards");
+      cache = new EEPromCache();
   }
+  cache->begin();
 
   microrl_init (prl, mrlprint);
   // set callback for execute

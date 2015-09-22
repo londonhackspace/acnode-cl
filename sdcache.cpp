@@ -7,6 +7,9 @@ SDCache::SDCache(char *filename) {
   _filename = filename;
 }
 
+void SDCache::begin() {
+}
+
 // caller needs to free returned user
 Card SDCache::get(Card u) {
   if (!SD.exists(_filename)) return Card();

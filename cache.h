@@ -15,9 +15,8 @@ unsigned int            :3; // pad to a whole byte
 
 struct Cache {
   public:
-//    virtual Cache(char *filename) = 0;
-//    virtual Cache() = 0;
-  
+    virtual void begin();
+
     // look up a uid in the cache and return a user struct
     // the returned user must be freed by the caller
     virtual Card get(Card u) = 0;

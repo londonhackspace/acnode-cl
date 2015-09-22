@@ -10,6 +10,8 @@ class EEPromCache: public Cache {
   public:
     EEPromCache();
 
+    virtual void begin();
+
     // the returned user must be freed by the caller
     virtual Card get(const Card u);
     virtual void set(const Card u);

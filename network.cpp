@@ -93,7 +93,7 @@ int querycard(Card card)
   char path[11 + 10 + 14 + 1];
   int result = -1;
 
-  sprintf(path, "GET /%ld/card/", acsettings.nodeid);
+  sprintf(path, "GET /%d/card/", acsettings.nodeid);
 
   card.str(path + strlen(path));
 
@@ -116,7 +116,7 @@ int networkCheckToolStatus()
   char path[13 + 10 + 1];
   int result = -1;
   
-  sprintf(path, "GET /%ld/status/", acsettings.nodeid);
+  sprintf(path, "GET /%d/status/", acsettings.nodeid);
   
   result = get_url(path);
   Serial.print("Status: ");
@@ -132,7 +132,7 @@ int setToolStatus(int status, Card card) {
   Serial.println("Setting tool status:");
   // /[nodeID]/status/[new_status]/by/[cardWithAdminPermissions]
   char url[64];
-  sprintf(url, "POST /%ld/status/%d/by/", acsettings.nodeid, status);
+  sprintf(url, "POST /%d/status/%d/by/", acsettings.nodeid, status);
   card.str(url + strlen(url));
   Serial.println(url);
 
@@ -151,7 +151,7 @@ void addNewUser(Card card, Card maintainer)
   Serial.println("Adding card:");
   // /<nodeid>/grant-to-card/<trainee card uid>/by-card/<maintainer card uid>
   char url[64];
-  sprintf(url, "POST /%ld/grant-to-card/", acsettings.nodeid);
+  sprintf(url, "POST /%d/grant-to-card/", acsettings.nodeid);
   card.str(url + strlen(url));
   sprintf(url + strlen(url), "/by-card/");
   maintainer.str(url + strlen(url));
@@ -170,7 +170,7 @@ int toolUseTime(Card card, int time) {
   Serial.println("Setting tool status:");
   // /[nodeID]/tooluse/time/for/[cardID]/[timeUsed]
   char url[64];
-  sprintf(url, "POST /%ld/tooluse/time/for/", acsettings.nodeid);
+  sprintf(url, "POST /%d/tooluse/time/for/", acsettings.nodeid);
   card.str(url + strlen(url));
   sprintf(url + strlen(url), "/%d", time);
   
@@ -192,7 +192,7 @@ int reportToolUse(Card card, int status) {
   // /[nodeID]/tooluse/[status]/[cardID]
 
   char url[64];
-  sprintf(url, "POST /%ld/tooluse/%d/", acsettings.nodeid, status);
+  sprintf(url, "POST /%d/tooluse/%d/", acsettings.nodeid, status);
   card.str(url + strlen(url));
 
   Serial.println(url);
