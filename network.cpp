@@ -20,8 +20,6 @@ int get_url(char * path) {
   Serial.println(path);
 
   if (client.connect(acsettings.servername, acsettings.port)) {
-
-    Serial.println(path);
     client.print(path);
     client.println(" HTTP/1.0");
     client.print("Host: ");
@@ -134,7 +132,6 @@ int setToolStatus(int status, Card card) {
   char url[64];
   sprintf(url, "POST /%d/status/%d/by/", acsettings.nodeid, status);
   card.str(url + strlen(url));
-  Serial.println(url);
 
   ret = get_url(url);
   Serial.print("Got: ");
@@ -155,7 +152,6 @@ void addNewUser(Card card, Card maintainer)
   card.str(url + strlen(url));
   sprintf(url + strlen(url), "/by-card/");
   maintainer.str(url + strlen(url));
-  Serial.println(url);
 
   ret = get_url(url);
   Serial.print("Got: ");
@@ -173,8 +169,6 @@ int toolUseTime(Card card, int time) {
   sprintf(url, "POST /%d/tooluse/time/for/", acsettings.nodeid);
   card.str(url + strlen(url));
   sprintf(url + strlen(url), "/%d", time);
-  
-  Serial.println(url);
 
   ret = get_url(url);
   Serial.print("Got: ");
@@ -194,8 +188,6 @@ int reportToolUse(Card card, int status) {
   char url[64];
   sprintf(url, "POST /%d/tooluse/%d/", acsettings.nodeid, status);
   card.str(url + strlen(url));
-
-  Serial.println(url);
 
   ret = get_url(url);
   Serial.print("Got: ");
