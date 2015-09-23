@@ -74,6 +74,7 @@ int SDCache::each(void(*callback)(Card u)) {
   user u;
   while (f.available()) {
     f.read(&u, sizeof(struct user));
+    wdog.feed();
     Card t(u.uid, u.uidlen, u.status, u.maintainer);
     callback(t);
     counter++;

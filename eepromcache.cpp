@@ -15,7 +15,6 @@ EEPromCache::EEPromCache() {
 /*
 
 less verbose network
-list can hit the watchdog!
 
 cache needs:
 
@@ -109,6 +108,7 @@ int EEPromCache::each(void( *callback)(Card u)) {
 
   while (1) {
     EEPROMRead((uint32_t *)&u, address, sizeof(user));
+    wdog.feed();
 
     if (u.end == 1) {
       break;
@@ -130,7 +130,6 @@ void EEPromCache::verify(void) {
   user u;
 
   while (1) {
-    wdog.feed();
     EEPROMRead((uint32_t *)&u, address, sizeof(user));
 
     if (u.end == 1) {
