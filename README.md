@@ -2,6 +2,7 @@
 Table of Contents
 =================
 
+  * [Table of Contents](#table-of-contents)
   * [Features](#features)
   * [Parts list](#parts-list)
     * [For the transistor switch](#for-the-transistor-switch)
@@ -9,9 +10,13 @@ Table of Contents
     * [Making the transistor switch](#making-the-transistor-switch)
     * [Wiring in the arcade switch](#wiring-in-the-arcade-switch)
     * [How to get this running with a cooqrobot/elechouse pn532 breakout board:](#how-to-get-this-running-with-a-cooqrobotelechouse-pn532-breakout-board)
-  * [You will need 2 libraries:](#you-will-need-2-libraries)
+    * [Using the tool running pin](#using-the-tool-running-pin)
+  * [You will need these libraries:](#you-will-need-these-libraries)
     * [Syslog from here:](#syslog-from-here)
-    * [and the PN532 libraries from here:](#and-the-pn532-libraries-from-here)
+    * [the PN532 libraries from here:](#the-pn532-libraries-from-here)
+    * [DateTimeLibrary](#datetimelibrary)
+    * [SD Card Library](#sd-card-library)
+  * [Pin assignments:](#pin-assignments)
   * [using the CLI](#using-the-cli)
   * [Button status/colours:](#button-statuscolours)
   * [To use the button menu:](#to-use-the-button-menu)
@@ -142,6 +147,10 @@ http://energia.nu/pin-maps/guide_tm4c129launchpad/
 
 N.B.: use energia-0101E0012, not energia-0101E0013, as 13 breaks things (i think it defines a function called wakeup which clashes with the one in the PN532 stuff).
 
+## Using the tool running pin
+
+You can send a signal to the acnode via pin PE_4 to say when your tool is actually running (as opposed to being switched on), useful for keeping track of wear and tear and consumables etc.
+
 # You will need these libraries:
 
 ## Syslog from here:
@@ -169,6 +178,17 @@ You'll need to edit DateTimeLibrary.h to add defined(__TM4C1294NCPDT__) on line 
 https://github.com/rei-vilo/SD_TM4C
 
 (and rename it to 'SD').
+
+# Pin assignments:
+
+* PG_1 - active high, switches power to the tool, output
+* PF_1 - the button, active low (uses internal pulllup), input
+* PM0  - RGB button Red channel, output
+* PM1  - RGB button Green channel, output
+* PM2  - RGB button Blue channel, output
+* PP0  - Serial RX from the card reader, input (should connect to TX on the card reader)
+* PP1  - Serial TX to the card reader, output (should connect to RX on the card reader)
+* PE_4 - tool running pin, active low (uses internal pullup), input
 
 # using the CLI
 
