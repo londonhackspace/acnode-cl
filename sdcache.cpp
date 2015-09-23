@@ -1,4 +1,5 @@
 #include "sdcache.h"
+#include "acnode.h"
 
 SDCache::SDCache() {
 }
