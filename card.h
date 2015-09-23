@@ -39,6 +39,6 @@ class Card {
     boolean _status;
     boolean _valid;
 };
-  
+
 #endif
 

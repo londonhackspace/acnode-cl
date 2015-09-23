@@ -211,7 +211,7 @@ void settime(DateTime *dt) {
          break;
        }
     }
-    
+
     char lineBuffer[128];
     char dateStr[30];
     int i = 0;
@@ -225,7 +225,7 @@ void settime(DateTime *dt) {
           Serial.println(dateStr);
           break;
         }
-        
+
         memset(lineBuffer, 0x0, 128);
         i = 0;
       } else {
@@ -233,7 +233,7 @@ void settime(DateTime *dt) {
         i++;
       }
     }
-    
+
     tm epoch;
     // Mon, 07 Sep 2015 22:50:40 GMT
     if (convertString2DateTime(dateStr, "%a, %d %b %Y %T %Z", epoch)) {

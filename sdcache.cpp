@@ -32,7 +32,7 @@ Card SDCache::get(Card u) {
 //  if (found)
 //    memcpy(ret, &user_entry, sizeof(struct user));
   f.close();
-  
+
   if (!found) {
     return Card();
   }

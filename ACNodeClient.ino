@@ -169,7 +169,7 @@ void setup() {
     }
     Serial.println();
     rtc.begin();
-    
+
     settime(&rtc);
   }
 

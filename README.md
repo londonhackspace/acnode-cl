@@ -177,18 +177,22 @@ You'll need to edit DateTimeLibrary.h to add defined(__TM4C1294NCPDT__) on line 
 
 https://github.com/rei-vilo/SD_TM4C
 
-(and rename it to 'SD').
+(and rename it to 'SD'), [also see](http://jasiek.me/2015/08/28/using-an-sd-card-with-a-ti-tiva-c-tm4129.html) for some more details.
 
 # Pin assignments:
 
 * PG_1 - active high, switches power to the tool, output
 * PF_1 - the button, active low (uses internal pulllup), input
-* PM0  - RGB button Red channel, output
-* PM1  - RGB button Green channel, output
-* PM2  - RGB button Blue channel, output
-* PP0  - Serial RX from the card reader, input (should connect to TX on the card reader)
-* PP1  - Serial TX to the card reader, output (should connect to RX on the card reader)
+* PM_0 - RGB button Red channel, output
+* PM_1 - RGB button Green channel, output
+* PM_2 - RGB button Blue channel, output
+* PP_0 - Serial RX from the card reader, input (should connect to TX on the card reader)
+* PP_1 - Serial TX to the card reader, output (should connect to RX on the card reader)
 * PE_4 - tool running pin, active low (uses internal pullup), input
+* PD_0 - SD Card MISO (pin 7)
+* PD_1 - SD Card MOSI (pin 2)
+* PD_3 - SD card clock (pin 5)
+* PC_7 - SD card CS (pin 1)
 
 # using the CLI
 

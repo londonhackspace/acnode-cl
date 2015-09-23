@@ -42,7 +42,7 @@ struct Cache {
 
   protected:
     char *_filename;
-  
+
 };
 
 #endif

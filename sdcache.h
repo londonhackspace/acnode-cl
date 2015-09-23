@@ -9,7 +9,7 @@
 /* see:
  *
  * http://jasiek.me/2015/08/28/using-an-sd-card-with-a-ti-tiva-c-tm4129.html
- * 
+ *
  * for hardware instructions
  */
 
