@@ -80,8 +80,8 @@ void Card::set_user(boolean u) {
 }
 
 // get the length of the uid
-int Card::get_longuid() const {
-  return (_uidlen ? 7 : 4);
+boolean Card::get_longuid() const {
+  return _uidlen;
 }
 
 // fill *uid with the uid

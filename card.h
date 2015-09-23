@@ -23,7 +23,7 @@ class Card {
     // set user status
     void set_user(boolean u);
     // true if its a 7 byte uid.
-    int get_longuid() const;
+    boolean get_longuid() const;
     // fill *uid with the uid
     void get_uid(uint8_t *uid) const;
     // is it a valid card?

@@ -16,16 +16,10 @@ EEPromCache::EEPromCache() {
 
 less verbose network
 list can hit the watchdog!
-something wrong with verify and 4 byte uid cards
 
 cache needs:
 
-
 verify -> finish in SDCache
-
-we don't need each now?
-
-or move list and verify to Cache and keep each() in the derived classes?
 
 other:
 
