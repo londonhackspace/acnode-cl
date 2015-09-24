@@ -189,10 +189,10 @@ https://github.com/rei-vilo/SD_TM4C
 * PP_0 - Serial RX from the card reader, input (should connect to TX on the card reader)
 * PP_1 - Serial TX to the card reader, output (should connect to RX on the card reader)
 * PE_4 - tool running pin, active low (uses internal pullup), input
-* PD_0 - SD Card MISO (pin 7)
-* PD_1 - SD Card MOSI (pin 2)
+* PD_0 - SD Card MISO (pin 7) aka D0
+* PD_1 - SD Card MOSI (pin 2) aka CMD
 * PD_3 - SD card clock (pin 5)
-* PC_7 - SD card CS (pin 1)
+* PC_7 - SD card CS (pin 1) aka CD
 
 # using the CLI
 
