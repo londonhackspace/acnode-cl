@@ -1,5 +1,6 @@
 #include "sdcache.h"
 #include "acnode.h"
+#include "network.h"
 
 SDCache::SDCache() {
 }
@@ -11,7 +12,6 @@ SDCache::SDCache(char *filename) {
 void SDCache::begin() {
 }
 
-// caller needs to free returned user
 Card SDCache::get(Card u) {
   if (!SD.exists(_filename)) return Card();
 
@@ -24,7 +24,7 @@ Card SDCache::get(Card u) {
   while (f.available()) {
     f.read(&user_entry, sizeof(struct user));
 
-    if (compare(user_entry.uid, tu.uid)) {
+    if (user_entry.uidlen == tu.uidlen && compare(user_entry.uid, tu.uid)) {
       found = true;
       break;
     }
@@ -46,6 +46,7 @@ Card SDCache::get(Card u) {
 void SDCache::set(const Card u) {
   File f = SD.open(_filename, FILE_APPEND);
   user user_entry, nu;
+  uint32_t spare = 0; // if we pass an invalid entry keep track of where it was so we can save there.
 
   memset(nu.uid, 0, 7);
   u.get_uid(nu.uid);
@@ -56,10 +57,21 @@ void SDCache::set(const Card u) {
 
   while (f.available()) {
     f.read(&user_entry, sizeof(struct user));
-    if (compare(user_entry.uid, nu.uid)) {
-      f.seek(-sizeof(struct user));
-      break;
+    if (!user_entry.invalid) {
+      if (user_entry.uidlen == nu.uidlen && compare(user_entry.uid, nu.uid)) {
+        f.seek(-sizeof(struct user));
+        break;
+      }
     }
+    // if we find an invalid entry keep it for later so we
+    // can overwrite it.
+    if (user_entry.invalid && spare == 0) {
+      spare = f.position();
+      spare -= sizeof(struct user);
+    }
+  }
+  if (spare > 0) {
+    f.seek(spare);
   }
   f.write((uint8_t *)&nu, sizeof(struct user));
   f.close();
@@ -76,9 +88,11 @@ int SDCache::each(void(*callback)(Card u)) {
   while (f.available()) {
     f.read(&u, sizeof(struct user));
     wdog.feed();
-    Card t(u.uid, u.uidlen, u.status, u.maintainer);
-    callback(t);
-    counter++;
+    if (!u.invalid) {
+      Card t(u.uid, u.uidlen, u.status, u.maintainer);
+      callback(t);
+      counter++;
+    }
   }
   f.close();
   return counter;
@@ -93,5 +107,30 @@ boolean SDCache::compare(const uint8_t *k1, const uint8_t *k2) {
 }
 
 void SDCache::verify(void) {
+  File f = SD.open(_filename, FILE_READ);
+  int counter = 0;
+
+  user u;
+
+  while (f.available()) {
+    f.read(&u, sizeof(struct user));
+    wdog.feed();
+    if (!u.invalid) {
+      Card t(u.uid, u.uidlen, u.status, u.maintainer);
+      if (querycard(t) == 0) {
+        Serial.println("User no-longer valid: ");
+        t.dump();
+        u.invalid = 1;
+        f.seek(-sizeof(struct user));
+        f.write((uint8_t *)&u, sizeof(struct user));
+      } else {
+        counter++;
+      }
+    }
+  }
+  f.close();
+  Serial.print("currently storing: ");
+  Serial.print(counter);
+  Serial.println(" users");
 }
 

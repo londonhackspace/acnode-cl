@@ -15,13 +15,6 @@ EEPromCache::EEPromCache() {
 /*
 
 less verbose network
-
-cache needs:
-
-verify -> finish in SDCache
-
-other:
-
 _toononpin inverted or not
 
 https://github.com/rei-vilo/SD_TM4C
