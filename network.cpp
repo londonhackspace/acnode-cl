@@ -17,7 +17,9 @@ int get_url(char * path) {
   Serial.print(":");
   Serial.print(acsettings.port);
   Serial.print(" // ");
-  Serial.println(path);
+  Serial.print(path);
+
+  if (acsettings.netverbose) { Serial.println(); }
 
   if (client.connect(acsettings.servername, acsettings.port)) {
     client.print(path);
@@ -44,17 +46,21 @@ int get_url(char * path) {
 
     if (client.available()) {
       char c;
-      Serial.println("Got Response:");
-      Serial.print(">");
+      if (acsettings.netverbose) {
+        Serial.println("Got Response:");
+        Serial.print(">");
+      }
 
       int newlines = 0;
       boolean first = false;
 
       while (client.available()) {
         c = client.read();
-        Serial.print(c);
+        if (acsettings.netverbose) {
+          Serial.print(c);
+        }
         if (c == '\n') {
-          Serial.print('\r');
+          if (acsettings.netverbose) { Serial.print('\r'); }
           newlines += 1;
         } else {
           if (c != '\r') {
@@ -72,16 +78,23 @@ int get_url(char * path) {
           first = true;
         }
       }
-
-      Serial.println("<");
+      if (acsettings.netverbose) {
+        Serial.println("<");
+      }
       client.flush();
       client.stop();
     }
-    Serial.println();
+    if (acsettings.netverbose) { Serial.println(); }
   } else {
     // if you didn't get a connection to the server:
     Serial.println("connection failed");
   }
+
+  if (acsettings.netverbose) {
+     Serial.print("Result");
+  }
+  Serial.print(" : ");
+  Serial.println(result);
   return result;
 }
 
@@ -117,8 +130,6 @@ int networkCheckToolStatus()
   sprintf(path, "GET /%d/status/", acsettings.nodeid);
   
   result = get_url(path);
-  Serial.print("Status: ");
-  Serial.println(result);
   
   return result;
 }
@@ -134,28 +145,23 @@ int setToolStatus(int status, Card card) {
   card.str(url + strlen(url));
 
   ret = get_url(url);
-  Serial.print("Got: ");
-  Serial.println(ret);
-  
   return ret;
 }
 
 // https://wiki.london.hackspace.org.uk/view/Project:Tool_Access_Control/Solexious_Proposal#Add_card
 void addNewUser(Card card, Card maintainer)
 {
-  int ret;
+  char url[64];
 
   Serial.println("Adding card:");
+
   // /<nodeid>/grant-to-card/<trainee card uid>/by-card/<maintainer card uid>
-  char url[64];
   sprintf(url, "POST /%d/grant-to-card/", acsettings.nodeid);
   card.str(url + strlen(url));
   sprintf(url + strlen(url), "/by-card/");
   maintainer.str(url + strlen(url));
 
-  ret = get_url(url);
-  Serial.print("Got: ");
-  Serial.println(ret);
+  get_url(url);
 }
 
 // https://wiki.london.hackspace.org.uk/view/Project:Tool_Access_Control/Solexious_Proposal#Tool_usage_.28usage_time.29
@@ -170,10 +176,7 @@ int toolUseTime(Card card, int time) {
   card.str(url + strlen(url));
   sprintf(url + strlen(url), "/%d", time);
 
-  ret = get_url(url);
-  Serial.print("Got: ");
-  Serial.println(ret);
-  
+  ret = get_url(url);  
   return ret;
 }
 
@@ -190,9 +193,6 @@ int reportToolUse(Card card, int status) {
   card.str(url + strlen(url));
 
   ret = get_url(url);
-  Serial.print("Got: ");
-  Serial.println(ret);
-
   return ret;
 }
 

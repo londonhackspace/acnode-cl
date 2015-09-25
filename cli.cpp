@@ -42,15 +42,16 @@ void mrlprint(const char * str) {
 #define _CMD_CACHE  "cache"
 #define _SCMD_EEPROM  "eeprom"
 #define _SCMD_SDCARD  "sdcard"
+#define _CMD_NETVERBOSE  "netverbose"
 
 
-#define _NUM_OF_CMD 19
+#define _NUM_OF_CMD 20
 #define _NUM_OF_VER_SCMD 2
 #define _NUM_OF_CACHE_SCMD 2
 
 //available  commands
 const char *keyworld [] = {
-  _CMD_HELP, _CMD_SHOW, _CMD_MAC, _CMD_SERVER, _CMD_NODEID, _CMD_PORT, _CMD_VER, _CMD_SAVE, _CMD_CLEAR, _CMD_LIST, _CMD_REBOOT, _CMD_NUKE, _CMD_SYSLOG, _CMD_NAME, _CMD_RTIME, _CMD_FILL, _CMD_VERIFY, _CMD_MINONTIME, _CMD_CACHE};
+  _CMD_HELP, _CMD_SHOW, _CMD_MAC, _CMD_SERVER, _CMD_NODEID, _CMD_PORT, _CMD_VER, _CMD_SAVE, _CMD_CLEAR, _CMD_LIST, _CMD_REBOOT, _CMD_NUKE, _CMD_SYSLOG, _CMD_NAME, _CMD_RTIME, _CMD_FILL, _CMD_VERIFY, _CMD_MINONTIME, _CMD_CACHE, _CMD_NETVERBOSE};
 // version subcommands
 const char * ver_keyworld [] = {
   _SCMD_MRL, _SCMD_ACNODE};
@@ -83,6 +84,7 @@ void print_help ()
   Serial.println ("\tverify - verify the card cache contents against the acserver");
   Serial.println ("\tminontime <time> - minimum time in seconds to keep the tool on for, up to 254 seconds");
   Serial.println ("\tcache {eeprom | sdcard} - set where to cache cards");
+  Serial.println ("\tnetverbose - Toggle verbosity of network debugging messages");
 }
 
 bool ishex(char c) {
@@ -413,6 +415,15 @@ int mrlexecute (int argc, const char * const * argv)
       }
       else {
         Serial.print ("cache needs 1 parameter, see help\n\r");
+      }
+    }
+    else if (strcmp (argv[i], _CMD_NETVERBOSE) == 0) {
+      if (acsettings.netverbose) {
+        acsettings.netverbose = 0;
+        Serial.println("Network debugging will be quiet now.");
+      } else {
+        acsettings.netverbose = 1;
+        Serial.println("Network debugging will be verbose now.");
       }
     }
     else {

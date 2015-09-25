@@ -230,7 +230,6 @@ void setup() {
   if (network) {
     Serial.println("Checking tool status");
     int status = networkCheckToolStatus();
-    Serial.println(status);
 
     if (status == -1) {
       network = false;
@@ -471,7 +470,6 @@ void loop() {
 
       if (check) {
         status = querycard(cc);
-        Serial.println(status);
 
         // if we've lost contact with the acserver at some point
         // we need to check and re-establish it, might as well use this as the test.

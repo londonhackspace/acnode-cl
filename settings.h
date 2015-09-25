@@ -35,6 +35,9 @@ struct settings {
   uint16_t nodeid; // are we calling this "node id" or "tool id"?
   unsigned int status  :1; // 0 = out of service, 1 = in service
   unsigned int sdcache :1; // 1 = use sdcard for the cache, 0 = use the eeprom
+  unsigned int netverbose :1; // 1 = verbose network replies, 0 = be quiet
+  unsigned int toolonpin_activehigh :1; // 1 = if active high (default), 0 = active low
+  unsigned int toolrunpin_activehigh :1; // 1 = if active high, 0 = active low (default cos of the lasercutter)
   char syslogserver[SERVERNAMELEN];
   char toolname[16];
   uint32_t runtime; // total seconds the tool has run

@@ -98,6 +98,26 @@ void dump_settings(settings acsettings) {
     Serial.print("the internal eeprom");
   }
   Serial.println(" to cache cards.");
+
+  if (acsettings.netverbose) {
+    Serial.println("Verbose network messages.");
+  } else {
+    Serial.println("Being quiet about the network.");
+  }
+
+  Serial.print("The tool will be powered on by switching the toolonpin ");
+  if (acsettings.toolonpin_activehigh) {
+    Serial.println("HIGH.");
+  } else {
+    Serial.println("LOW.");
+  }
+
+  Serial.print("The acnode will detect that the tool is running when the toolrunpin is ");
+  if (acsettings.toolrunpin_activehigh) {
+    Serial.println("HIGH.");
+  } else {
+    Serial.println("LOW.");
+  }
 }
 
 settings get_settings(void) {
@@ -110,7 +130,7 @@ settings get_settings(void) {
       // nothing to do
       break;
     case ACSETTINGS42:
-      // upgrade the settings
+      // upgrade the settings and add defaults for new settings.
       Serial.println("Old settings found, upgrading");
       settings42 osettings;
       memset(&osettings, 0, sizeof(osettings));
@@ -126,6 +146,10 @@ settings get_settings(void) {
       acsettings.runtime = osettings.runtime;
       acsettings.minontime = 5;
       acsettings.sdcache = 0;
+      acsettings.netverbose = 1;
+      acsettings.toolonpin_activehigh = 1;
+      acsettings.toolrunpin_activehigh = 0;
+
       acsettings.valid = ACSETTINGSVALID;
       set_settings(acsettings);
       break;
@@ -153,6 +177,9 @@ settings get_settings(void) {
       acsettings.runtime = 0;
       acsettings.sdcache = 0;
       acsettings.minontime = 5;
+      acsettings.netverbose = 1;
+      acsettings.toolonpin_activehigh = 1;
+      acsettings.toolrunpin_activehigh = 0;
 
       // save the settings since it's a new board.
       acsettings.valid = ACSETTINGSVALID;
