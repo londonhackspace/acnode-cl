@@ -92,11 +92,23 @@ void Tool::poll() {
   }
 
   if (tool_on_state == onstate) {
-    startrunning();
+    if (!_toolon) {
+      char msg[] = "Tool appears to have started running while it's off!";
+      Serial.println(msg);
+      syslog.syslog(LOG_WARNING, msg);
+    } else {
+      startrunning();
+    }
   }
 
   if (tool_on_state == offstate) {
-    stoprunning();
+    if (!_toolon) {
+      char msg[] = "Tool appears to have stopped running while it's off!";
+      Serial.println(msg);
+      syslog.syslog(LOG_WARNING, msg);
+    } else {
+      stoprunning();
+    }
   }
 }
 
