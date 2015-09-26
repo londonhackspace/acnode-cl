@@ -12,17 +12,6 @@
 EEPromCache::EEPromCache() {
 }
 
-/*
-
-less verbose network
-_toononpin inverted or not
-
-https://github.com/rei-vilo/SD_TM4C
-
-^-- consider const char* for functions
-
-*/
-
 void EEPromCache::begin() {
   // N.B. settings.cpp actually inits the eeprom
   uint32_t eesize;

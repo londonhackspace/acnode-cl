@@ -148,6 +148,7 @@ settings get_settings(void) {
       acsettings.sdcache = 0;
       acsettings.netverbose = 1;
       acsettings.toolonpin_activehigh = 1;
+      // the laser signal is inverted
       acsettings.toolrunpin_activehigh = 0;
 
       acsettings.valid = ACSETTINGSVALID;
@@ -179,6 +180,7 @@ settings get_settings(void) {
       acsettings.minontime = 5;
       acsettings.netverbose = 1;
       acsettings.toolonpin_activehigh = 1;
+      // the laser signal is inverted
       acsettings.toolrunpin_activehigh = 0;
 
       // save the settings since it's a new board.

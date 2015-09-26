@@ -42,22 +42,32 @@ void mrlprint(const char * str) {
 #define _CMD_CACHE  "cache"
 #define _SCMD_EEPROM  "eeprom"
 #define _SCMD_SDCARD  "sdcard"
-#define _CMD_NETVERBOSE  "netverbose"
+#define _CMD_NETVERBOSE "netverbose"
+#define _CMD_TOOLONPIN  "toolonpin"
+#define _CMD_TOOLRUNPIN "toolrunpin"
+#define _SCMD_HIGH      "high"
+#define _SCMD_LOW       "low"
 
-
-#define _NUM_OF_CMD 20
+#define _NUM_OF_CMD 22
 #define _NUM_OF_VER_SCMD 2
 #define _NUM_OF_CACHE_SCMD 2
+#define _NUM_OF_PIN_SCMD 2
 
 //available  commands
 const char *keyworld [] = {
-  _CMD_HELP, _CMD_SHOW, _CMD_MAC, _CMD_SERVER, _CMD_NODEID, _CMD_PORT, _CMD_VER, _CMD_SAVE, _CMD_CLEAR, _CMD_LIST, _CMD_REBOOT, _CMD_NUKE, _CMD_SYSLOG, _CMD_NAME, _CMD_RTIME, _CMD_FILL, _CMD_VERIFY, _CMD_MINONTIME, _CMD_CACHE, _CMD_NETVERBOSE};
+  _CMD_HELP, _CMD_SHOW, _CMD_MAC, _CMD_SERVER, _CMD_NODEID, _CMD_PORT, _CMD_VER, _CMD_SAVE, _CMD_CLEAR,
+  _CMD_LIST, _CMD_REBOOT, _CMD_NUKE, _CMD_SYSLOG, _CMD_NAME, _CMD_RTIME, _CMD_FILL, _CMD_VERIFY,
+  _CMD_MINONTIME, _CMD_CACHE, _CMD_NETVERBOSE, _CMD_TOOLONPIN, _CMD_TOOLRUNPIN
+};
 // version subcommands
 const char * ver_keyworld [] = {
   _SCMD_MRL, _SCMD_ACNODE};
 
 const char * cache_keyword [] = {
   _SCMD_EEPROM, _SCMD_SDCARD};
+
+const char * pin_keyword [] = {
+  _SCMD_HIGH, _SCMD_LOW};
 
 // array for comletion
 char * compl_world [_NUM_OF_CMD + 1];
@@ -83,8 +93,10 @@ void print_help ()
   Serial.println ("\tfill - fill the card cache with test cards");
   Serial.println ("\tverify - verify the card cache contents against the acserver");
   Serial.println ("\tminontime <time> - minimum time in seconds to keep the tool on for, up to 254 seconds");
-  Serial.println ("\tcache {eeprom | sdcard} - set where to cache cards");
-  Serial.println ("\tnetverbose - Toggle verbosity of network debugging messages");
+  Serial.println ("\tcache {eeprom | sdcard} - set where to cache cards.");
+  Serial.println ("\tnetverbose - Toggle verbosity of network debugging messages.");
+  Serial.println ("\ttoolonpin {high | low} - Set tool on pin to be active high or low.");
+  Serial.println ("\ttoolrunpin {high | low} - set toolrun pin to be active high or low.");
 }
 
 bool ishex(char c) {
@@ -425,6 +437,40 @@ int mrlexecute (int argc, const char * const * argv)
         acsettings.netverbose = 1;
         Serial.println("Network debugging will be verbose now.");
       }
+    } else if (strcmp (argv[i], _CMD_TOOLONPIN) == 0) {
+      if (++i < argc) {
+        if (strcmp (argv[i], _SCMD_HIGH) == 0) {
+          Serial.println("toolon pin is active high");
+          acsettings.toolonpin_activehigh = 1;
+          Serial.println("'save' and 'reboot' to change the cache now.");
+        }
+        else if (strcmp (argv[i], _SCMD_LOW) == 0) {
+          Serial.println("toolon pin is active low");
+          acsettings.toolonpin_activehigh = 0;
+          Serial.println("'save' and 'reboot' to change the cache now.");
+        }
+        else {
+          Serial.print ((char*)argv[i]);
+          Serial.print (" wrong argument, see help\n\r");
+        }
+      }
+    } else if (strcmp (argv[i], _CMD_TOOLRUNPIN) == 0) {
+      if (++i < argc) {
+        if (strcmp (argv[i], _SCMD_HIGH) == 0) {
+          Serial.println("toolrun pin is active high");
+          acsettings.toolrunpin_activehigh = 1;
+          Serial.println("'save' and 'reboot' to change the cache now.");
+        }
+        else if (strcmp (argv[i], _SCMD_LOW) == 0) {
+          Serial.println("toolrun pin is active low");
+          acsettings.toolrunpin_activehigh = 0;
+          Serial.println("'save' and 'reboot' to change the cache now.");
+        }
+        else {
+          Serial.print ((char*)argv[i]);
+          Serial.print (" wrong argument, see help\n\r");
+        }
+      }
     }
     else {
       Serial.print ("command: '");
@@ -465,13 +511,21 @@ char ** mrlcomplete(int argc, const char * const * argv)
     }
   }
   else if ((argc > 1) && (strcmp (argv[0], _CMD_CACHE)==0)) { // if command needs subcommands
-    // iterate through subcommand for command _CMD_VER array
+    // iterate through subcommand for command _CMD_CACHE array
     for (int i = 0; i < _NUM_OF_CACHE_SCMD; i++) {
       if (strstr (cache_keyword [i], argv [argc-1]) == cache_keyword [i]) {
         compl_world [j++] = (char *)cache_keyword[i];
       }
     }
   } 
+  else if ((argc > 1) && ((strcmp (argv[0], _CMD_TOOLONPIN)==0) || (strcmp (argv[0], _CMD_TOOLRUNPIN)==0))) { // if command needs subcommands
+    // iterate through subcommand for the pin commands
+    for (int i = 0; i < _NUM_OF_PIN_SCMD; i++) {
+      if (strstr (pin_keyword [i], argv [argc-1]) == pin_keyword [i]) {
+        compl_world [j++] = (char *)pin_keyword[i];
+      }
+    }
+  }
   else { // if there is no token in cmdline, just print all available token
     for (; j < _NUM_OF_CMD; j++) {
       compl_world[j] = (char *)keyworld[j];

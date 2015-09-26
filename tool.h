@@ -19,7 +19,7 @@ class Tool
     boolean status(); // true if the tool has been switched on
   private:
     int _toolpin;
-    int _toolonpin;
+    int _toolrunpin;
     boolean _toolon;
     boolean _turnoff;
     unsigned long _start;  // used the runtime as detected by the _toolonpin

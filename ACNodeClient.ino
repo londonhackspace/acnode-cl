@@ -100,6 +100,12 @@ void setup() {
   // start the watchdog early in case of hangs
   wdog.begin();
 
+  // need settings to configure the tool
+  init_settings();
+
+  acsettings = get_settings();
+  dump_settings(acsettings);
+
   // start the tool early so it can be switched off(!?)
   tool.begin();
 
@@ -108,11 +114,6 @@ void setup() {
   rgb.yellow();
 
   wdog.feed();
-
-  init_settings();
-
-  acsettings = get_settings();
-  dump_settings(acsettings);
 
   if (acsettings.sdcache) {
     if (SD.begin(SD_CS_PIN, SPI_HALF_SPEED, 2)) {

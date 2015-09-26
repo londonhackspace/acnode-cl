@@ -176,7 +176,7 @@ int toolUseTime(Card card, int time) {
   card.str(url + strlen(url));
   sprintf(url + strlen(url), "/%d", time);
 
-  ret = get_url(url);  
+  ret = get_url(url);
   return ret;
 }
 

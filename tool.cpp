@@ -6,7 +6,7 @@
 Tool::Tool(int pin) {
   _toolpin = pin;
   _toolon = false;
-  _toolonpin = -1;
+  _toolrunpin = -1;
   _turnoff = false;
 }
 
@@ -15,11 +15,11 @@ volatile int tool_change_flag = 0;
 int tool_on_pin;
 
 // If we have a seperate pin to tell us when the tool is actually running
-Tool::Tool(int pin, int onpin) {
+Tool::Tool(int pin, int runpin) {
   _toolpin = pin;
   _toolon = false;
-  _toolonpin = onpin;
-  tool_on_pin = onpin;
+  _toolrunpin = runpin;
+  tool_on_pin = runpin;
   memset(&tool_user, 0, sizeof(user));
   _turnoff = false;
 }
@@ -27,7 +27,7 @@ Tool::Tool(int pin, int onpin) {
 // not a member function since it's an ISR.
 // The tool can change (lower?) this pin to say when it running
 // useful for when we want to record laser cutter tube usage etc.
-void toolonisr() {
+void toolrunisr() {
   int state = digitalRead(tool_on_pin);
 
   if (state != tool_on_state) {
@@ -38,18 +38,25 @@ void toolonisr() {
 
 void Tool::begin() {
   pinMode(_toolpin, OUTPUT);
-  digitalWrite(_toolpin, LOW);
+  if (acsettings.toolonpin_activehigh) {
+    digitalWrite(_toolpin, LOW);
+  } else {
+    digitalWrite(_toolpin, HIGH);
+  }
 
-  if (_toolonpin) {
-    tool_on_state = 0;
+  if (_toolrunpin) {
     tool_change_flag = 0;
-    pinMode(_toolonpin, INPUT_PULLUP);
-    attachInterrupt(_toolonpin, toolonisr, CHANGE);
+    if (acsettings.toolrunpin_activehigh) {
+      pinMode(_toolrunpin, INPUT_PULLDOWN);
+    } else {
+      pinMode(_toolrunpin, INPUT_PULLUP);
+    }
+    tool_on_state = digitalRead(_toolrunpin);
+    attachInterrupt(_toolrunpin, toolrunisr, CHANGE);
   }
 }
 
 void Tool::poll() {
-
   if (_turnoff) {
       unsigned long duration = (millis() - _ontime) / 1000;
       // have we been running for more than the minimum on time?
@@ -61,7 +68,7 @@ void Tool::poll() {
   }
 
   // do we need to run this?
-  if (!_toolonpin) {
+  if (!_toolrunpin) {
     return;
   }
 
@@ -75,12 +82,20 @@ void Tool::poll() {
   Serial.println(tool_on_state);
   tool_change_flag = 0;
 
-  // the laser signal is inverted
-  if (tool_on_state == 0) {
+  int offstate, onstate;
+  if (acsettings.toolrunpin_activehigh) {
+    offstate = 0;
+    onstate = 1;
+  } else {
+    offstate = 1;
+    onstate = 0;
+  }
+
+  if (tool_on_state == onstate) {
     startrunning();
   }
 
-  if (tool_on_state == 1) {
+  if (tool_on_state == offstate) {
     stoprunning();
   }
 }
@@ -148,12 +163,16 @@ void Tool::on(Card user) {
     Serial.println(msg);
     syslog.syslog(LOG_NOTICE, msg);
 
-    if (!_toolonpin) {
+    if (!_toolrunpin) {
       startrunning();
     }
 
     // switch tool on here.
-    digitalWrite(_toolpin, HIGH);
+    if (acsettings.toolonpin_activehigh) {
+      digitalWrite(_toolpin, HIGH);
+    } else {
+      digitalWrite(_toolpin, LOW);
+    }
     // end 
     _toolon = true;
     _ontime = millis();
@@ -190,10 +209,14 @@ void Tool::off() {
     }
 
     // switch tool off here
-    digitalWrite(_toolpin, LOW);
+    if (acsettings.toolonpin_activehigh) {
+      digitalWrite(_toolpin, LOW);
+    } else {
+      digitalWrite(_toolpin, HIGH);
+    }
     // end
 
-    if (!_toolonpin) {
+    if (!_toolrunpin) {
       stoprunning();
     }
 
