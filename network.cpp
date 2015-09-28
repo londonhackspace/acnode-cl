@@ -11,6 +11,13 @@
 //
 int get_url(char * path) {
   int result = -1;
+  char outb[128];
+  char ret[256];
+  int retp = 0;
+
+  // just incase there is any left over data.
+  client.flush();
+  client.stop();
 
   Serial.print("Connecting to http://");
   Serial.print(acsettings.servername);
@@ -22,16 +29,20 @@ int get_url(char * path) {
   if (acsettings.netverbose) { Serial.println(); }
 
   if (client.connect(acsettings.servername, acsettings.port)) {
-    client.print(path);
-    client.println(" HTTP/1.0");
-    client.print("Host: ");
-    client.println(acsettings.servername);
-    client.print("User-Agent: ");
-    client.print("ACNode ");
-    client.print(ACVERSION);
-    client.print(", Energia ");
-    client.println(ENERGIA);
-    client.println();
+    strcpy(outb, path);
+    strcpy(outb + strlen(outb), " HTTP/1.0");
+    strcpy(outb + strlen(outb), "\r\n");
+    strcpy(outb + strlen(outb), "Host: ");
+    strcpy(outb + strlen(outb), acsettings.servername);
+    strcpy(outb + strlen(outb), "\r\n");
+    strcpy(outb + strlen(outb), "User-Agent: ACNode ");
+    strcpy(outb + strlen(outb), ACVERSION);
+    strcpy(outb + strlen(outb), ", Energia ");
+    sprintf(outb + strlen(outb), "%d", ENERGIA);
+    strcpy(outb + strlen(outb), "\r\n");
+    strcpy(outb + strlen(outb), "\r\n");
+
+    client.print(outb);
 
     int timeout = 0;
 
@@ -45,7 +56,7 @@ int get_url(char * path) {
     }
 
     if (client.available()) {
-      char c;
+      int c;
       if (acsettings.netverbose) {
         Serial.println("Got Response:");
         Serial.print(">");
@@ -54,10 +65,23 @@ int get_url(char * path) {
       int newlines = 0;
       boolean first = false;
 
-      while (client.available()) {
+      while (client.connected() || client.available()) {
         c = client.read();
+        // chars are actually unsigned?
+        if (c == -1 || c == 0xff) {
+          continue;
+        }
+        if (!isprint(c) && c != 0xa && c != 0xd) {
+          Serial.print("Got a bogus c: ");
+          Serial.println(c, HEX);
+        }
         if (acsettings.netverbose) {
-          Serial.print(c);
+          Serial.print((char)c);
+        }
+        ret[retp++] = (char)c;
+        ret[retp] = '\0';
+        if (retp + 1 > 256) {
+          retp = 0;
         }
         if (c == '\n') {
           if (acsettings.netverbose) { Serial.print('\r'); }
@@ -95,6 +119,11 @@ int get_url(char * path) {
   }
   Serial.print(" : ");
   Serial.println(result);
+
+  if (result == -1) {
+    Serial.println(ret);
+  }
+
   return result;
 }
 
