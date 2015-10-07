@@ -15,6 +15,8 @@ int get_url(char * path) {
   char ret[256];
   int retp = 0;
 
+  ret[0] = '\0';
+
   // just incase there is any left over data.
   client.flush();
   client.stop();
