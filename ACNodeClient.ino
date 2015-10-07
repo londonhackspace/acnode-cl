@@ -198,7 +198,7 @@ void setup() {
 
   wdog.feed();
 
-  Serial.println("Initialising PN532");
+  Serial.println("Initialising Card reader...");
 
   nfc.begin();
 
@@ -211,8 +211,8 @@ void setup() {
   }
   
   // Got ok data, print it out!
-  Serial.print("Found chip PN5"); Serial.println((versiondata>>24) & 0xFF, HEX); 
-  Serial.print("Firmware ver. "); Serial.print((versiondata>>16) & 0xFF, DEC); 
+  Serial.print("Found chip PN5"); Serial.print((versiondata>>24) & 0xFF, HEX);
+  Serial.print(", Firmware ver. "); Serial.print((versiondata>>16) & 0xFF, DEC);
   Serial.print('.'); Serial.println((versiondata>>8) & 0xFF, DEC);
 
   // Set the max number of retry attempts to read from a card
