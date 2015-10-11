@@ -240,6 +240,8 @@ int EEPromCache::find_free(void) {
 user EEPromCache::card_to_struct(const Card u) {
   user nu;
 
+  memset(&nu, 0, sizeof(nu));
+
   nu.status = u.is_user();
   nu.maintainer = u.is_maintainer();
   if (u.get_longuid()) {
@@ -247,6 +249,7 @@ user EEPromCache::card_to_struct(const Card u) {
   } else {
     nu.uidlen = 0;
   }
+  nu.end = 0;
 
   u.get_uid(nu.uid);
   return nu;
