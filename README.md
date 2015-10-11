@@ -167,11 +167,13 @@ You'll need to copy or symlink PN532 and PN532_HSU into your energia-sketches li
 
 ## DateTimeLibrary
 
-https://github.com/jasiek/DateTimeLibrary
+https://github.com/londonhackspace/DateTimeLibrary
 
 Best to clone directly to your Energia libraries folder.
 
-You'll need to edit DateTimeLibrary.h to add defined(__TM4C1294NCPDT__) on line 35
+If you a are using Energia 16 you will need to patch the energia code with this change:
+
+https://github.com/energia/Energia/pull/741/files
 
 ## SD Card Library
 
