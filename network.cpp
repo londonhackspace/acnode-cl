@@ -11,7 +11,7 @@
 //
 int get_url(char * path) {
   int result = -1;
-  char outb[128];
+  char outb[160];
   char ret[256];
   int retp = 0;
 
@@ -42,9 +42,16 @@ int get_url(char * path) {
     strcpy(outb + strlen(outb), ", Energia ");
     sprintf(outb + strlen(outb), "%d", ENERGIA);
     strcpy(outb + strlen(outb), "\r\n");
+    if (isprint(acsettings.secret[0])) {
+      sprintf(outb + strlen(outb), "X-AC-Key: %s\r\n", acsettings.secret);
+    }
     strcpy(outb + strlen(outb), "\r\n");
 
     client.print(outb);
+
+    if (acsettings.netverbose) {
+      Serial.println(outb);
+    }
 
     int timeout = 0;
 

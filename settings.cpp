@@ -14,6 +14,9 @@ void init_settings(void) {
     }
   }
 
+  Serial.print("setting left: ");
+  Serial.println(128 - sizeof(acsettings));
+
   if (sizeof(acsettings) > 128) {
     Serial.print("acsettings wrong size, must be smaller than 128: ");
     Serial.println(sizeof(acsettings));
@@ -60,6 +63,13 @@ void dump_settings(settings acsettings) {
     Serial.println(acsettings.servername);
   } else {
      Serial.println("!Invalid!");
+  }
+
+  Serial.print("Server API key: ");
+  if (isprint(acsettings.secret[0])) {
+    Serial.println(acsettings.secret);
+  } else {
+     Serial.println("Not Set!");
   }
   
   Serial.print("Port: ");
@@ -131,28 +141,59 @@ settings get_settings(void) {
       break;
     case ACSETTINGS42:
       // upgrade the settings and add defaults for new settings.
-      Serial.println("Old settings found, upgrading");
-      settings42 osettings;
-      memset(&osettings, 0, sizeof(osettings));
-      EEPROMRead((uint32_t *)&osettings, 0, sizeof(osettings));
+      Serial.println("Old settings (42) found, upgrading");
+      {
+        settings42 osettings;
+        memset(&osettings, 0, sizeof(osettings));
+        EEPROMRead((uint32_t *)&osettings, 0, sizeof(osettings));
 
-      memcpy(acsettings.mac, osettings.mac, 6);
-      memcpy(acsettings.servername, osettings.servername, SERVERNAMELEN);
-      memcpy(acsettings.syslogserver, osettings.syslogserver, SERVERNAMELEN);
-      memcpy(acsettings.toolname, osettings.toolname, TOOLNAMELEN);
-      acsettings.port = osettings.port;
-      acsettings.nodeid = osettings.nodeid;
-      acsettings.status = osettings.status;
-      acsettings.runtime = osettings.runtime;
-      acsettings.minontime = 5;
-      acsettings.sdcache = 0;
-      acsettings.netverbose = 1;
-      acsettings.toolonpin_activehigh = 1;
-      // the laser signal is inverted
-      acsettings.toolrunpin_activehigh = 0;
+        memcpy(acsettings.mac, osettings.mac, 6);
+        memcpy(acsettings.servername, osettings.servername, SERVERNAMELEN);
+        memcpy(acsettings.syslogserver, osettings.syslogserver, SERVERNAMELEN);
+        memcpy(acsettings.toolname, osettings.toolname, TOOLNAMELEN);
+        acsettings.port = osettings.port;
+        acsettings.nodeid = osettings.nodeid;
+        acsettings.status = osettings.status;
+        acsettings.runtime = osettings.runtime;
+        acsettings.minontime = 5;
+        acsettings.sdcache = 0;
+        acsettings.netverbose = 1;
+        acsettings.toolonpin_activehigh = 1;
+        // the laser signal is inverted
+        acsettings.toolrunpin_activehigh = 0;
+        acsettings.secret[0] = '\0';
+      }
 
       acsettings.valid = ACSETTINGSVALID;
       set_settings(acsettings);
+      break;
+    case ACSETTINGS43:
+      // upgrade the settings and add defaults for new settings.
+      Serial.println("Old settings (43) found, upgrading");
+      {
+        settings43 osettings;
+        memset(&osettings, 0, sizeof(osettings));
+        EEPROMRead((uint32_t *)&osettings, 0, sizeof(osettings));
+
+        memcpy(acsettings.mac, osettings.mac, 6);
+        memcpy(acsettings.servername, osettings.servername, SERVERNAMELEN);
+        memcpy(acsettings.syslogserver, osettings.syslogserver, SERVERNAMELEN);
+        memcpy(acsettings.toolname, osettings.toolname, TOOLNAMELEN);
+        acsettings.port = osettings.port;
+        acsettings.nodeid = osettings.nodeid;
+        acsettings.status = osettings.status;
+        acsettings.runtime = osettings.runtime;
+        acsettings.minontime = osettings.minontime;
+        acsettings.sdcache = osettings.sdcache;
+        acsettings.netverbose = osettings.netverbose;
+        acsettings.toolonpin_activehigh = osettings.toolonpin_activehigh;
+        acsettings.toolrunpin_activehigh = osettings.toolrunpin_activehigh;
+
+        acsettings.secret[0] = '\0';
+
+        acsettings.valid = ACSETTINGSVALID;
+        set_settings(acsettings);
+      }
       break;
     default:
       Serial.println("Settings not valid, using defaults");
@@ -182,6 +223,8 @@ settings get_settings(void) {
       acsettings.toolonpin_activehigh = 1;
       // the laser signal is inverted
       acsettings.toolrunpin_activehigh = 0;
+
+      acsettings.secret[0] = '\0';
 
       // save the settings since it's a new board.
       acsettings.valid = ACSETTINGSVALID;

@@ -47,8 +47,9 @@ void mrlprint(const char * str) {
 #define _CMD_TOOLRUNPIN "toolrunpin"
 #define _SCMD_HIGH      "high"
 #define _SCMD_LOW       "low"
+#define _CMD_SECRET   "secret"
 
-#define _NUM_OF_CMD 22
+#define _NUM_OF_CMD 23
 #define _NUM_OF_VER_SCMD 2
 #define _NUM_OF_CACHE_SCMD 2
 #define _NUM_OF_PIN_SCMD 2
@@ -57,7 +58,7 @@ void mrlprint(const char * str) {
 const char *keyworld [] = {
   _CMD_HELP, _CMD_SHOW, _CMD_MAC, _CMD_SERVER, _CMD_NODEID, _CMD_PORT, _CMD_VER, _CMD_SAVE, _CMD_CLEAR,
   _CMD_LIST, _CMD_REBOOT, _CMD_NUKE, _CMD_SYSLOG, _CMD_NAME, _CMD_RTIME, _CMD_FILL, _CMD_VERIFY,
-  _CMD_MINONTIME, _CMD_CACHE, _CMD_NETVERBOSE, _CMD_TOOLONPIN, _CMD_TOOLRUNPIN
+  _CMD_MINONTIME, _CMD_CACHE, _CMD_NETVERBOSE, _CMD_TOOLONPIN, _CMD_TOOLRUNPIN, _CMD_SECRET
 };
 // version subcommands
 const char * ver_keyworld [] = {
@@ -97,6 +98,7 @@ void print_help ()
   Serial.println ("\tnetverbose - Toggle verbosity of network debugging messages.");
   Serial.println ("\ttoolonpin {high | low} - Set tool on pin to be active high or low.");
   Serial.println ("\ttoolrunpin {high | low} - set toolrun pin to be active high or low.");
+  Serial.println ("\tsecret <secret> - 8 char secret for authenticating with the acserver.");
 }
 
 bool ishex(char c) {
@@ -470,6 +472,28 @@ int mrlexecute (int argc, const char * const * argv)
           Serial.print ((char*)argv[i]);
           Serial.print (" wrong argument, see help\n\r");
         }
+      }
+    }
+    else if (strcmp (argv[i], _CMD_SECRET) == 0) {
+      boolean ok = false;
+      if ((++i) < argc) { // if value preset
+        if (strlen (argv[i]) == KEYLEN) {
+          int k;
+          ok = true;
+          for (k = 0 ; k < KEYLEN ; k++) {
+            if (!isprint(argv[i][k])) {
+              ok = false;
+            }
+          }
+          if (ok) {
+            Serial.print("new API key: ");
+            Serial.println(argv[i]);
+            strncpy(acsettings.secret, argv[i], KEYLEN);
+          }
+        }
+      }
+      if (!ok) {
+        Serial.println("secret <secret key> - 8 chars long, ascii only");
       }
     }
     else {
