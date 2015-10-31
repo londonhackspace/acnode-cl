@@ -145,8 +145,6 @@ See here for the Connected Launchpad pinouts:
 
 http://energia.nu/pin-maps/guide_tm4c129launchpad/
 
-N.B.: use energia-0101E0012, not energia-0101E0013, as 13 breaks things (i think it defines a function called wakeup which clashes with the one in the PN532 stuff).
-
 ## Using the tool running pin
 
 You can send a signal to the acnode via pin PE_4 to say when your tool is actually running (as opposed to being switched on), useful for keeping track of wear and tear and consumables etc.
