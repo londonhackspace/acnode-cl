@@ -56,7 +56,7 @@ boolean network = false;
 
 // PG_1 to switch tool on, PE_4 is low when the tool is running
 Tool tool(PG_1, PE_4);
-Door door(PB_4);
+Door door(PB_4, PB_5);
 Announcer *announcer;
 
 RGB rgb(PM_0, PM_1, PM_2);

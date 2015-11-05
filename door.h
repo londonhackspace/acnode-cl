@@ -8,9 +8,10 @@ class Door {
 
  public:
    static int _pin;
+   static int _npin;
    static unsigned long _opened_at;
    
-   Door(int pin);
+   Door(int pin, int npin);
    static void open();
    static boolean opened();
    static void close();
