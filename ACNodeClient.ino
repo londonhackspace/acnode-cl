@@ -31,6 +31,8 @@ ACNodeClient
 #include "card.h"
 #include "sdcache.h"
 #include "eepromcache.h"
+#include "door.h"
+#include "announcer.h"
 
 // create microrl object and pointer on it
 microrl_t rl;
@@ -54,6 +56,8 @@ boolean network = false;
 
 // PG_1 to switch tool on, PE_4 is low when the tool is running
 Tool tool(PG_1, PE_4);
+Door door(PB_4, PB_5);
+Announcer *announcer;
 
 RGB rgb(PM_0, PM_1, PM_2);
 
@@ -68,6 +72,7 @@ Every card_every(500);
 Every tool_status_check(2000);
 
 Button button(PF_1);
+Button bell_button(PM_3);
 
 Watchdog wdog;
 
@@ -195,6 +200,7 @@ void setup() {
   }
 
   button.begin();
+  bell_button.begin();
   one_sec.begin();
   five_sec.begin();
   card_every.begin();
@@ -278,6 +284,9 @@ void setup() {
   cc.set_valid(false);
   maintainer.set_valid(false);
 
+  announcer = new Announcer(acsettings.announcer_port);
+  announcer->START();
+
   Serial.println("press enter for a prompt");
 }
 
@@ -297,9 +306,113 @@ MenuType menu = NOMENU;
 MenuState menu_state;
 
 void loop() {
-  Card tu;
-  boolean check = true;
+  // put received char from stdin to microrl lib
+  if (Serial.available()) {
+    char c;
+    c = Serial.read();
+    microrl_insert_char (prl, c);
+  }
+
+  if (doorbot()) {
+    doorbot_loop();
+  } else {
+    acnode_loop();
+  }
+}
+
+void doorbot_loop() { 
+  if(bell_button.poll() > 0) {
+    Serial.println("DING DONG. Someone rang the bell!");
+    announcer->BELL();
+  }
+
+  if (one_sec.check()) {
+    if (door.maybe_close()) {
+      rgb.blue();
+    }
+  }
   
+  if (!door.opened()) {
+    readcard();
+    user read_user;
+
+    if (!cc.invalid) { // we have a card of some sort
+      int result = querycard(cc);
+      switch (result) {
+        case 2:
+        case 1:
+        case 0:
+          // we know about these cards, let the user in
+          doorbot_maybe_cache_card(result, &read_user);
+          doorbot_open_door();
+          break;
+        case -1:
+          // unknown card, go away
+          doorbot_maybe_cache_card(result, &read_user);
+          rgb.orange();
+          delay(1000);
+          break;
+        default:
+          // network error, have a look at the cache
+          user *found_user = doorbot_cache_get();
+          if (found_user && doorbot_has_access(found_user)) doorbot_open_door();
+      }
+      // regardless of what happened, tell the world that we've scanned a card.
+      announcer->RFID(&read_user);
+    }
+  }
+}
+
+void doorbot_maybe_cache_card(int hint, user *read_user) {
+  memset(read_user, 0, sizeof(user));
+  memcpy(read_user, &cc, sizeof(user));
+
+  user *found_user = get_user(read_user);
+
+  switch (hint) {
+    case 2:
+      read_user->maintainer = 1; // set and fall through (!)
+    case 1:
+    case 0:
+      read_user->status = 1;
+      break;
+    case -1:
+      read_user->invalid = 1;
+  }
+  
+  if (found_user) {
+    // user is in the cache
+    if (!compare_user(found_user, read_user)) {
+      // user out of sync with cache
+      store_user(read_user);
+    }
+  } else {
+    // user not in the cache
+    if (hint > -1) {
+      // store if we know of this card
+      store_user(read_user);
+    }
+  }
+}
+
+user* doorbot_cache_get() {
+  user read_user;
+  memset(&read_user, 0, sizeof(user));
+  memcpy(&read_user, &cc, sizeof(user));
+  
+  return get_user(&read_user);
+}
+
+boolean doorbot_has_access(user *u) {
+  return u->status;
+}
+
+void doorbot_open_door() {
+  rgb.green();
+  door.open();
+}
+
+void acnode_loop() {
   // some housekeeping stuff
   if (heart_every.check()) {
     wdog.feed();
@@ -375,13 +488,6 @@ void loop() {
     }
   }
 
-  // put received char from stdin to microrl lib
-  if (Serial.available()) {
-    char c;
-    c = Serial.read();
-    microrl_insert_char (prl, c);
-  }
-
   // used to check the tool on state via an ISR.
   tool.poll();
 
@@ -407,6 +513,20 @@ void loop() {
   }
 
   if (card_every.check()) {
+    cu = read_user();
+  }
+
+  // do we have a card? if so, do things with it.
+  if (cu != NULL) {
+    card_loop();
+    menu_loop();
+  }
+}
+
+user *read_user() {
+    user *tu;
+    boolean check = true;
+  
     // does the actuall card reading, updates cc.
     cc = readcard();
 
@@ -479,7 +599,7 @@ void loop() {
 
         // if we've lost contact with the acserver at some point
         // we need to check and re-establish it, might as well use this as the test.
-        if (status >= 0) {
+        if (status >= -1) {
           network = true;
         } else {
           network = false;
@@ -497,6 +617,7 @@ void loop() {
           // so mark as invalid
           if (status == 0) {
             nu.set_valid(false);
+            return NULL;
           }
 
           tu = cache->get(nu);
@@ -610,12 +731,6 @@ void loop() {
         }
       }
     }
-  }
-
-  // do we have a card? if so, do things with it.
-  if (cu.is_valid()) {
-    card_loop();
-    menu_loop();
   }
 }
 
@@ -895,3 +1010,6 @@ Card readcard()
   return Card();
 }
 
+boolean doorbot() {
+  return acsettings.role == 1;
+}
