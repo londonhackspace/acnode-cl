@@ -1,3 +1,5 @@
+#include <Arduino.h>
+
 /*
 ACNodeClient
  v0.2+
