@@ -1,9 +1,14 @@
+// Test for a patch to work with PlatformIO.
+#if ENERGIA >= 17
+#error "Energia has been upgraded to 17 within PlatformIO. You can now remove the lib/SPI directory and this notice."
+#endif
+
 #include <Arduino.h>
 
 /*
 ACNodeClient
  v0.2+
- 
+
  */
 #include <Ethernet.h>
 
@@ -216,7 +221,7 @@ void setup() {
     syslog.syslog(LOG_EMERG, "Couldn't find PN532 board");
     while (1); // halt
   }
-  
+
   // Got ok data, print it out!
   Serial.print("Found chip PN5"); Serial.print((versiondata>>24) & 0xFF, HEX);
   Serial.print(", Firmware ver. "); Serial.print((versiondata>>16) & 0xFF, DEC);
@@ -229,7 +234,7 @@ void setup() {
   // with the powerdown thing we don't need a long timeout
   // so use 16...
   nfc.setPassiveActivationRetries(0x10);
-  
+
   // configure board to read RFID tags
   nfc.SAMConfig();
 
@@ -301,7 +306,7 @@ MenuState menu_state;
 void loop() {
   Card tu;
   boolean check = true;
-  
+
   // some housekeeping stuff
   if (heart_every.check()) {
     wdog.feed();
@@ -623,7 +628,7 @@ void loop() {
 
 // When we have a card on the reader go round this loop.
 void card_loop() {
-  
+
   if (one_sec.check()) {
     Serial.print("card on reader: ");
     cu.dump();
@@ -686,13 +691,13 @@ void menu_loop(void) {
     // nothing to do
     return;
   }
-  
+
   if (menu == NOMENU) {
     if (button_state == LONG_PRESS) {
       // long press outside of a menu does nothing
       return;
     }
-    
+
     if (button_state == SHORT_PRESS) {
       // menu now activated
       menu_timeout = millis() + (60 * 1000);
@@ -865,7 +870,7 @@ Card readcard()
   success = nfc.readPassiveTargetID(PN532_MIFARE_ISO14443A, &uid[0], &uidLength);
 
   nfc.powerDown();
-  
+
   if (!success)
   {
     card_on_reader = false;
@@ -896,4 +901,3 @@ Card readcard()
   card_on_reader = false;
   return Card();
 }
-
