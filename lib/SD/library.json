@@ -1,0 +1,25 @@
+{
+  "name": "SD",
+  "keywords": "sd, card, file, system",
+  "description": "This library aims to expose a subset of SD card functionality in the form of a higher level 'wrapper' object (adaptation for LaunchPad LM4F120 / TM4C123)",
+  "repository":
+  {
+    "type": "git",
+    "url": "https://github.com/rei-vilo/SD_TM4C.git"
+  },
+  "authors":
+  [
+    {
+      "name": "Rei Vilo",
+      "maintainer": true
+    },
+    {
+      "name": "William Greiman"
+    },
+    {
+      "name": "SparkFun Electronics"
+    }
+  ],
+  "frameworks": "energia",
+  "platforms": "timsp430,titiva"
+}
