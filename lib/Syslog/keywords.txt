@@ -1,0 +1,3 @@
+Syslog	KEYWORD1
+setFacility	KEYWORD2
+syslog	KEYWORD2

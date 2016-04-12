@@ -1,0 +1,3 @@
+This is a simple class to support syslog with the Arduino Ethernet API's.
+
+Only tested on Energia.
