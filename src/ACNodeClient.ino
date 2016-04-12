@@ -19,7 +19,6 @@ ACNodeClient
 #include <syslog.h>
 #include <SPI.h>
 #include <SD.h>
-#include <DateTimeLibrary.h>
 
 #include "settings.h"
 #include "microrl.h"
@@ -55,7 +54,6 @@ Card maintainer;
 
 EthernetClient client;
 Syslog syslog;
-DateTime rtc;
 
 boolean network = false;
 
@@ -176,14 +174,6 @@ void setup() {
       Serial.print(".");
     }
     Serial.println();
-
-    // start the clock and set the time.
-    rtc.begin();
-    time_t now;
-    // just use the ACServer for ntp
-    getTimeNTP(now, acsettings.servername);
-    rtc.setTime(now);
-    Serial.println(stringDateTime(rtc.getLocalTime()));
   }
 
   wdog.feed();
