@@ -1,8 +1,3 @@
-// Test for a patch to work with PlatformIO.
-#if ENERGIA >= 17
-#error "Energia has been upgraded to 17 within PlatformIO. You can now remove the lib/SPI directory and this notice."
-#endif
-
 #include <Arduino.h>
 
 /*
