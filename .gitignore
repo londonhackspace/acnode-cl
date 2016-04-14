@@ -1,5 +1,3 @@
-.clang_complete
 .pioenvs
+.clang_complete
 .gcc-flags.json
-*~
-src/tmp_ino_to.cpp
