@@ -85,6 +85,10 @@ void setup() {
   Serial.print(ENERGIA);
   Serial.print(", Arduino API version ");
   Serial.println(ARDUINO);
+  Serial.print("Built on ");
+  Serial.print(__DATE__);
+  Serial.print(" ");
+  Serial.println(__TIME__);
   Serial.println("Starting up.");
   // lets use all the LED's
   pinMode(D1_LED, OUTPUT);
