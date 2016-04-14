@@ -131,6 +131,8 @@ https://pointless.net/photos/id/1419334749/
 
 ## How to get this running with a cooqrobot/elechouse pn532 breakout board:
 
+![pn532 connected](pictures/pn532_connection.jpg)
+
 1. carefully unsolder the 0 ohm resistor jumper from the HIS0 connector, then resolder it (or just bridge the pads with solder) so that the '0' side is connected rather than the 1, this puts the reader in HSU mode.
 
 2. Solder headers onto the 8 pin connector on the board where the tx/rx pins are, you need at least tx,rx,3.3v,gnd. N.B. you can't use the SCL/SDA pins on the 4 pin connector because they have pullups on them...
