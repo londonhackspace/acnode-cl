@@ -11,11 +11,7 @@ Table of Contents
     * [Wiring in the arcade switch](#wiring-in-the-arcade-switch)
     * [How to get this running with a cooqrobot/elechouse pn532 breakout board:](#how-to-get-this-running-with-a-cooqrobotelechouse-pn532-breakout-board)
     * [Using the tool running pin](#using-the-tool-running-pin)
-  * [You will need these libraries:](#you-will-need-these-libraries)
-    * [Syslog from here:](#syslog-from-here)
-    * [the PN532 libraries from here:](#the-pn532-libraries-from-here)
-    * [DateTimeLibrary](#datetimelibrary)
-    * [SD Card Library](#sd-card-library)
+  * [Building and flashing the firmware](#building-and-flashing-the-firmware)
   * [Pin assignments:](#pin-assignments)
   * [using the CLI](#using-the-cli)
   * [Button status/colours:](#button-statuscolours)
@@ -151,35 +147,13 @@ http://energia.nu/pin-maps/guide_tm4c129launchpad/
 
 You can send a signal to the acnode via pin PE_4 to say when your tool is actually running (as opposed to being switched on), useful for keeping track of wear and tear and consumables etc.
 
-# You will need these libraries:
+# Building and flashing the firmware
 
-## Syslog from here:
-
-https://github.com/londonhackspace/Syslog
-
-put it in the libraries folder under your energia sketches folder
-
-## the PN532 libraries from here:
-
-https://github.com/londonhackspace/PN532
-
-You'll need to copy or symlink PN532 and PN532_HSU into your energia-sketches libraries directory as well.
-
-## DateTimeLibrary
-
-https://github.com/londonhackspace/DateTimeLibrary
-
-Best to clone directly to your Energia libraries folder.
-
-If you a are using Energia 16 you will need to patch the energia code with this change:
-
-https://github.com/energia/Energia/pull/741/files
-
-## SD Card Library
-
-https://github.com/rei-vilo/SD_TM4C
-
-(and rename it to 'SD'), [also see](http://jasiek.me/2015/08/28/using-an-sd-card-with-a-ti-tiva-c-tm4129.html) for some more details.
+* Install [PlatformIO](http://platformio.org)
+* Clone this repository.
+* Open the cloned repository by going to `PlatformIO | Open Project folder...`.
+* Choose `PlatformIO | Build` or `PlatformIO | Upload`.
+* All dependencies will be installed automatically prior to the first build.
 
 # Pin assignments:
 
