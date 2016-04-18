@@ -1,3 +1,4 @@
+![Build Status](https://api.travis-ci.org/londonhackspace/acnode-cl.svg?branch=master)
 
 Table of Contents
 =================
