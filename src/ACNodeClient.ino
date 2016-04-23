@@ -264,10 +264,10 @@ void setup() {
 
   wdog.feed();
 
-  if (network) {
-    // verify the users in the cache against the acserver
-    cache->verify();
-  }
+  // For now, just purge the cache. Checking a card against the server at startup
+  // takes ~3s per card. TODO: Add code to check against the server when card is
+  // scanned and TTL is deemed to be expired.
+  cache->purge();
 
   wdog.feed();
 
