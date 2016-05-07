@@ -1,0 +1,4 @@
+(fp_lib_table
+  (lib (name ws2812)(type Legacy)(uri "$(KIPRJMOD)/mod/ws2812.mod")(options "")(descr ""))
+  (lib (name armory)(type Legacy)(uri "$(KIPRJMOD)/mod/armory.mod")(options "")(descr ""))
+)

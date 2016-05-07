@@ -1,4 +1,4 @@
-update=2016 May 07, Saturday 10:45:36
+update=2016 May 07, Saturday 19:50:06
 version=1
 last_client=kicad
 [pcbnew]
@@ -59,3 +59,5 @@ LibName27=atmel
 LibName28=contrib
 LibName29=valves
 LibName30=lib/ws2812
+LibName31=lib/srd-05vdc-sl-c
+LibName32=lib/armory
