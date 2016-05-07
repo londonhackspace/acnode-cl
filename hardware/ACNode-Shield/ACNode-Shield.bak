@@ -349,39 +349,4 @@ Wire Wire Line
 Wire Wire Line
 	9900 5100 9900 4450
 Connection ~ 9900 4450
-$Comp
-L SD_Card CON?
-U 1 1 572DC1F7
-P 3200 6300
-F 0 "CON?" H 3200 7058 50  0000 C CNN
-F 1 "SD_Card" H 3200 6966 50  0000 C CNN
-F 2 "10067847-001" H 3200 6874 50  0000 C CNN
-F 3 "" H 3200 6300 50  0000 C CNN
-	1    3200 6300
-	1    0    0    -1  
-$EndComp
-Text GLabel 1950 6600 0    60   Input ~ 0
-PQ2
-Text GLabel 1950 6100 0    60   Input ~ 0
-PQ3
-Text GLabel 1950 6300 0    60   Input ~ 0
-+3.3v
-Text GLabel 1550 6200 0    60   Input ~ 0
-GND
-Text GLabel 1550 6400 0    60   Input ~ 0
-PQ0
-Text GLabel 1550 6000 0    60   Input ~ 0
-PQ1
-Wire Wire Line
-	1950 6100 2300 6100
-Wire Wire Line
-	2300 6000 1550 6000
-Wire Wire Line
-	1550 6200 2300 6200
-Wire Wire Line
-	2300 6300 1950 6300
-Wire Wire Line
-	1550 6400 2300 6400
-Wire Wire Line
-	2300 6600 1950 6600
 $EndSCHEMATC
