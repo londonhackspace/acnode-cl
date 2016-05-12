@@ -400,17 +400,6 @@ $EndComp
 Text GLabel 2100 1600 0    60   Input ~ 0
 +5V
 $Comp
-L R R2
-U 1 1 572DD805
-P 2750 3050
-F 0 "R2" H 2820 3096 50  0000 L CNN
-F 1 "100" H 2820 3004 50  0000 L CNN
-F 2 "Resistors_ThroughHole:Resistor_Horizontal_RM10mm" V 2680 3050 50  0001 C CNN
-F 3 "" H 2750 3050 50  0000 C CNN
-	1    2750 3050
-	1    0    0    -1  
-$EndComp
-$Comp
 L D D1
 U 1 1 572DD85B
 P 2500 2000
@@ -434,19 +423,17 @@ Wire Wire Line
 	2750 1600 2750 1850
 Connection ~ 2750 1850
 Wire Wire Line
-	2750 2800 2750 2900
+	2750 2800 2750 3300
 Text GLabel 2100 3300 0    60   Input ~ 0
 GND
 Wire Wire Line
-	2100 3300 2750 3300
-Wire Wire Line
-	2750 3300 2750 3200
+	2750 3300 2100 3300
 $Comp
 L R R1
 U 1 1 572DDBEA
 P 2200 2600
 F 0 "R1" V 1992 2600 50  0000 C CNN
-F 1 "10k" V 2084 2600 50  0000 C CNN
+F 1 "1k" V 2084 2600 50  0000 C CNN
 F 2 "Resistors_ThroughHole:Resistor_Horizontal_RM10mm" V 2130 2600 50  0001 C CNN
 F 3 "" H 2200 2600 50  0000 C CNN
 	1    2200 2600
