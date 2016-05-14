@@ -351,22 +351,6 @@ Wire Wire Line
 Wire Wire Line
 	9900 5100 9900 4450
 Connection ~ 9900 4450
-Text GLabel 1950 6500 0    60   Input ~ 0
-PQ2
-Text GLabel 1950 6100 0    60   Input ~ 0
-PQ3
-Text GLabel 1550 6200 0    60   Input ~ 0
-+3.3v
-Text GLabel 1550 6400 0    60   Input ~ 0
-GND
-Text GLabel 1950 6300 0    60   Input ~ 0
-PQ0
-Text GLabel 1550 6000 0    60   Input ~ 0
-PQ1
-Wire Wire Line
-	1950 6100 2400 6100
-Wire Wire Line
-	1550 6000 2400 6000
 $Comp
 L SW_PUSH SW2
 U 1 1 572DC67E
@@ -473,17 +457,6 @@ Wire Wire Line
 Wire Wire Line
 	3900 2100 4200 2100
 $Comp
-L C_Small C1
-U 1 1 572DE1F3
-P 1900 5750
-F 0 "C1" V 1670 5750 50  0000 C CNN
-F 1 "10nF" V 1762 5750 50  0000 C CNN
-F 2 "Capacitors_SMD:C_1210_HandSoldering" H 1900 5750 50  0001 C CNN
-F 3 "" H 1900 5750 50  0000 C CNN
-	1    1900 5750
-	0    1    1    0   
-$EndComp
-$Comp
 L PN2222A Q1
 U 1 1 572E2FF6
 P 2650 2600
@@ -514,35 +487,53 @@ Wire Wire Line
 $Comp
 L MICRO_SD_HINGE J1
 U 1 1 572E391C
-P 3200 6300
-F 0 "J1" H 3250 6350 60  0000 C CNN
-F 1 "MICRO_SD_HINGE" H 3200 6850 60  0000 C CNN
-F 2 "armory:MICRO_SD_HINGE_AMP" V 3310 5800 60  0001 C CNN
-F 3 "" V 3310 5800 60  0000 C CNN
-	1    3200 6300
+P 3350 6200
+F 0 "J1" H 3400 6250 60  0000 C CNN
+F 1 "MICRO_SD_HINGE" H 3350 6750 60  0000 C CNN
+F 2 "MicroSD:MICRO_SD_HINGE_CHINA" V 3460 5700 60  0001 C CNN
+F 3 "" V 3460 5700 60  0000 C CNN
+	1    3350 6200
 	1    0    0    -1  
 $EndComp
+Text GLabel 2200 6400 0    60   Input ~ 0
+PQ1
+Text GLabel 1800 6300 0    60   Input ~ 0
+PQ3
+Text GLabel 2200 6200 0    60   Input ~ 0
++3.3v
+Text GLabel 1800 6100 0    60   Input ~ 0
+PQ0
+Text GLabel 2200 6000 0    60   Input ~ 0
+GND
+Text GLabel 1800 5900 0    60   Input ~ 0
+PQ2
 Wire Wire Line
-	1550 6400 2400 6400
+	2200 6400 2550 6400
 Wire Wire Line
-	2400 6500 1950 6500
+	2550 6300 1800 6300
 Wire Wire Line
-	1550 6200 2400 6200
+	2200 6200 2550 6200
 Wire Wire Line
-	1950 6300 2400 6300
+	1800 6100 2550 6100
 Wire Wire Line
-	1800 5750 1650 5750
+	2550 6000 2200 6000
 Wire Wire Line
-	1650 5750 1650 6200
-Connection ~ 1650 6200
+	1800 5900 2550 5900
+$Comp
+L C_Small C1
+U 1 1 5736F818
+P 2350 5500
+F 0 "C1" H 2360 5570 50  0000 L CNN
+F 1 "C_Small" H 2360 5420 50  0000 L CNN
+F 2 "Capacitors_SMD:C_1206" H 2350 5500 50  0001 C CNN
+F 3 "" H 2350 5500 50  0000 C CNN
+	1    2350 5500
+	0    1    1    0   
+$EndComp
 Wire Wire Line
-	2000 5750 2150 5750
+	2250 5500 2250 6000
+Connection ~ 2250 6000
 Wire Wire Line
-	2150 5750 2150 7000
-Connection ~ 2150 6400
-Wire Wire Line
-	2150 7000 3450 7000
-Connection ~ 3350 7000
-Connection ~ 3250 7000
-Connection ~ 3150 7000
+	2450 5500 2450 6200
+Connection ~ 2450 6200
 $EndSCHEMATC
