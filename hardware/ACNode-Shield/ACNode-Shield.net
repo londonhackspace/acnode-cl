@@ -1,7 +1,7 @@
 (export (version D)
   (design
     (source /Users/jps/github/ACNodeClient/hardware/ACNode-Shield/ACNode-Shield.sch)
-    (date "2016 May 14, Saturday 10:43:26")
+    (date "2016 June 11, Saturday 22:57:41")
     (tool "Eeschema 4.0.2-stable")
     (sheet (number 1) (name /) (tstamps /)
       (title_block
@@ -96,7 +96,7 @@
     (comp (ref J1)
       (value MICRO_SD_HINGE)
       (footprint MicroSD:MICRO_SD_HINGE_CHINA)
-      (libsource (lib armory) (part MICRO_SD_HINGE))
+      (libsource (lib ACNode-Shield-cache) (part MICRO_SD_HINGE))
       (sheetpath (names /) (tstamps /))
       (tstamp 572E391C))
     (comp (ref C1)
@@ -194,7 +194,7 @@
       (pins
         (pin (num 1) (name K) (type passive))
         (pin (num 2) (name A) (type passive))))
-    (libpart (lib armory) (part MICRO_SD_HINGE)
+    (libpart (lib ACNode-Shield-cache) (part MICRO_SD_HINGE)
       (fields
         (field (name Reference) J)
         (field (name Value) MICRO_SD_HINGE))
@@ -258,18 +258,18 @@
         (pin (num 3) (name GND) (type power_in))
         (pin (num 4) (name DIN) (type input)))))
   (libraries
-    (library (logical armory)
-      (uri /Users/jps/github/ACNodeClient/hardware/ACNode-Shield/lib/armory.lib))
-    (library (logical conn)
-      (uri "/Library/Application Support/kicad/library/conn.lib"))
-    (library (logical transistors)
-      (uri "/Library/Application Support/kicad/library/transistors.lib"))
+    (library (logical ws2812)
+      (uri /Users/jps/github/ACNodeClient/hardware/ACNode-Shield/lib/ws2812.lib))
     (library (logical device)
       (uri "/Library/Application Support/kicad/library/device.lib"))
+    (library (logical transistors)
+      (uri "/Library/Application Support/kicad/library/transistors.lib"))
+    (library (logical conn)
+      (uri "/Library/Application Support/kicad/library/conn.lib"))
     (library (logical srd-05vdc-sl-c)
       (uri /Users/jps/github/ACNodeClient/hardware/ACNode-Shield/lib/srd-05vdc-sl-c.lib))
-    (library (logical ws2812)
-      (uri /Users/jps/github/ACNodeClient/hardware/ACNode-Shield/lib/ws2812.lib)))
+    (library (logical ACNode-Shield-cache)
+      (uri /Users/jps/github/ACNodeClient/hardware/ACNode-Shield/ACNode-Shield-cache.lib)))
   (nets
     (net (code 1) (name PP5)
       (node (ref U2) (pin 4))
