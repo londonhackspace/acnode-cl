@@ -33,6 +33,7 @@ ACNodeClient
 #include "sdcache.h"
 #include "eepromcache.h"
 #include "nocache.h"
+#include "doorbot.h"
 
 // create microrl object and pointer on it
 microrl_t rl;
@@ -283,7 +284,24 @@ enum MenuState {ADD, OFFLINE, ONLINE};
 MenuType menu = NOMENU;
 MenuState menu_state;
 
+Door door(PG_1, 0);
+Doorbot doorbot(door, wdog, nfc, rgb);
+
 void loop() {
+  // put received char from stdin to microrl lib
+  if (Serial.available()) {
+    char c;
+    c = Serial.read();
+    microrl_insert_char (prl, c);
+  }
+  acsettings.role == 1 ? doorbot_loop() : acnode_loop();
+}
+
+void doorbot_loop() {
+  doorbot.run();
+}
+
+void acnode_loop() {
   Card tu;
   boolean check = true;
 
