@@ -130,6 +130,21 @@ void dump_settings(settings acsettings) {
   } else {
     Serial.println("LOW.");
   }
+
+  Serial.print("This node behaves like a: ");
+  switch(acsettings.role) {
+    case 0:
+      Serial.println("regular acnode");
+      break;
+    case 1:
+      Serial.println("doorbot");
+      break;
+    case 2:
+      Serial.println("doorbot with access control");
+      break;
+    case 3:
+      Serial.println("auditing only");
+  }
 }
 
 settings get_settings(void) {
@@ -227,6 +242,7 @@ settings get_settings(void) {
       acsettings.toolrunpin_activehigh = 0;
 
       memset(acsettings.secret, 0, KEYLEN);
+      acsettings.role = 0;
 
       // save the settings since it's a new board.
       acsettings.valid = ACSETTINGSVALID;

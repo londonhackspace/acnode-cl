@@ -48,8 +48,9 @@ void mrlprint(const char * str) {
 #define _SCMD_HIGH      "high"
 #define _SCMD_LOW       "low"
 #define _CMD_SECRET   "secret"
+#define _CMD_ROLE "role"
 
-#define _NUM_OF_CMD 23
+#define _NUM_OF_CMD 24
 #define _NUM_OF_VER_SCMD 2
 #define _NUM_OF_CACHE_SCMD 2
 #define _NUM_OF_PIN_SCMD 2
@@ -58,7 +59,7 @@ void mrlprint(const char * str) {
 const char *keyworld [] = {
   _CMD_HELP, _CMD_SHOW, _CMD_MAC, _CMD_SERVER, _CMD_NODEID, _CMD_PORT, _CMD_VER, _CMD_SAVE, _CMD_CLEAR,
   _CMD_LIST, _CMD_REBOOT, _CMD_NUKE, _CMD_SYSLOG, _CMD_NAME, _CMD_RTIME, _CMD_FILL, _CMD_VERIFY,
-  _CMD_MINONTIME, _CMD_CACHE, _CMD_NETVERBOSE, _CMD_TOOLONPIN, _CMD_TOOLRUNPIN, _CMD_SECRET
+  _CMD_MINONTIME, _CMD_CACHE, _CMD_NETVERBOSE, _CMD_TOOLONPIN, _CMD_TOOLRUNPIN, _CMD_SECRET, _CMD_ROLE
 };
 // version subcommands
 const char * ver_keyworld [] = {
@@ -99,6 +100,7 @@ void print_help ()
   Serial.println ("\ttoolonpin {high | low} - Set tool on pin to be active high or low.");
   Serial.println ("\ttoolrunpin {high | low} - set toolrun pin to be active high or low.");
   Serial.println ("\tsecret <secret> - 8 char secret for authenticating with the acserver.");
+  Serial.println ("\trole <role id> - how this acnode behaves: 0 - regular acnode, 1 - doorbot, 2 - doorbot with access control, 3 - audit only");
 }
 
 bool ishex(char c) {
@@ -139,19 +141,19 @@ int mrlexecute (int argc, const char * const * argv)
       if (++i < argc) {
         if (strcmp (argv[i], _SCMD_ACNODE) == 0) {
           Serial.print ("ACNode v " ACVERSION "\n\r");
-        } 
+        }
         else if (strcmp (argv[i], _SCMD_MRL) == 0) {
           Serial.print ("microrl v 1.2\n\r");
-        } 
+        }
         else {
           Serial.print ((char*)argv[i]);
           Serial.print (" wrong argument, see help\n\r");
         }
-      } 
+      }
       else {
         Serial.print ("version needs 1 paramater, see help\n\r");
       }
-    } 
+    }
     else if (strcmp (argv[i], _CMD_SHOW) == 0) {
       dump_settings(acsettings);
     }
@@ -166,20 +168,20 @@ int mrlexecute (int argc, const char * const * argv)
             if (ishex(argv[i][j * 3])) {
               ok = true;
             } else {
-              ok = false; 
+              ok = false;
               break;
             }
             if (ishex(argv[i][(j * 3) + 1])) {
               ok = true;
             } else {
-              ok = false; 
+              ok = false;
               break;
             }
             if (j < 5) {
               if (argv[i][(j * 3) + 2] == ':') {
                 ok = true;
               } else {
-                ok = false; 
+                ok = false;
                 break;
               }
             }
@@ -200,11 +202,11 @@ int mrlexecute (int argc, const char * const * argv)
         } else {
           Serial.println("mac address wrong length");
         }
-      } 
+      }
       else {
         Serial.println("mac <macaddress>");
       }
-    } 
+    }
     else if (strcmp (argv[i], _CMD_SERVER) == 0) {
       if ((++i) < argc) { // if value preset
         if (strlen (argv[i]) < SERVERNAMELEN) {
@@ -214,11 +216,11 @@ int mrlexecute (int argc, const char * const * argv)
         } else {
           Serial.println("server name too long!");
         }
-      } 
+      }
       else {
         Serial.println("server <hostname>");
       }
-    } 
+    }
     else if (strcmp (argv[i], _CMD_NODEID) == 0) {
       if ((++i) < argc) { // if value preset
         // not likely to have more than 999 tools.
@@ -250,7 +252,7 @@ int mrlexecute (int argc, const char * const * argv)
         } else {
           Serial.println("nodeid too big");
         }
-      } 
+      }
     }
     else if (strcmp (argv[i], _CMD_PORT) == 0) {
       if ((++i) < argc) { // if value preset
@@ -296,7 +298,7 @@ int mrlexecute (int argc, const char * const * argv)
       if (ret == 0) {
         Serial.println("OK!");
         acsettings.valid = ACSETTINGSVALID;
-      } 
+      }
       else {
         Serial.print("Error: ");
         Serial.println(ret);
@@ -496,6 +498,18 @@ int mrlexecute (int argc, const char * const * argv)
         Serial.println("secret <secret key> - 8 chars long, ascii only");
       }
     }
+    else if (strcmp (argv[i], _CMD_ROLE) == 0) {
+      if ((++i) < argc) { // if value preset
+        int role = atoi(argv[i]);
+        if (role > -1 && role < 4) {
+          acsettings.role = role;
+        } else {
+          Serial.println("Invalid role.");
+        }
+      } else {
+        Serial.println("role <role id>");
+      }
+    }
     else {
       Serial.print ("command: '");
       Serial.print ((char*)argv[i]);
@@ -541,7 +555,7 @@ char ** mrlcomplete(int argc, const char * const * argv)
         compl_world [j++] = (char *)cache_keyword[i];
       }
     }
-  } 
+  }
   else if ((argc > 1) && ((strcmp (argv[0], _CMD_TOOLONPIN)==0) || (strcmp (argv[0], _CMD_TOOLRUNPIN)==0))) { // if command needs subcommands
     // iterate through subcommand for the pin commands
     for (int i = 0; i < _NUM_OF_PIN_SCMD; i++) {
@@ -561,4 +575,3 @@ char ** mrlcomplete(int argc, const char * const * argv)
   // return set of variants
   return compl_world;
 }
-
