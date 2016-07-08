@@ -51,7 +51,7 @@ void mrlprint(const char * str) {
 #define _CMD_ROLE "role"
 #define _CMD_ANNOUNCE_PORT "announce_port"
 
-#define _NUM_OF_CMD 24
+#define _NUM_OF_CMD 25
 #define _NUM_OF_VER_SCMD 2
 #define _NUM_OF_CACHE_SCMD 2
 #define _NUM_OF_PIN_SCMD 2
@@ -553,6 +553,8 @@ int mrlexecute (int argc, const char * const * argv)
         Serial.println("announce_port <port>");
       }
     }
+=======
+>>>>>>> 11e1589... This device can have one of four roles.
     else {
       Serial.print ("command: '");
       Serial.print ((char*)argv[i]);
