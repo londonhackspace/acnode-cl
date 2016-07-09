@@ -145,6 +145,11 @@ void dump_settings(settings acsettings) {
     case 3:
       Serial.println("auditing only");
   }
+
+  if (acsettings.role > 0) {
+    Serial.print("Announcer port: ");
+    Serial.println(acsettings.announce_port);
+  }
 }
 
 settings get_settings(void) {
@@ -243,6 +248,7 @@ settings get_settings(void) {
 
       memset(acsettings.secret, 0, KEYLEN);
       acsettings.role = 0;
+      acsettings.announce_port = 0;
 
       // save the settings since it's a new board.
       acsettings.valid = ACSETTINGSVALID;

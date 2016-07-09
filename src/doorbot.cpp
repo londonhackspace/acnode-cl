@@ -1,8 +1,21 @@
 #include "doorbot.h"
 
-Doorbot::Doorbot(Door &d, Watchdog &w, PN532 &n, RGB &l) : door(d), wdog(w), nfc(n), led(l) {
-
+Doorbot::Doorbot(Door &d, Watchdog &w, PN532 &n, RGB &l) :
+  door(d),
+  wdog(w),
+  nfc(n),
+  led(l)
+  {
+    this->announcer = NULL;
 };
+
+void Doorbot::enableAnnouncer(uint16_t port) {
+  if (this->announcer) {
+    delete this->announcer;
+  }
+  this->announcer = new Announcer(port);
+  this->announcer->START();
+}
 
 void Doorbot::run() {
   wdog.feed();
@@ -44,6 +57,8 @@ void Doorbot::cardPresent(void (Doorbot::*handler) (Card c)) {
 
 void Doorbot::handleCardPresent(Card c) {
   int status = querycard(c);
+  announceCard(c);
+
   switch (status) {
     case -1:
         denyAccess();
@@ -51,6 +66,12 @@ void Doorbot::handleCardPresent(Card c) {
     default:
       grantAccess();
   }
+}
+
+void Doorbot::announceCard(Card c) {
+  char buffer[14];
+  c.str(buffer);
+  this->announcer->RFID(buffer);
 }
 
 void Doorbot::denyAccess() {

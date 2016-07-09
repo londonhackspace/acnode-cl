@@ -2,6 +2,7 @@
 #define _DOORBOT_H_
 
 #include "door.h"
+#include "announcer.h"
 #include "card.h"
 #include "network.h"
 #include "watchdog.h"
@@ -13,16 +14,19 @@
 class Doorbot {
   public:
     Doorbot(Door &, Watchdog &, PN532 &, RGB &l);
+    void enableAnnouncer(uint16_t port);
     void run();
   private:
     void cardPresent(void (Doorbot::*handler) (Card c));
     void handleCardPresent(Card c);
     void denyAccess();
     void grantAccess();
+    void announceCard(Card c);
     Door& door;
     Watchdog &wdog;
     PN532 &nfc;
     RGB &led;
+    Announcer *announcer;
 };
 
 #endif

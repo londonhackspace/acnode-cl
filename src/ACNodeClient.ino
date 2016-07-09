@@ -75,6 +75,9 @@ Watchdog wdog;
 
 Cache *cache = NULL;
 
+Door door(PG_1, 0);
+Doorbot doorbot(door, wdog, nfc, rgb);
+
 #define SD_CS_PIN PC_7
 #define ACNODE_DIR "ACNODE"
 
@@ -182,6 +185,8 @@ void setup() {
     syslog.syslog(LOG_ALERT, "Alert! Was previously reset by the watchdog!");
   }
 
+  doorbot.enableAnnouncer(acsettings.announce_port);
+
   button.begin();
   one_sec.begin();
   five_sec.begin();
@@ -284,8 +289,6 @@ enum MenuState {ADD, OFFLINE, ONLINE};
 MenuType menu = NOMENU;
 MenuState menu_state;
 
-Door door(PG_1, 0);
-Doorbot doorbot(door, wdog, nfc, rgb);
 
 void loop() {
   // put received char from stdin to microrl lib

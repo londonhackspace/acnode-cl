@@ -65,7 +65,8 @@ struct settings {
   uint8_t minontime; // the minimum time the tool should be on for.
   char secret[KEYLEN + 1]; // API key to talk to the acserver
   uint8_t role; // 0 - regular acnode, 1 - doorbot, 2 - auditor
-  char __padding[3];
+  uint16_t announce_port;
+  char __padding[1];
 } __attribute__ ((packed));
 
 settings get_settings(void);
