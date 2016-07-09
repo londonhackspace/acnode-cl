@@ -32,6 +32,7 @@ ACNodeClient
 #include "card.h"
 #include "sdcache.h"
 #include "eepromcache.h"
+#include "nocache.h"
 
 // create microrl object and pointer on it
 microrl_t rl;
@@ -127,9 +128,8 @@ void setup() {
       Serial.println("Using the SD Card to cache cards");
     } else {
       Serial.println("SD card could not be accessed");
-      Serial.println("Please fix the SD card and try again.");
-      rgb.red();
-      while (1) {;}
+      Serial.println("Please fix the SD card and try again. Cache is disabled until reboot.");
+      cache = new NoCache();
     }
   } else {
       Serial.println("Using the eeprom to cache cards");
