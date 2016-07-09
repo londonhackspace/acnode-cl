@@ -34,6 +34,7 @@ ACNodeClient
 #include "eepromcache.h"
 #include "nocache.h"
 #include "doorbot.h"
+#include "doorbot_ac.h"
 
 // create microrl object and pointer on it
 microrl_t rl;
@@ -76,7 +77,7 @@ Watchdog wdog;
 Cache *cache = NULL;
 
 Door door(PG_1, 0);
-Doorbot doorbot(door, wdog, nfc, rgb);
+Doorbot *doorbot = NULL;
 
 #define SD_CS_PIN PC_7
 #define ACNODE_DIR "ACNODE"
@@ -185,7 +186,16 @@ void setup() {
     syslog.syslog(LOG_ALERT, "Alert! Was previously reset by the watchdog!");
   }
 
-  doorbot.enableAnnouncer(acsettings.announce_port);
+  switch (acsettings.role) {
+    case 1:
+      doorbot = new Doorbot(door, wdog, nfc, rgb);
+      doorbot->enableAnnouncer(acsettings.announce_port);
+      break;
+    case 2:
+      doorbot = new DoorbotWithAccessControl(door, wdog, nfc, rgb);
+      doorbot->enableAnnouncer(acsettings.announce_port);
+      break;
+  }
 
   button.begin();
   one_sec.begin();
@@ -297,11 +307,18 @@ void loop() {
     c = Serial.read();
     microrl_insert_char (prl, c);
   }
-  acsettings.role == 1 ? doorbot_loop() : acnode_loop();
+  switch (acsettings.role) {
+    case 1:
+    case 2:
+      doorbot->run();
+      break;
+    default:
+      acnode_loop();
+  }
 }
 
 void doorbot_loop() {
-  doorbot.run();
+  doorbot->run();
 }
 
 void acnode_loop() {
