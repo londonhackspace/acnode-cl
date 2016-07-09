@@ -78,6 +78,7 @@ Cache *cache = NULL;
 
 Door door(PG_1, 0);
 Doorbot *doorbot = NULL;
+Doorbot doorbot(door, wdog, nfc, rgb);
 
 #define SD_CS_PIN PC_7
 #define ACNODE_DIR "ACNODE"

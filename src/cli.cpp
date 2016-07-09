@@ -553,8 +553,6 @@ int mrlexecute (int argc, const char * const * argv)
         Serial.println("announce_port <port>");
       }
     }
-=======
->>>>>>> 11e1589... This device can have one of four roles.
     else {
       Serial.print ("command: '");
       Serial.print ((char*)argv[i]);
