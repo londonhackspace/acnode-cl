@@ -7,6 +7,7 @@
 #include "network.h"
 #include "watchdog.h"
 #include "rgb.h"
+#include "every.h"
 #include "PN532.h"
 
 #define ACCESS_DENIED_LED_ON_TIME 2000
@@ -27,6 +28,9 @@ class Doorbot {
     PN532 &nfc;
     RGB &led;
     Announcer *announcer;
+    Every *every_card;
+    Card lastScanned;
+    unsigned long lastScannedTime;
 };
 
 #endif

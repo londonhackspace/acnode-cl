@@ -7,6 +7,7 @@ Doorbot::Doorbot(Door &d, Watchdog &w, PN532 &n, RGB &l) :
   led(l)
   {
     this->announcer = NULL;
+    this->every_card = new Every(500);
 };
 
 void Doorbot::enableAnnouncer(uint16_t port) {
@@ -29,6 +30,9 @@ void Doorbot::run() {
 };
 
 void Doorbot::cardPresent(void (Doorbot::*handler) (Card c)) {
+  // No need to check that often.
+  if (!this->every_card->check()) return;
+
   uint8_t uid[] = { 0, 0, 0, 0, 0, 0, 0 };  // Buffer to store the returned UID
   uint8_t uidLength;                        // Length of the UID (4 or 7 bytes depending on ISO14443A card type)
 
@@ -69,9 +73,14 @@ void Doorbot::handleCardPresent(Card c) {
 }
 
 void Doorbot::announceCard(Card c) {
-  char buffer[14];
-  c.str(buffer);
-  this->announcer->RFID(buffer);
+  // Debouncing.
+  if (this->lastScanned != c || millis() - this->lastScannedTime > 5000) {
+    char buffer[14];
+    c.str(buffer);
+    this->announcer->RFID(buffer);
+    this->lastScanned = c;
+    this->lastScannedTime = millis();
+  }
 }
 
 void Doorbot::denyAccess() {
