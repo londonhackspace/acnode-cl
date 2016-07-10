@@ -163,7 +163,7 @@ settings get_settings(void) {
         acsettings.toolonpin_activehigh = 1;
         // the laser signal is inverted
         acsettings.toolrunpin_activehigh = 0;
-        acsettings.secret[0] = '\0';
+        memset(acsettings.secret, 0, KEYLEN);
       }
 
       acsettings.valid = ACSETTINGSVALID;
@@ -191,7 +191,7 @@ settings get_settings(void) {
         acsettings.toolonpin_activehigh = osettings.toolonpin_activehigh;
         acsettings.toolrunpin_activehigh = osettings.toolrunpin_activehigh;
 
-        acsettings.secret[0] = '\0';
+        memset(acsettings.secret, 0, KEYLEN);
 
         acsettings.valid = ACSETTINGSVALID;
         set_settings(acsettings);
@@ -226,7 +226,7 @@ settings get_settings(void) {
       // the laser signal is inverted
       acsettings.toolrunpin_activehigh = 0;
 
-      acsettings.secret[0] = '\0';
+      memset(acsettings.secret, 0, KEYLEN);
 
       // save the settings since it's a new board.
       acsettings.valid = ACSETTINGSVALID;
