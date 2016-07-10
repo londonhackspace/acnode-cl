@@ -507,6 +507,8 @@ int mrlexecute (int argc, const char * const * argv)
         int role = atoi(argv[i]);
         if (role > -1 && role < 4) {
           acsettings.role = role;
+          Serial.print("new role: ");
+          Serial.println(role);
         } else {
           Serial.println("Invalid role.");
         }
