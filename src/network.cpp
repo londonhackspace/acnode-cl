@@ -38,11 +38,14 @@ int handle_response(int success, HttpClient &http) {
     http.sendHeader("X-AC-Key", acsettings.secret);
   }
   http.endRequest();
+  wdog.feed();
   int result = -99;
   if (success == HTTP_SUCCESS) {
     if (http.responseStatusCode() == 200) {
       if (http.available()) {
         http.skipResponseHeaders();
+        wdog.feed();
+
         uint8_t buffer[16];
         http.read(buffer, 16);
         log(buffer);
@@ -69,6 +72,7 @@ int get_url(char *path) {
     http.beginRequest();
 
     log("GET ", path);
+    wdog.feed();
     result = handle_response(http.get(acsettings.servername, acsettings.port, path, user_agent()), http);
     http.stop();
     log(result);
@@ -82,6 +86,7 @@ int post_url(char *path) {
   http.beginRequest();
 
   log("POST ", path);
+  wdog.feed();
   result = handle_response(http.post(acsettings.servername, acsettings.port, path, user_agent()), http);
   http.stop();
   log(result);
