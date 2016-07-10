@@ -11,7 +11,7 @@ namespace networking {
     return user_agent;
   }
 
-  void log(uint8_t l) {
+  void log(int l) {
 #ifdef LOGGING
     Serial.print("> ");
     Serial.println(l);
@@ -34,6 +34,10 @@ namespace networking {
   }
 
 int handle_response(int success, HttpClient &http) {
+  if (strlen(acsettings.secret) > 0) {
+    http.sendHeader("X-AC-Key", acsettings.secret);
+  }
+  http.endRequest();
   int result = -99;
   if (success == HTTP_SUCCESS) {
     if (http.responseStatusCode() == 200) {
@@ -43,6 +47,11 @@ int handle_response(int success, HttpClient &http) {
         http.read(buffer, 16);
         log(buffer);
         result = strtol((const char *)buffer, NULL, 10);
+
+        if (result < 0) {
+          result = (-result) & 0xff;
+          result = -result;
+        }
       } else {
         result = -98;
       }
@@ -57,6 +66,8 @@ int get_url(char *path) {
     int result;
     HttpClient http(client);
     http.setHttpResponseTimeout(HTTP_TIMEOUT);
+    http.beginRequest();
+
     log("GET ", path);
     result = handle_response(http.get(acsettings.servername, acsettings.port, path, user_agent()), http);
     http.stop();
@@ -68,6 +79,8 @@ int post_url(char *path) {
   int result;
   HttpClient http(client);
   http.setHttpResponseTimeout(HTTP_TIMEOUT);
+  http.beginRequest();
+
   log("POST ", path);
   result = handle_response(http.post(acsettings.servername, acsettings.port, path, user_agent()), http);
   http.stop();
