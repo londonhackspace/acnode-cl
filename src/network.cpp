@@ -2,6 +2,8 @@
 #include "acnode.h"
 #include "version.h"
 
+#define HTTP_TIMEOUT 3000
+
 namespace networking {
   const char *user_agent() {
     static char user_agent[64];
@@ -31,41 +33,9 @@ namespace networking {
 #endif
   }
 
-  int get_url(char *path) {
-    int result;
-    HttpClient http(client);
-
-    log("GET ", path);
-
-    if (http.get(acsettings.servername, acsettings.port, path, user_agent()) == HTTP_SUCCESS) {
-      if (http.responseStatusCode() == 200) {
-        if (http.available()) {
-          http.skipResponseHeaders();
-          uint8_t buffer[16];
-          http.read(buffer, 16);
-          log(buffer);
-          result = strtol((const char *)buffer, NULL, 10);
-        } else {
-          result = -98;
-        }
-      } else {
-        result = -http.responseStatusCode();
-      }
-    } else {
-      result = -97;
-    }
-    http.stop();
-    log(result);
-    return result;
-}
-
-int post_url(char *path) {
-  int result;
-  HttpClient http(client);
-
-  log("POST ", path);
-
-  if (http.post(acsettings.servername, acsettings.port, path, user_agent()) == HTTP_SUCCESS) {
+int handle_response(int success, HttpClient &http) {
+  int result = -99;
+  if (success == HTTP_SUCCESS) {
     if (http.responseStatusCode() == 200) {
       if (http.available()) {
         http.skipResponseHeaders();
@@ -79,9 +49,27 @@ int post_url(char *path) {
     } else {
       result = -http.responseStatusCode();
     }
-  } else {
-    result = -97;
   }
+  return result;
+}
+
+int get_url(char *path) {
+    int result;
+    HttpClient http(client);
+    http.setHttpResponseTimeout(HTTP_TIMEOUT);
+    log("GET ", path);
+    result = handle_response(http.get(acsettings.servername, acsettings.port, path, user_agent()), http);
+    http.stop();
+    log(result);
+    return result;
+}
+
+int post_url(char *path) {
+  int result;
+  HttpClient http(client);
+  http.setHttpResponseTimeout(HTTP_TIMEOUT);
+  log("POST ", path);
+  result = handle_response(http.post(acsettings.servername, acsettings.port, path, user_agent()), http);
   http.stop();
   log(result);
   return result;
