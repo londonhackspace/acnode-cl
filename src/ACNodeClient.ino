@@ -64,6 +64,7 @@ Cache *cache = NULL;
 Door door(PG_1, 0);
 Doorbot *doorbot = NULL;
 ACNode *acnode = NULL;
+int active_role;
 
 #define SD_CS_PIN PC_7
 #define ACNODE_DIR "ACNODE"
@@ -172,7 +173,9 @@ void setup() {
     syslog.syslog(LOG_ALERT, "Alert! Was previously reset by the watchdog!");
   }
 
-  switch (acsettings.role) {
+  // The role may change when the user changes it via settings.
+  active_role = acsettings.role;
+  switch (active_role) {
     case 1:
       doorbot = new Doorbot(door, wdog, nfc, rgb);
       doorbot->enableAnnouncer(acsettings.announce_port);
@@ -270,7 +273,7 @@ void loop() {
     c = Serial.read();
     microrl_insert_char (prl, c);
   }
-  switch (acsettings.role) {
+  switch (active_role) {
     case 1:
     case 2:
       doorbot->run();
