@@ -29,7 +29,7 @@ void Doorbot::run() {
 };
 
 void Doorbot::handleCardPresent(Card c) {
-  int status = querycard(c);
+  int status = networking::querycard(c);
   announceCard(c);
 
   switch (status) {

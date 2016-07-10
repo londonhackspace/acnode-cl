@@ -14,7 +14,7 @@ void DoorbotWithAccessControl::run() {
 }
 
 void DoorbotWithAccessControl::handleCardPresent(Card c) {
-  int status = querycard(c);
+  int status = networking::querycard(c);
   announceCard(c);
 
   switch (status) {
