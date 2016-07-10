@@ -15,6 +15,7 @@ Table of Contents
   * [Building and flashing the firmware](#building-and-flashing-the-firmware)
   * [Pin assignments:](#pin-assignments)
   * [using the CLI](#using-the-cli)
+  * [Roles](#roles)
   * [Button status/colours:](#button-statuscolours)
   * [To use the button menu:](#to-use-the-button-menu)
     * [For maintainers the menu items are:](#for-maintainers-the-menu-items-are)
@@ -197,6 +198,26 @@ and then `save` to save the settings.
 * Out of service, idle: flashing blue/red
 * Out of service, valid user: red (and the tool will be off)
 * Out of service, maintainer: yellow (and the tool will turn on)
+
+# Roles
+
+Each node can work in a variety of roles:
+
+## Regular ACNode (0)
+
+When a card is presented and held, the tool is activated, provided the card has access to this particular tool.
+
+## Doorbot (1)
+
+Activates the tool if any known card is presented.
+
+## Doorbot with access control (2)
+
+Activates the tool if a card with access is presented.
+
+## Audit only (3)
+
+When any known card is presented and held, the tool is activated (no access control -- logging only).
 
 # To use the button menu:
 
