@@ -13,10 +13,6 @@ BUGS and TODO:
 #include <stdio.h>
 #endif
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 #define true  1
 #define false 0
 
@@ -689,8 +685,3 @@ void microrl_insert_char (microrl_t * pThis, int ch)
 	}
 #endif
 }
-
-#ifdef __cplusplus
-}
-#endif
-

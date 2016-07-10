@@ -4,10 +4,6 @@
 
 #include "config.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
  /* define the Key codes */
 #define KEY_NUL 0 /**< ^@ Null character */
 #define KEY_SOH 1 /**< ^A Start of heading, = console interrupt */
@@ -117,9 +113,3 @@ void microrl_set_sigint_callback (microrl_t * pThis, void (*sigintf)(void));
 void microrl_insert_char (microrl_t * pThis, int ch);
 
 #endif
-
-#ifdef __cplusplus
-}
-#endif
-
-
