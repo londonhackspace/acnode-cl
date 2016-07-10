@@ -80,16 +80,7 @@ Cache *cache = NULL;
 void setup() {
   Serial.begin(9600);
   Serial.println("");
-  Serial.print("\n\nACNode Client version ");
-  Serial.print(ACVERSION);
-  Serial.print(" built with Energia ");
-  Serial.print(ENERGIA);
-  Serial.print(", Arduino API version ");
-  Serial.println(ARDUINO);
-  Serial.print("Built on ");
-  Serial.print(__DATE__);
-  Serial.print(" ");
-  Serial.println(__TIME__);
+  print_buildinfo();
   Serial.println("Starting up.");
   // lets use all the LED's
   pinMode(D1_LED, OUTPUT);

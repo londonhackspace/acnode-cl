@@ -71,6 +71,6 @@ int set_settings(settings acsettings);
 void init_settings(void);
 void dump_settings(settings acsettings);
 int clear_settings(void);
+void print_buildinfo();
 
 #endif
-

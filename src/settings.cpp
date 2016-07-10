@@ -36,6 +36,8 @@ void init_settings(void) {
 }
 
 void dump_settings(settings acsettings) {
+  print_buildinfo();
+
   if (acsettings.valid) {
     Serial.println("Using settings from eeprom");
   } else {
@@ -71,10 +73,10 @@ void dump_settings(settings acsettings) {
   } else {
      Serial.println("Not Set!");
   }
-  
+
   Serial.print("Port: ");
   Serial.println(acsettings.port);
-  
+
   Serial.print("nodeid: ");
   Serial.println(acsettings.nodeid);
 
@@ -265,3 +267,15 @@ int clear_settings(void) {
   return ret;
 }
 
+void print_buildinfo() {
+  Serial.print("Revision: ");
+  Serial.println(GIT_REVISION);
+  Serial.print("Built with Energia ");
+  Serial.print(ENERGIA);
+  Serial.print(", Arduino API version ");
+  Serial.println(ARDUINO);
+  Serial.print("Built on ");
+  Serial.print(__DATE__);
+  Serial.print(" ");
+  Serial.println(__TIME__);
+}
