@@ -142,7 +142,7 @@ void SDCache::verify(void) {
     wdog.feed();
     if (!u.invalid) {
       Card t(u.uid, u.uidlen, u.status, u.maintainer);
-      status = querycard(t);
+      status = networking::querycard(t);
       if (status == 0) {
         Serial.println("User no-longer valid: ");
         t.dump();
@@ -172,4 +172,3 @@ void SDCache::verify(void) {
   Serial.print(counter);
   Serial.println(" users");
 }
-

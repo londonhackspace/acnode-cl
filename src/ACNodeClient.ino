@@ -222,7 +222,7 @@ void setup() {
 
   if (network) {
     Serial.println("Checking tool status");
-    int status = networkCheckToolStatus();
+    int status = networking::networkCheckToolStatus();
 
     if (status == -1) {
       network = false;
@@ -429,7 +429,7 @@ void loop() {
           Serial.println(tmp);
           syslog.syslog(LOG_NOTICE, tmp);
 
-          addNewUser(nu, maintainer);
+          networking::addNewUser(nu, maintainer);
           adding = false;
         }
       }
@@ -462,7 +462,7 @@ void loop() {
       }
 
       if (check) {
-        status = querycard(cc);
+        status = networking::querycard(cc);
 
         // if we've lost contact with the acserver at some point
         // we need to check and re-establish it, might as well use this as the test.
@@ -560,7 +560,7 @@ void loop() {
           // only report tool usage if the network is ok.
           if (network) {
             // tell the server this user has started using the tool.
-            reportToolUse(cu, 1);
+            networking::reportToolUse(cu, 1);
           }
         }
 
@@ -577,7 +577,7 @@ void loop() {
           // only report tool usage if the network is ok.
           if (network) {
             // tell the server this user has stopped using the tool.
-            reportToolUse(cu, 0);
+            networking::reportToolUse(cu, 0);
           }
         }
 
@@ -625,7 +625,7 @@ void card_loop() {
       if (network) {
         // only check every 2 seconds
         if (tool_status_check.check()) {
-          status = networkCheckToolStatus();
+          status = networking::networkCheckToolStatus();
         }
       }
 
@@ -740,7 +740,7 @@ void offline(void) {
   Serial.println(tmp);
   syslog.syslog(LOG_WARNING, tmp);
 
-  int ret = setToolStatus(0, cu);
+  int ret = networking::setToolStatus(0, cu);
   Serial.print("After setting ToolStatus: ");
   Serial.println(ret);
 
@@ -760,7 +760,7 @@ void online(void) {
   Serial.println(tmp);
   syslog.syslog(LOG_WARNING, tmp);
 
-  int ret = setToolStatus(1, cu);
+  int ret = networking::setToolStatus(1, cu);
   Serial.print("After setting ToolStatus: ");
   Serial.println(ret);
 

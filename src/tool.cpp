@@ -148,7 +148,7 @@ void Tool::stoprunning() {
     syslog.syslog(LOG_NOTICE, msg);
 
     if (network) {
-      toolUseTime(tool_user, duration);
+      networking::toolUseTime(tool_user, duration);
     }
 }
 
@@ -185,7 +185,7 @@ void Tool::on(Card user) {
     } else {
       digitalWrite(_toolpin, LOW);
     }
-    // end 
+    // end
     _toolon = true;
     _ontime = millis();
     tool_user = user;
@@ -241,4 +241,3 @@ void Tool::off() {
 boolean Tool::status() {
   return _toolon;
 }
-

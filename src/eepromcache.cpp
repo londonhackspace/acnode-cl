@@ -119,7 +119,7 @@ void EEPromCache::verify(void) {
     }
     if (u.invalid == 0) {
       Card tc(u.uid, u.uidlen, u.status, u.maintainer);
-      if (querycard(tc) == 0) {
+      if (networking::querycard(tc) == 0) {
         Serial.println("User no-longer valid: ");
         tc.dump();
         u.invalid = 1;
@@ -259,4 +259,3 @@ Card EEPromCache::struct_to_card(const user u) {
   Card nc(u.uid, u.uidlen, u.status, u.maintainer);
   return nc;
 }
-
