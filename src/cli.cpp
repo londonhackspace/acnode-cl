@@ -483,23 +483,33 @@ int mrlexecute (int argc, const char * const * argv)
     else if (strcmp (argv[i], _CMD_SECRET) == 0) {
       boolean ok = false;
       if ((++i) < argc) { // if value preset
-        if (strlen (argv[i]) == KEYLEN) {
-          int k;
-          ok = true;
-          for (k = 0 ; k < KEYLEN ; k++) {
-            if (!isprint(argv[i][k])) {
-              ok = false;
+        int len = strlen(argv[i]);
+        switch (len) {
+          case 4:
+            if (strncmp(argv[i], "none", 4) == 0) {
+              memset(acsettings.secret, 0x0, 8);
+              Serial.println("secret disabled");
+              ok = true;
             }
-          }
-          if (ok) {
-            Serial.print("new API key: ");
-            Serial.println(argv[i]);
-            strncpy(acsettings.secret, argv[i], KEYLEN);
-          }
+            break;
+          case KEYLEN:
+            int k;
+            ok = true;
+            for (k = 0 ; k < KEYLEN ; k++) {
+              if (!isprint(argv[i][k])) {
+                ok = false;
+              }
+            }
+            if (ok) {
+              Serial.print("new API key: ");
+              Serial.println(argv[i]);
+              strncpy(acsettings.secret, argv[i], KEYLEN);
+            }
         }
       }
       if (!ok) {
         Serial.println("secret <secret key> - 8 chars long, ascii only");
+        Serial.println("secret none - disable secret");
       }
     }
     else if (strcmp (argv[i], _CMD_ROLE) == 0) {
