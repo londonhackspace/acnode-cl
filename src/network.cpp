@@ -68,6 +68,7 @@ int handle_response(int success, HttpClient &http) {
 int get_url(char *path) {
     int result;
     HttpClient http(client);
+    http.setHttpWaitForDataDelay(200);
     http.setHttpResponseTimeout(HTTP_TIMEOUT);
     http.beginRequest();
 
@@ -82,6 +83,7 @@ int get_url(char *path) {
 int post_url(char *path) {
   int result;
   HttpClient http(client);
+  http.setHttpWaitForDataDelay(200);
   http.setHttpResponseTimeout(HTTP_TIMEOUT);
   http.beginRequest();
 
