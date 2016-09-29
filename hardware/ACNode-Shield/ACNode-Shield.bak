@@ -30,7 +30,6 @@ LIBS:contrib
 LIBS:valves
 LIBS:ws2812
 LIBS:srd-05vdc-sl-c
-LIBS:armory
 LIBS:ACNode-Shield-cache
 EELAYER 25 0
 EELAYER END
