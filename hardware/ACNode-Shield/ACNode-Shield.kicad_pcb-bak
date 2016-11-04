@@ -3,7 +3,7 @@
   (general
     (links 45)
     (no_connects 2)
-    (area 11.949999 8.975 62.050001 65.175)
+    (area 11.949999 11.949999 62.050001 62.050001)
     (thickness 1.6)
     (drawings 6)
     (tracks 204)
@@ -830,10 +830,10 @@
     (pad "" smd rect (at -11.75 3.55) (size 1.3 2.4) (layers F.Cu F.Paste F.Mask))
   )
 
-  (gr_text LHS (at 42.2 60) (layer B.Cu)
+  (gr_text "LHS\nACNode\nShield\nrev 2" (at 17.4 56) (layer F.Cu)
     (effects (font (size 1.5 1.5) (thickness 0.3)))
   )
-  (gr_text "LHS\nACNode\nShield\nrev 2" (at 17.2 56.3) (layer B.SilkS)
+  (gr_text LHS (at 42.2 60) (layer B.Cu)
     (effects (font (size 1.5 1.5) (thickness 0.3)) (justify mirror))
   )
   (gr_line (start 12 12) (end 12 62) (layer Edge.Cuts) (width 0.1))
