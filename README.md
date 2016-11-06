@@ -193,7 +193,7 @@ and then `save` to save the settings.
 * Starting up: yellow
 * In service, idle: blue
 * In service, valid user, tool on: green
-* In service, invalid user: orange
+* In service, invalid user: red
 * In service, maintainer: yellow
 * Out of service, idle: flashing blue/red
 * Out of service, valid user: red (and the tool will be off)

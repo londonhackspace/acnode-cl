@@ -37,46 +37,25 @@ extern Cache *cache;
 
 #define TRACE Serial.print(__FILE__); Serial.print(": "); Serial.println( __LINE__);
 
-enum MenuType {NOMENU, USER, MAINTAINER};
-enum MenuState {ADD, OFFLINE, ONLINE};
-
 class ACNode : public Role {
 public:
   ACNode(PN532 &, RGB &, Tool &, Button &b, microrl_t *);
   void run();
 protected:
-  void card_loop();
-  void menu_loop();
-  void offline();
-  void online();
-  void user_menu(int);
-  void maintainer_menu(int);
+  void feed_incoming_character();
+  bool card_present();
+  bool card_has_access();
+  void activate();
+  void deactivate();
+  void housekeeping();
   Card readcard();
 private:
-  Every card_every;
-  Every five_sec;
-  Every heart_every;
-  Every one_sec;
-  Every tool_status_check;
-
-  bool heartbeat;
-  bool card_on_reader;
-  bool adding;
-  unsigned long adding_timeout;
-  unsigned long menu_timeout;
-
-  MenuType menu;
-  MenuState menu_state;
-
   RGB &rgb;
   Tool &tool;
   Button &button;
 
   microrl_t *prl;
-
-  Card cu;
-  Card cc;
-  Card maintainer;
+  Card card_on_reader;
 };
 
 #endif
