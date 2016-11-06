@@ -99,7 +99,7 @@ void setup() {
 
   // start the rgb early so we can get some feedback
   rgb.begin();
-  rgb.yellow();
+  rgb.solid(YELLOW);
 
   wdog.feed();
 
@@ -249,9 +249,9 @@ void setup() {
     snprintf(tmp, 42, "total runtime: ");
     duration_str(tmp + strlen(tmp), acsettings.runtime);
     syslog.syslog(LOG_INFO, tmp);
-    rgb.blue();
+    rgb.solid(BLUE);
   } else {
-    rgb.orange();
+    rgb.solid(ORANGE);
   }
 
   wdog.feed();

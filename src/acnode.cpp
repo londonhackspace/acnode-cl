@@ -42,17 +42,18 @@ bool ACNode::card_has_access() {
 }
 
 void ACNode::activate() {
-  rgb.green();
+  rgb.solid(GREEN);
   tool.on(card_on_reader);
 }
 
 void ACNode::deactivate() {
-  rgb.blue();
+  rgb.solid(BLUE);
   tool.off();
 }
 
 void ACNode::housekeeping() {
   wdog.feed();
+  rgb.run();
   feed_incoming_character();
   tool.poll();
 }
@@ -65,7 +66,7 @@ void ACNode::run() {
     if (card_has_access()) {
       activate();
     } else {
-      rgb.red();
+      rgb.solid(RED);
     }
   } else {
     deactivate();

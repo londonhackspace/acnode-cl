@@ -20,11 +20,12 @@ void Doorbot::enableAnnouncer(uint16_t port) {
 void Doorbot::run() {
   wdog.feed();
   door.maybeClose();
+  led.run();
   cardPresent((void (Role::*)(Card c))&Doorbot::handleCardPresent);
   if (door.isOpen()) {
-    led.green();
+    led.solid(GREEN);
   } else {
-    led.blue();
+    led.solid(BLUE);
   }
 };
 
@@ -53,7 +54,7 @@ void Doorbot::announceCard(Card c) {
 }
 
 void Doorbot::denyAccess() {
-  led.red();
+  led.solid(RED);
   delay(ACCESS_DENIED_LED_ON_TIME);
 }
 
