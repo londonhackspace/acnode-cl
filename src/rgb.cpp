@@ -9,93 +9,40 @@ void RGB::begin() {
   pinMode(_r, OUTPUT);
   pinMode(_g, OUTPUT);
   pinMode(_b, OUTPUT);
-  colour = OFF;
 }
 
 void RGB::white() {
-  if (colour == WHITE)
-    return;
-  analogWrite(_r, 64);
-  analogWrite(_g, 0);
-  analogWrite(_b, 64);
-  colour = WHITE;
+  color(64, 0, 64);
 }
 
 void RGB::red() {
-  if (colour == RED)
-    return;
-  off();
-  analogWrite(_r, 0);
-  colour = RED;
+  color(0, 255, 255);
 }
 
 void RGB::green() {
-  if (colour == GREEN)
-    return;
-  off();
-  analogWrite(_g, 0);
-  colour = GREEN;
+  color(255, 0, 255);
 }
 
 void RGB::blue() {
-  if (colour == BLUE)
-    return;
-  off();
-  analogWrite(_b, 0);
-  colour = BLUE;
+  color(255, 255, 0);
 }
 
 void RGB::yellow() {
-  if (colour == YELLOW)
-    return;
-  off();
-  analogWrite(_r, 0);
-  analogWrite(_g, 0);
-  colour = YELLOW;
+  color(0, 0, 255);
 }
 
 void RGB::orange() {
-  if (colour == ORANGE)
-    return;
-  off();
-  analogWrite(_r, 0);
-  analogWrite(_g, 200);
-  colour = ORANGE;
+  color(0, 200, 255);
 }
 
 void RGB::off() {
-  if (colour == OFF)
-    return;
-  analogWrite(_r, 255);
-  analogWrite(_g, 255);
-  analogWrite(_b, 255);
-  colour = OFF;
+  color(255, 255, 255);
 }
 
-void RGB::set(Colour c) {
-  switch (c) {
-    case RED:
-      red();
-      break;
-    case GREEN:
-      green();
-      break;
-    case BLUE:
-      blue();
-      break;
-    case YELLOW:
-      yellow();
-      break;
-    case ORANGE:
-      orange();
-      break;
-    case WHITE:
-      white();
-      break;
-    case OFF:
-      off();
-      break;
-  }
+void RGB::color(byte r, byte g, byte b) {
+  analogWrite(_r, r);
+  analogWrite(_g, g);
+  analogWrite(_b, b);
 }
 
 void RGB::pretty () {
@@ -118,4 +65,3 @@ void RGB::pretty () {
     }
   }
 }
-

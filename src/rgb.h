@@ -3,8 +3,6 @@
 
 #include <Energia.h>
 
-enum Colour {RED, GREEN, BLUE, YELLOW, ORANGE, WHITE, OFF};
-
 class RGB
 {
   public:
@@ -17,14 +15,12 @@ class RGB
     void orange();
     void white();
     void off();
-    void set(Colour c);
+    void color(byte r, byte g, byte b);
     void pretty();
   private:
     int _r;
     int _g;
     int _b;
-    Colour colour;
 };
 
 #endif
-
