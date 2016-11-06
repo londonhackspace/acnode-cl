@@ -205,19 +205,22 @@ Each node can work in a variety of roles:
 
 ## Regular ACNode (0)
 
-When a card is presented and held, the tool is activated, provided the card has access to this particular tool.
+Provided that a card known to the system is presented, and it has access to this particular tool, the relay is active
+as long as the card is on the reader.
 
 ## Doorbot (1)
 
-Activates the tool if any known card is presented.
+Provided that a card known to the system is presented, the relay is activated for `KEEP_OPEN_MILISECONDS` (1.5 seconds).
 
 ## Doorbot with access control (2)
 
-Activates the tool if a card with access is presented.
+Provided that a card known to the system is presented, and it has access to this particular tool (door), the relay
+is activated for `KEEP_OPEN_MILISECONDS` (1.5 seconds).
 
 ## Audit only (3)
 
-When any known card is presented and held, the tool is activated (no access control -- logging only).
+Provided that a card known to the system is presented, the relay is active as long as the card is on the reader.
+This is used primarily for logging what user was using a tool at what time.
 
 # To use the button menu:
 
