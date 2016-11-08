@@ -225,7 +225,7 @@ void setup() {
     Serial.println("Checking tool status");
     int status = networking::networkCheckToolStatus();
 
-    if (status == -1) {
+    if (status < 0) {
       network = false;
       Serial.println("acserver error");
       char tmp[42];
