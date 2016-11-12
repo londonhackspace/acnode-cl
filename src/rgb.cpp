@@ -1,7 +1,5 @@
 #include "rgb.h"
 
-Colour::Colour(byte r, byte g, byte b) : r(r), g(g), b(b) { }
-
 RGB::RGB(int pin_r, int pin_g, int pin_b) : colour(BLACK) {
   _r = pin_r;
   _g = pin_g;
@@ -21,11 +19,11 @@ void RGB::begin() {
 void RGB::run() {
   if (is_flashing) {
     unsigned long now = millis();
-    if (now - last_called_run > FLASH_INTERVAL) {
+    if (now - last_toggled_time > FLASH_INTERVAL) {
       flashing_on ? light_up(colour) : light_up(BLACK);
       flashing_on = !flashing_on;
+      last_toggled_time = now;
     }
-    last_called_run = now;
   } else {
     light_up(colour);
   }

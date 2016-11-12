@@ -24,6 +24,7 @@ ACNodeClient
 #include "network.h"
 #include "acnode.h"
 #include "rgb.h"
+#include "colour.h"
 #include "button.h"
 #include "every.h"
 #include "version.h"
