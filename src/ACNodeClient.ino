@@ -45,7 +45,6 @@ microrl_t * prl = &rl;
 PN532_HSU pnhsu(Serial6);
 PN532 nfc(pnhsu);
 
-settings acsettings;
 EthernetClient client;
 Syslog syslog;
 

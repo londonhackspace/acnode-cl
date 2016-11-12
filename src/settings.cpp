@@ -3,6 +3,8 @@
 #include "acnode.h"
 #include "utils.h"
 
+settings acsettings;
+
 void init_settings(void) {
   // must be a multiple of 4 cos our eeprom is
   // read and written in 32 bit chunks.

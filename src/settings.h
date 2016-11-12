@@ -69,6 +69,8 @@ struct settings {
   char __padding[1];
 } __attribute__ ((packed));
 
+extern settings acsettings;
+
 settings get_settings(void);
 int set_settings(settings acsettings);
 void init_settings(void);
