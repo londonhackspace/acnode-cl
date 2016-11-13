@@ -25,11 +25,9 @@ void Menu::run(Card *c) {
     int poll = button.poll();
     switch (poll) {
       case SHORT_PRESS:
-        DEBUG("SHORT PRESS");
         advance(c->is_maintainer());
         break;
       case LONG_PRESS:
-        DEBUG("LONG PRESS");
         select(c);
     }
   }
@@ -62,7 +60,6 @@ void Menu::advance(bool is_maintainer) {
   bool is_online = (acsettings.status == 1);
   menu_activated_at = millis();
   if (is_maintainer) {
-    DEBUG("IS MAINTAINER");
     switch(state) {
       case IDLE:
         state = READY_TO_ADD_USER;
@@ -79,9 +76,8 @@ void Menu::advance(bool is_maintainer) {
           DEBUG("Unhandled");
     }
   } else {
-    DEBUG("IS USER");
     // An ordinary user can only take a machine offline.
-    state = IDLE ? READY_TO_TAKE_OFFLINE : IDLE;
+    state = (state == IDLE) ? READY_TO_TAKE_OFFLINE : IDLE;
   }
 }
 
