@@ -14,6 +14,7 @@ class RGB
     void run();
     void solid(Colour &c);
     void flashing(Colour &c);
+    void flashing(Colour &c, Colour &d);
     void off();
   private:
     void light_up(Colour &c);
@@ -23,7 +24,8 @@ class RGB
     bool is_flashing;
     bool flashing_on;
     unsigned long last_toggled_time;
-    Colour colour;
+    Colour colour1;
+    Colour colour2;
 };
 
 #endif

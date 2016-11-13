@@ -44,12 +44,13 @@ bool ACNode::card_has_access() {
 }
 
 void ACNode::activate() {
-  rgb.solid(GREEN);
+  card_on_reader.is_maintainer() ? rgb.solid(YELLOW) : rgb.solid(GREEN);
   tool.on(card_on_reader);
 }
 
 void ACNode::deactivate() {
-  rgb.solid(BLUE);
+  // TODO: Try and move this into role.h
+  acsettings.status == 1 ? rgb.solid(BLUE) : rgb.flashing(BLUE, RED);
   tool.off();
 }
 
