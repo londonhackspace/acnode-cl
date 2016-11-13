@@ -32,7 +32,7 @@ ACNodeClient
 #include "card.h"
 #include "sdcache.h"
 #include "eepromcache.h"
-#include "nocache.h"
+#include "ramcache.h"
 #include "doorbot.h"
 #include "doorbot_ac.h"
 
@@ -109,8 +109,8 @@ void setup() {
       Serial.println("Using the SD Card to cache cards");
     } else {
       Serial.println("SD card could not be accessed");
-      Serial.println("Please fix the SD card and try again. Cache is disabled until reboot.");
-      cache = new NoCache();
+      Serial.println("Please fix the SD card and try again. Caching cards in RAM for now.");
+      cache = new RAMCache();
     }
   } else {
       Serial.println("Using the eeprom to cache cards");

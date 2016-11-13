@@ -21,6 +21,7 @@ void Cache::fill(const int count) {
 }
 
 void list_callback(Card c) {
+  wdog.feed();
   c.dump();
 }
 
@@ -30,4 +31,3 @@ void Cache::list(void) {
   Serial.print(count);
   Serial.println(" users");
 }
-

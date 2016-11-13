@@ -1,5 +1,8 @@
 #include "ramcache.h"
 #include "network.h"
+#include "watchdog.h"
+
+extern Watchdog wdog;
 
 CacheEntry::CacheEntry() :
   expires_at(0),
@@ -26,6 +29,8 @@ void CacheEntry::expire() {
 }
 
 void RAMCache::begin() {
+  Serial.println("RAM Cache TTL: " + String(CACHE_TTL));
+  Serial.println("RAM Cache memory: " + String(sizeof(CacheEntry) * CACHE_CAPACITY));
   purge();
 }
 
@@ -88,6 +93,7 @@ void RAMCache::verify() {
   for (int i = 0; i < CACHE_CAPACITY; i++) {
     CacheEntry *entry = &entries[i];
     if (!entry->expired(now)) {
+      wdog.feed();
       int status = networking::querycard(entry->card);
       switch (status) {
         case 2:
