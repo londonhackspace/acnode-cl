@@ -44,8 +44,17 @@ bool ACNode::card_has_access() {
 }
 
 void ACNode::activate() {
-  card_on_reader.is_maintainer() ? rgb.solid(YELLOW) : rgb.solid(GREEN);
-  tool.on(card_on_reader);
+  if (card_on_reader.is_maintainer()) {
+    rgb.solid(YELLOW);
+    tool.on(card_on_reader);
+  } else {
+    if (acsettings.status == 1) {
+      rgb.solid(GREEN);
+      tool.on(card_on_reader);
+    } else {
+      rgb.solid(RED);
+    }
+  }
 }
 
 void ACNode::deactivate() {
