@@ -14,6 +14,12 @@ bool ACNode::card_present() {
 }
 
 bool ACNode::card_has_access() {
+  Card cached = cache->get(card_on_reader);
+
+  if (cached.compare_uid(card_on_reader)) {
+    return cached.is_user() || cached.is_maintainer();
+  }
+
   int status = networking::querycard(card_on_reader);
   switch (status) {
     case 2: // maintainer
@@ -21,6 +27,8 @@ bool ACNode::card_has_access() {
     case 1: // user
       card_on_reader.set_user(true);
       Serial.println("Card has access");
+      // Cache the card for future lookups
+      cache->set(card_on_reader);
       return true;
     case 0:
       Serial.println("Card known, but has no access");
