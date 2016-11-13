@@ -156,7 +156,7 @@ void addNewUser(Card card, Card maintainer)
 }
 
 // https://wiki.london.hackspace.org.uk/view/Project:Tool_Access_Control/Solexious_Proposal#Tool_usage_.28usage_time.29
-// is the time here in ms or Seconds?
+// Time reported is in SECONDS.
 int toolUseTime(Card card, int time) {
   int ret = -1;
 
