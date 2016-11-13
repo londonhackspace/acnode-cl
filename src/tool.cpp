@@ -63,6 +63,9 @@ void Tool::poll() {
       if (duration > acsettings.minontime) {
         // if so we can turn off now
         _turnoff = false;
+
+        // report to the acserver that we're done with this tool
+        networking::reportToolUse(tool_user, 0);
         off();
       }
   }
@@ -178,6 +181,9 @@ void Tool::on(Card user) {
     if (!_toolrunpin) {
       startrunning();
     }
+
+    // tell acserver that the tool is in use
+    networking::reportToolUse(user, 1);
 
     // switch tool on here.
     if (acsettings.toolonpin_activehigh) {
