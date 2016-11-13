@@ -28,7 +28,7 @@ private:
   void take_offline(Card *c);
   void take_online(Card *c);
   void reset_if_timed_out();
-  Card *added_by;
+  Card added_by;
   Button button;
   RGB &led;
   unsigned long menu_activated_at;

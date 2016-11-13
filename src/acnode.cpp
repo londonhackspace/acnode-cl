@@ -63,28 +63,26 @@ void ACNode::housekeeping() {
 
 void ACNode::run() {
   housekeeping();
-  menu.run(&card_on_reader);
+  if (menu.active()) {
+    if (card_present()) {
+      card_has_access(); // Read card permissions
+      menu.run(&card_on_reader);
+    }
+  } else {
+    if (card_present()) {
+      Serial.print("Card on reader: ");
+      card_on_reader.dump();
 
-  if (card_present()) {
-    Serial.print("Card on reader: ");
-    card_has_access();
-    card_on_reader.dump();
-
-     // calls querycard to update details about the card
-    menu.run(&card_on_reader);
-
-    // The menu may have its own plans for lighting up LEDs etc,
-    // so disable the ACNode for a little bit.
-    if (!menu.active()) {
+      // This is the entry point to the menu.
       if (card_has_access()) {
+        menu.run(&card_on_reader);
         activate();
       } else {
         rgb.solid(RED);
       }
+    } else {
+      deactivate();
     }
-  } else {
-    menu.run(&card_on_reader);
-    deactivate();
   }
 }
 

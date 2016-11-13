@@ -4,7 +4,6 @@
 #define DEBUG(x) Serial.println(String(__FILE__) + ":" + String(__LINE__) + ":" + x);
 
 Menu::Menu(RGB &rgb, int button_pin) :
-  added_by(NULL),
   button(button_pin),
   led(rgb),
   menu_activated_at(1<<31),
@@ -51,8 +50,9 @@ void Menu::run(Card *c) {
   }
 
   if (state == ADDING_USER) {
-    if (c->is_valid() && c != added_by) {
-      networking::addNewUser(*c, *added_by);
+    DEBUG("ADDING USER");
+    if (c->is_valid() && *c != added_by) {
+      networking::addNewUser(*c, added_by);
       reset();
     }
   }
@@ -88,7 +88,7 @@ void Menu::advance(bool is_maintainer) {
 void Menu::select(Card *c) {
   switch (state) {
     case READY_TO_ADD_USER:
-      added_by = c;
+      added_by = *c;
       menu_activated_at = millis();
       state = ADDING_USER;
       break;
@@ -105,7 +105,7 @@ void Menu::select(Card *c) {
 
 void Menu::reset() {
   menu_activated_at = 1<<31;
-  added_by = NULL;
+  added_by = Card();
   state = IDLE;
 }
 
