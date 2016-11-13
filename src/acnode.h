@@ -38,7 +38,7 @@ extern Cache *cache;
 
 class ACNode : public Role {
 public:
-  ACNode(PN532 &, RGB &, Tool &, int button_pin, microrl_t *);
+  ACNode(PN532 &, RGB &, Tool &, int button_pin);
   void run();
 protected:
   void feed_incoming_character();
@@ -53,7 +53,6 @@ private:
   Tool &tool;
   Menu menu;
 
-  microrl_t *prl;
   Card card_on_reader;
 };
 

@@ -1,20 +1,11 @@
 #include "acnode.h"
 
-ACNode::ACNode(PN532 &n, RGB &r, Tool &t, int button_pin, microrl_t *p) :
+ACNode::ACNode(PN532 &n, RGB &r, Tool &t, int button_pin) :
   Role(n),
   rgb(r),
   tool(t),
-  menu(r, button_pin),
-  prl(p)
+  menu(r, button_pin)
 {
-}
-
-void ACNode::feed_incoming_character() {
-  if (Serial.available()) {
-    char c;
-    c = Serial.read();
-    microrl_insert_char (prl, c);
-  }
 }
 
 bool ACNode::card_present() {
@@ -66,7 +57,6 @@ void ACNode::deactivate() {
 void ACNode::housekeeping() {
   wdog.feed();
   rgb.run();
-  feed_incoming_character();
   tool.poll();
 }
 

@@ -183,7 +183,7 @@ void setup() {
       doorbot->enableAnnouncer(acsettings.announce_port);
       break;
     default:
-      acnode = new ACNode(nfc, rgb, tool, BUTTON_PIN, prl);
+      acnode = new ACNode(nfc, rgb, tool, BUTTON_PIN);
       break;
   }
 
