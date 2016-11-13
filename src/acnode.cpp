@@ -1,10 +1,10 @@
 #include "acnode.h"
 
-ACNode::ACNode(PN532 &n, RGB &r, Tool &t, Button &b, microrl_t *p) :
+ACNode::ACNode(PN532 &n, RGB &r, Tool &t, int button_pin, microrl_t *p) :
   Role(n),
   rgb(r),
   tool(t),
-  button(b),
+  menu(r, button_pin),
   prl(p)
 {
 }
@@ -26,7 +26,9 @@ bool ACNode::card_has_access() {
   int status = networking::querycard(card_on_reader);
   switch (status) {
     case 2: // maintainer
+      card_on_reader.set_maintainer(true);
     case 1: // user
+      card_on_reader.set_user(true);
       Serial.println("Card has access");
       return true;
     case 0:
@@ -60,15 +62,27 @@ void ACNode::housekeeping() {
 
 void ACNode::run() {
   housekeeping();
+  menu.run(&card_on_reader);
+
   if (card_present()) {
     Serial.print("Card on reader: ");
+    card_has_access();
     card_on_reader.dump();
-    if (card_has_access()) {
-      activate();
-    } else {
-      rgb.solid(RED);
+
+     // calls querycard to update details about the card
+    menu.run(&card_on_reader);
+
+    // The menu may have its own plans for lighting up LEDs etc,
+    // so disable the ACNode for a little bit.
+    if (!menu.active()) {
+      if (card_has_access()) {
+        activate();
+      } else {
+        rgb.solid(RED);
+      }
     }
   } else {
+    menu.run(&card_on_reader);
     deactivate();
   }
 }

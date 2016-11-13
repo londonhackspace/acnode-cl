@@ -13,10 +13,9 @@
 #include "tool.h"
 #include "microrl.h"
 #include "network.h"
-#include "button.h"
+#include "menu.h"
 
 // put these things here so more things can use it.
-extern settings acsettings;
 extern EthernetClient client;
 extern Syslog syslog;
 extern boolean network;
@@ -39,7 +38,7 @@ extern Cache *cache;
 
 class ACNode : public Role {
 public:
-  ACNode(PN532 &, RGB &, Tool &, Button &b, microrl_t *);
+  ACNode(PN532 &, RGB &, Tool &, int button_pin, microrl_t *);
   void run();
 protected:
   void feed_incoming_character();
@@ -52,7 +51,7 @@ protected:
 private:
   RGB &rgb;
   Tool &tool;
-  Button &button;
+  Menu menu;
 
   microrl_t *prl;
   Card card_on_reader;

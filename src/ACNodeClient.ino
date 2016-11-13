@@ -25,7 +25,6 @@ ACNodeClient
 #include "acnode.h"
 #include "rgb.h"
 #include "colour.h"
-#include "button.h"
 #include "every.h"
 #include "version.h"
 #include "watchdog.h"
@@ -55,8 +54,6 @@ Tool tool(PG_1, PE_4);
 
 RGB rgb(PM_0, PM_1, PM_2);
 
-Button button(PF_1);
-
 Watchdog wdog;
 
 Cache *cache = NULL;
@@ -66,6 +63,7 @@ Doorbot *doorbot = NULL;
 ACNode *acnode = NULL;
 int active_role;
 
+#define BUTTON_PIN PM_7
 #define SD_CS_PIN PC_7
 #define ACNODE_DIR "ACNODE"
 
@@ -185,7 +183,7 @@ void setup() {
       doorbot->enableAnnouncer(acsettings.announce_port);
       break;
     default:
-      acnode = new ACNode(nfc, rgb, tool, button, prl);
+      acnode = new ACNode(nfc, rgb, tool, BUTTON_PIN, prl);
       break;
   }
 
