@@ -39,7 +39,10 @@ Card RAMCache::get(Card u) {
   for (int i = 0; i < CACHE_CAPACITY; i++) {
     CacheEntry *entry = &entries[i];
     if (!entry->expired(now)) {
-      if (entry->card.compare_uid(u)) return entry->card;
+      if (entry->card.compare_uid(u)) {
+        entry->touch(now);
+        return entry->card;
+      }
     }
   }
   return Card();
