@@ -1,13 +1,6 @@
 #include <Arduino.h>
-
-/*
-ACNodeClient
- v0.2+
-
- */
 #include <Ethernet.h>
 
-#define DEBUG 1
 #include <PN532_debug.h>
 #include <PN532_HSU.h>
 #include <PN532.h>

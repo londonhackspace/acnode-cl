@@ -1,6 +1,7 @@
 #ifndef _MENU_H
 #define _MENU_H
 
+#include "macros.h"
 #include "rgb.h"
 #include "button.h"
 #include "settings.h"

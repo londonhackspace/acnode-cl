@@ -1,8 +1,6 @@
 #include "menu.h"
 #include "network.h"
 
-#define DEBUG(x) Serial.println(String(__FILE__) + ":" + String(__LINE__) + ":" + x);
-
 Menu::Menu(RGB &rgb, int button_pin) :
   button(button_pin),
   led(rgb),
@@ -48,7 +46,6 @@ void Menu::run(Card *c) {
   }
 
   if (state == ADDING_USER) {
-    DEBUG("ADDING USER");
     if (c->is_valid() && *c != added_by) {
       networking::addNewUser(*c, added_by);
       reset();
