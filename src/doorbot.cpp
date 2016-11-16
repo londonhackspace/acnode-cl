@@ -30,7 +30,13 @@ void Doorbot::run() {
 };
 
 void Doorbot::handleCardPresent(Card c) {
-  int status = networking::querycard(c);
+  int status;
+  Card cached = cache->get(c);
+  if (cached.compare_uid(c) && cached.is_valid()) {
+    status = 1;
+  } else {
+    status = networking::querycard(c);
+  }
   announceCard(c);
 
   switch (status) {
@@ -38,6 +44,7 @@ void Doorbot::handleCardPresent(Card c) {
         denyAccess();
       break;
     default:
+      cache->set(c);
       grantAccess();
   }
 }

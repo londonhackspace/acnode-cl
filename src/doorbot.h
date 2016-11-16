@@ -10,6 +10,9 @@
 #include "rgb.h"
 #include "every.h"
 #include "PN532.h"
+#include "cache.h"
+
+extern Cache *cache;
 
 #define ACCESS_DENIED_LED_ON_TIME 2000
 
