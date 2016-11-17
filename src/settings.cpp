@@ -241,7 +241,7 @@ settings get_settings(void) {
       acsettings.port = 1234;
       acsettings.status = 0;
       acsettings.runtime = 0;
-      acsettings.sdcache = 0;
+      acsettings.sdcache = 1;
       acsettings.minontime = 5;
       acsettings.netverbose = 1;
       acsettings.toolonpin_activehigh = 1;
