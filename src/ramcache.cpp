@@ -50,6 +50,9 @@ Card RAMCache::get(Card u) {
 
 void RAMCache::set(const Card u) {
   unsigned long now = millis();
+  // Card is already in the cache.
+  if (get(u).compare_uid(u)) return;
+
   CacheEntry *slot = NULL;
   for (int i = 0; i < CACHE_CAPACITY; i++) {
     CacheEntry *entry = &entries[i];
