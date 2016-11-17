@@ -35,16 +35,19 @@ void RAMCache::begin() {
 }
 
 Card RAMCache::get(Card u) {
+
   unsigned long now = millis();
   for (int i = 0; i < CACHE_CAPACITY; i++) {
     CacheEntry *entry = &entries[i];
     if (!entry->expired(now)) {
       if (entry->card.compare_uid(u)) {
         entry->touch(now);
+        DEBUG("RAM Cache lookup: HIT")
         return entry->card;
       }
     }
   }
+  DEBUG("RAM Cache lookup: MISS")
   return Card();
 }
 

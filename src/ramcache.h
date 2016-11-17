@@ -3,6 +3,7 @@
 
 #include "cache.h"
 #include "card.h"
+#include "macros.h"
 
 #define CACHE_TTL 8 * 3600 * 1000 // eight hours
 #define CACHE_CAPACITY 1500
