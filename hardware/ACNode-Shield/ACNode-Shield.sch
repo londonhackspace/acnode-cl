@@ -496,7 +496,7 @@ F 3 "" V 5260 4900 60  0000 C CNN
 $EndComp
 Text GLabel 2350 5600 0    60   Input ~ 0
 PQ1
-Text GLabel 1950 5500 0    60   Input ~ 0
+Text GLabel 1950 5100 0    60   Input ~ 0
 PQ3
 Text GLabel 2350 5400 0    60   Input ~ 0
 +3.3v
@@ -504,20 +504,12 @@ Text GLabel 1950 5300 0    60   Input ~ 0
 PQ0
 Text GLabel 2350 5200 0    60   Input ~ 0
 GND
-Text GLabel 1950 5100 0    60   Input ~ 0
+Text GLabel 1950 5500 0    60   Input ~ 0
 PQ2
-Wire Wire Line
-	2350 5600 4350 5600
-Wire Wire Line
-	1950 5500 4350 5500
 Wire Wire Line
 	2350 5400 4350 5400
 Wire Wire Line
-	1950 5300 4350 5300
-Wire Wire Line
 	2350 5200 4350 5200
-Wire Wire Line
-	1950 5100 4350 5100
 $Comp
 L C_Small C1
 U 1 1 5736F818
@@ -535,4 +527,12 @@ Connection ~ 2400 5200
 Wire Wire Line
 	2600 4700 2600 5400
 Connection ~ 2600 5400
+Wire Wire Line
+	2350 5600 4350 5600
+Wire Wire Line
+	1950 5300 4350 5300
+Wire Wire Line
+	1950 5500 4350 5500
+Wire Wire Line
+	1950 5100 4350 5100
 $EndSCHEMATC
