@@ -1,4 +1,4 @@
-![Build Status](https://api.travis-ci.org/londonhackspace/acnode-cl.svg?branch=master)
+[![Build Status](https://travis-ci.org/londonhackspace/acnode-cl.svg?branch=master)](https://travis-ci.org/londonhackspace/acnode-cl)
 
 Table of Contents
 =================
@@ -153,6 +153,7 @@ You can send a signal to the acnode via pin PE_4 to say when your tool is actual
 
 * Install [PlatformIO](http://platformio.org)
 * Clone this repository.
+* Run `rm -rf ~/.platformio/packages/framework-energiativa/libraries/AIR430*`
 * Open the cloned repository by going to `PlatformIO | Open Project folder...`.
 * Choose `PlatformIO | Build` or `PlatformIO | Upload`.
 * All dependencies will be installed automatically prior to the first build.
