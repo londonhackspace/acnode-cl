@@ -8,4 +8,6 @@ cache:
 install:
   - pip install -U platformio
 script:
+  - platformio update
+  - rm -rf ~/.platformio/packages/framework-energiativa/libraries/AIR430*
   - platformio run
