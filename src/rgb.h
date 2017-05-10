@@ -15,12 +15,14 @@ class RGB
     void solid(Colour &c);
     void flashing(Colour &c);
     void flashing(Colour &c, Colour &d);
+    void rainbow();
     void off();
   private:
     void light_up(Colour &c);
     int _r;
     int _g;
     int _b;
+    bool is_rainbow;
     bool is_flashing;
     bool flashing_on;
     unsigned long last_toggled_time;

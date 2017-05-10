@@ -6,6 +6,7 @@ RGB::RGB(int pin_r, int pin_g, int pin_b) : colour1(BLACK), colour2(BLACK) {
   _b = pin_b;
   is_flashing = false;
   flashing_on = false;
+  is_rainbow = false;
 }
 
 void RGB::begin() {
@@ -17,6 +18,11 @@ void RGB::begin() {
 }
 
 void RGB::run() {
+  if (is_rainbow) {
+    int index = (millis() / 300) % 6;
+    light_up(RAINBOW[index]);
+    return;
+  }
   if (is_flashing) {
     unsigned long now = millis();
     if (now - last_toggled_time > FLASH_INTERVAL) {
@@ -31,6 +37,7 @@ void RGB::run() {
 
 void RGB::solid(Colour &c) {
   is_flashing = false;
+  is_rainbow = false;
   colour1 = c;
   run();
 }
@@ -41,8 +48,14 @@ void RGB::flashing(Colour &c) {
 
 void RGB::flashing(Colour &c, Colour &d) {
   is_flashing = true;
+  is_rainbow = false;
   colour1 = c;
   colour2 = d;
+  run();
+}
+
+void RGB::rainbow() {
+  is_rainbow = true;
   run();
 }
 

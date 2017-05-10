@@ -7,6 +7,7 @@
 #include <syslog.h>
 #include <SPI.h>
 #include <SD.h>
+#include <OneMsTaskTimer.h>
 
 #include "settings.h"
 #include "microrl.h"
@@ -60,6 +61,9 @@ int active_role;
 #define SD_CS_PIN PC_7
 #define ACNODE_DIR "ACNODE"
 
+void serviceLed() { rgb.run(); };
+OneMsTaskTimer_t ledBlinker = { 300, serviceLed, 0, 0 };
+
 void setup() {
   Serial.begin(9600);
   Serial.println("");
@@ -90,7 +94,12 @@ void setup() {
 
   // start the rgb early so we can get some feedback
   rgb.begin();
-  rgb.solid(YELLOW);
+
+  // Workaround for a missing declaration in the library
+  uint32_t timer_index_ = 0;
+  OneMsTaskTimer::add(&ledBlinker);
+  rgb.rainbow();
+  OneMsTaskTimer::start();
 
   wdog.feed();
 

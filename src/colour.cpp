@@ -9,3 +9,6 @@ Colour YELLOW(0, 0, 255);
 Colour ORANGE(0, 200, 255);
 Colour WHITE(0, 0, 0);
 Colour BLACK(255, 255, 255);
+Colour PURPLE(107, 255, 44);
+
+Colour RAINBOW[] = {RED, ORANGE, YELLOW, GREEN, BLUE, PURPLE};
