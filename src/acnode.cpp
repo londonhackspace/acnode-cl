@@ -4,7 +4,9 @@ ACNode::ACNode(PN532 &n, RGB &r, Tool &t, int button_pin) :
   Role(n),
   rgb(r),
   tool(t),
-  menu(r, button_pin)
+  menu(r, button_pin),
+  last_status_checked_at(0),
+  enabled(false)
 {
 }
 
@@ -47,7 +49,7 @@ void ACNode::activate() {
     rgb.solid(YELLOW);
     tool.on(card_on_reader);
   } else {
-    if (acsettings.status == 1) {
+    if (is_enabled()) {
       rgb.solid(GREEN);
       tool.on(card_on_reader);
     } else {
@@ -58,7 +60,7 @@ void ACNode::activate() {
 
 void ACNode::deactivate() {
   // TODO: Try and move this into role.h
-  acsettings.status == 1 ? rgb.solid(BLUE) : rgb.flashing(BLUE, RED);
+  is_enabled() ? rgb.solid(BLUE) : rgb.flashing(BLUE, RED);
   tool.off();
 }
 
@@ -91,6 +93,16 @@ void ACNode::run() {
       deactivate();
     }
   }
+}
+
+bool ACNode::is_enabled() {
+  // Check status once every 30 seconds.
+  if (millis() - last_status_checked_at > 30000 || !enabled) {
+    last_status_checked_at = millis();
+    int status = networking::networkCheckToolStatus();
+    enabled = (status == 1);
+  }
+  return enabled;
 }
 
 Card ACNode::readcard()

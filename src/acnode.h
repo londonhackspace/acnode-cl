@@ -3,7 +3,6 @@
 
 #include <Ethernet.h>
 #include <syslog.h>
-#include "settings.h"
 #include "card.h"
 #include "watchdog.h"
 #include "cache.h"
@@ -48,12 +47,15 @@ protected:
   void deactivate();
   void housekeeping();
   Card readcard();
+  bool is_enabled();
 private:
   RGB &rgb;
   Tool &tool;
   Menu menu;
 
   Card card_on_reader;
+  unsigned long last_status_checked_at;
+  bool enabled;
 };
 
 #endif
