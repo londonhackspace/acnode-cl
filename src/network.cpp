@@ -3,12 +3,11 @@
 #include "version.h"
 
 #define HTTP_TIMEOUT 3000
+#define USER_AGENT "ACNode rev " GIT_REVISION
 
 namespace networking {
   const char *user_agent() {
-    static char user_agent[64];
-    sprintf(user_agent, "ACNode rev %s", GIT_REVISION);
-    return user_agent;
+    return USER_AGENT;
   }
 
   void log(int l) {
