@@ -154,6 +154,7 @@ You can send a signal to the acnode via pin PE_4 to say when your tool is actual
 * Install [PlatformIO](http://platformio.org)
 * Clone this repository.
 * Run `rm -rf ~/.platformio/packages/framework-energiativa/libraries/AIR430*`
+* Run `patch ~/.platformio/packages/framework-energiativa/libraries/OneMsTaskTimer/OneMsTaskTimer.cpp -i enable-onemstasktimer.patch`.
 * Open the cloned repository by going to `PlatformIO | Open Project folder...`.
 * Choose `PlatformIO | Build` or `PlatformIO | Upload`.
 * All dependencies will be installed automatically prior to the first build.
