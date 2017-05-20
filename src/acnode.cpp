@@ -63,6 +63,8 @@ void ACNode::activate() {
 
 void ACNode::deactivate() {
   // TODO: Try and move this into role.h
+  // Force a status check, TODO: add an optional param to is_enabled()
+  last_status_checked_at = -30000;
   is_enabled() ? rgb.solid(BLUE) : rgb.solid(RED);
   tool.off();
 }
@@ -79,6 +81,8 @@ void ACNode::run() {
     if (card_present()) {
       card_has_access(); // Read card permissions
       menu.run(&card_on_reader);
+    } else {
+      menu.reset();
     }
   } else {
     if (card_present()) {
