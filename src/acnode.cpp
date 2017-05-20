@@ -63,7 +63,7 @@ void ACNode::activate() {
 
 void ACNode::deactivate() {
   // TODO: Try and move this into role.h
-  is_enabled() ? rgb.solid(BLUE) : rgb.flashing(BLUE, RED);
+  is_enabled() ? rgb.solid(BLUE) : rgb.solid(RED);
   tool.off();
 }
 
@@ -100,7 +100,7 @@ void ACNode::run() {
 
 bool ACNode::is_enabled() {
   // Check status once every 30 seconds.
-  if (millis() - last_status_checked_at > 30000 || !enabled) {
+  if (millis() - last_status_checked_at > 30000) {
     last_status_checked_at = millis();
     int status = networking::networkCheckToolStatus();
     enabled = (status == 1);
