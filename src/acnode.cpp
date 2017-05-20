@@ -19,6 +19,9 @@ bool ACNode::card_has_access() {
   Card cached = cache->get(card_on_reader);
 
   if (cached.compare_uid(card_on_reader)) {
+    Serial.println("Card has been seen before (cached)");
+    // Use the cached version (TODO: restructure this)
+    card_on_reader = cached;
     return cached.is_user() || cached.is_maintainer();
   }
 
