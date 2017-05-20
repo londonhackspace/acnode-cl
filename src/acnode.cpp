@@ -5,7 +5,7 @@ ACNode::ACNode(PN532 &n, RGB &r, Tool &t, int button_pin) :
   rgb(r),
   tool(t),
   menu(r, button_pin),
-  last_status_checked_at(0),
+  last_status_checked_at(-30000),
   enabled(false)
 {
 }
@@ -104,6 +104,7 @@ bool ACNode::is_enabled() {
     last_status_checked_at = millis();
     int status = networking::networkCheckToolStatus();
     enabled = (status == 1);
+    acsettings.status = status;
   }
   return enabled;
 }
