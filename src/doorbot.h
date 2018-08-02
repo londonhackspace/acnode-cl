@@ -21,6 +21,7 @@ class Doorbot : public Role {
     Doorbot(Door &, Watchdog &, PN532 &, RGB &l);
     void enableAnnouncer(uint16_t port);
     void run();
+    void networkingError();
   protected:
     void handleCardPresent(Card c);
     void denyAccess();

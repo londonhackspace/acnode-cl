@@ -43,6 +43,9 @@ void Doorbot::handleCardPresent(Card c) {
     case -1:
         denyAccess();
       break;
+    case -99:
+        networkingError();
+        break;
     default:
       cache->set(c);
       grantAccess();
@@ -67,4 +70,19 @@ void Doorbot::denyAccess() {
 
 void Doorbot::grantAccess() {
   door.open();
+}
+
+void Doorbot::networkingError() {
+  // Captain, these lights are blinking out of sequence. What shall we do?
+  // Get them to blink in sequence!
+  // We have a networking error, so blink RED/BLUE/RED/BLUE to highlight some problem
+  led.solid(RED);
+  delay(ACCESS_DENIED_LED_ON_TIME/4);
+  led.solid(BLUE);
+  delay(ACCESS_DENIED_LED_ON_TIME/4);
+  led.solid(RED);
+  delay(ACCESS_DENIED_LED_ON_TIME/4);
+  led.solid(BLUE);
+  delay(ACCESS_DENIED_LED_ON_TIME/4);
+  led.solid(BLACK);
 }
