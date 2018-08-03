@@ -174,6 +174,26 @@ You can send a signal to the acnode via pin PE_4 to say when your tool is actual
 * PD_3 - SD card clock (pin 5)
 * PC_7 - SD card CS (pin 1) aka CD
 
+# Pin assignments on ACNode shield rev 1 board (square PCB)
+
+Other ACnode PCBs are available
+
+* P1 connector (numbers rising towards on-board relay, P1_1 is furthest from it)
+* P1_1 GND
+* P1_2 +3.3V
+* P1_3 PP0 RX  -> PN532 TXD
+* P1_4 PP1 TX  -> PN532 RXD
+
+* P3 connector (numbers rising towards reset button)
+* P3_1 +3.3V
+* P3_2 Red LED
+* P3_3 Green LED
+* P3_4 Blue LED
+
+Note that Deek-Robot branded PN532 boards need +5V not +3.3v to function. 
+Use the pinouts labelled on the back of the board.
+Other boards (Elechouse NFC module v3) sort of work at +3.3V, but may not give sufficient juice to the NFC target to energise certain types of cards.
+
 # using the CLI
 
 Once the firmware has been uploaded to the connected launchpad connect with a serial terminal (if you use a real one rather than the Energia serial monitor you get command history and line editing).
