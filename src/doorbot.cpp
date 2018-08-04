@@ -39,16 +39,13 @@ void Doorbot::handleCardPresent(Card c) {
   }
   announceCard(c);
 
-  switch (status) {
-    case -1:
-        denyAccess();
-      break;
-    case -99:
-        networkingError();
-        break;
-    default:
-      cache->set(c);
-      grantAccess();
+  if(status >= 0) {
+    cache->set(c);
+    grantAccess();
+  } else if(status == -1) {
+    denyAccess();
+  } else {
+    networkingError();
   }
 }
 
