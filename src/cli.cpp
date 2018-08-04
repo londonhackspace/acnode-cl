@@ -487,7 +487,7 @@ int mrlexecute (int argc, const char * const * argv)
         switch (len) {
           case 4:
             if (strncmp(argv[i], "none", 4) == 0) {
-              memset(acsettings.secret, 0x0, 8);
+              memset(acsettings.secret, 0x0, KEYLEN+1);
               Serial.println("secret disabled");
               ok = true;
             }
@@ -504,6 +504,7 @@ int mrlexecute (int argc, const char * const * argv)
               Serial.print("new API key: ");
               Serial.println(argv[i]);
               strncpy(acsettings.secret, argv[i], KEYLEN);
+              acsettings.secret[KEYLEN] = 0;
             }
         }
       }
