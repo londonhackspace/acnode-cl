@@ -3,10 +3,11 @@
 
 #define KEEP_OPEN_MILISECONDS 1500
 
-Door::Door(int pin, int initialState) {
+Door::Door(int pin, int initialState, uint16_t holdTime) {
   this->pin = pin;
   this->initialState = initialState;
   this->openedAt = 0;
+  this->holdTime = holdTime;
   pinMode(this->pin, OUTPUT);
   digitalWrite(this->pin, this->initialState);
 }
@@ -26,7 +27,7 @@ bool Door::isOpen() {
 }
 
 bool Door::maybeClose() {
-  if (millis() - this->openedAt > KEEP_OPEN_MILISECONDS) {
+  if (millis() - this->openedAt > holdTime) {
     this->close();
     return true;
   }

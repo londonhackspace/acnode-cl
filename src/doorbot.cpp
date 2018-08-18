@@ -9,12 +9,11 @@ Doorbot::Doorbot(Door &d, Watchdog &w, PN532 &n, RGB &l) :
     this->announcer = NULL;
 };
 
-void Doorbot::enableAnnouncer(uint16_t port) {
+void Doorbot::enableAnnouncer(Announcer* announcer) {
   if (this->announcer) {
     delete this->announcer;
   }
-  this->announcer = new Announcer(port);
-  this->announcer->START();
+  this->announcer = announcer;
 }
 
 void Doorbot::run() {
@@ -50,6 +49,8 @@ void Doorbot::handleCardPresent(Card c) {
 }
 
 void Doorbot::announceCard(Card c) {
+  if(!announcer)
+    return;
   // Debouncing.
   if (this->lastScanned != c || millis() - this->lastScannedTime > 5000) {
     char buffer[14];

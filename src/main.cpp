@@ -9,6 +9,7 @@
 #include <SD.h>
 #include <OneMsTaskTimer.h>
 
+#include "broadcastannouncer.h"
 #include "settings.h"
 #include "microrl.h"
 #include "cli.h"
@@ -52,7 +53,7 @@ Watchdog wdog;
 
 Cache *cache = NULL;
 
-Door door(PG_1, 0);
+Door *door = NULL;
 Doorbot *doorbot = NULL;
 ACNode *acnode = NULL;
 int active_role;
@@ -173,16 +174,34 @@ void setup() {
     syslog.syslog(LOG_ALERT, "Alert! Was previously reset by the watchdog!");
   }
 
+  Announcer* announcer;
+
+  switch(acsettings.announce_mode) {
+    case 1:
+      announcer= new BroadcastAnnouncer(acsettings.announce_port);
+      break;
+    case 2:
+      Serial.println("Warning: MQTT Announcer not currently supported! Disabling Announcements...");
+    default:
+      announcer = nullptr;
+  }
+
+  if(announcer) {
+    announcer->START();
+  }
+
+  door = new Door(PG_1, 0, acsettings.door_keep_open_ms);
+
   // The role may change when the user changes it via settings.
   active_role = acsettings.role;
   switch (active_role) {
     case 1:
-      doorbot = new Doorbot(door, wdog, nfc, rgb);
-      doorbot->enableAnnouncer(acsettings.announce_port);
+      doorbot = new Doorbot(*door, wdog, nfc, rgb);
+      doorbot->enableAnnouncer(announcer);
       break;
     case 2:
-      doorbot = new DoorbotWithAccessControl(door, wdog, nfc, rgb);
-      doorbot->enableAnnouncer(acsettings.announce_port);
+      doorbot = new DoorbotWithAccessControl(*door, wdog, nfc, rgb);
+      doorbot->enableAnnouncer(announcer);
       break;
     default:
       acnode = new ACNode(nfc, rgb, tool, BUTTON_PIN);

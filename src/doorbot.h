@@ -19,7 +19,7 @@ extern Cache *cache;
 class Doorbot : public Role {
   public:
     Doorbot(Door &, Watchdog &, PN532 &, RGB &l);
-    void enableAnnouncer(uint16_t port);
+    void enableAnnouncer(Announcer* announcer);
     void run();
     void networkingError();
   protected:

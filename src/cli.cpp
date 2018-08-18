@@ -50,6 +50,11 @@ void mrlprint(const char * str) {
 #define _CMD_SECRET   "secret"
 #define _CMD_ROLE "role"
 #define _CMD_ANNOUNCE_PORT "announce_port"
+#define _CMD_ANNOUNCE_MODE "announce_mode"
+#define _CMD_MQTT_SERVER "mqtt_server"
+#define _CMD_MQTT_PORT "mqtt_port"
+#define _CMD_MQTT_TOPIC_BASE "mqtt_topic_base"
+#define _CMD_DOOR_KEEP_OPEN_MSEC "door_keep_open_time"
 
 #define _NUM_OF_CMD 25
 #define _NUM_OF_VER_SCMD 2
@@ -60,7 +65,8 @@ void mrlprint(const char * str) {
 const char *keyworld [] = {
   _CMD_HELP, _CMD_SHOW, _CMD_MAC, _CMD_SERVER, _CMD_NODEID, _CMD_PORT, _CMD_VER, _CMD_SAVE, _CMD_CLEAR,
   _CMD_LIST, _CMD_REBOOT, _CMD_NUKE, _CMD_SYSLOG, _CMD_NAME, _CMD_RTIME, _CMD_FILL, _CMD_VERIFY,
-  _CMD_MINONTIME, _CMD_CACHE, _CMD_NETVERBOSE, _CMD_TOOLONPIN, _CMD_TOOLRUNPIN, _CMD_SECRET, _CMD_ROLE, _CMD_ANNOUNCE_PORT
+  _CMD_MINONTIME, _CMD_CACHE, _CMD_NETVERBOSE, _CMD_TOOLONPIN, _CMD_TOOLRUNPIN, _CMD_SECRET, _CMD_ROLE, _CMD_ANNOUNCE_PORT,
+  _CMD_ANNOUNCE_MODE, _CMD_MQTT_SERVER, _CMD_MQTT_PORT, _CMD_MQTT_TOPIC_BASE, _CMD_DOOR_KEEP_OPEN_MSEC
 };
 // version subcommands
 const char * ver_keyworld [] = {
@@ -103,7 +109,17 @@ void print_help ()
   Serial.println ("\tsecret <secret> - 8 char secret for authenticating with the acserver.");
   Serial.println ("\trole <role id> - how this acnode behaves: 0 - regular acnode, 1 - doorbot, 2 - doorbot with access control, 3 - audit only");
   if (acsettings.role > 0) {
-    Serial.println("\tannounce_port <port> - when a card is scanned, send a notificaiton to this port");
+    if(acsettings.announce_mode == 1) {
+      Serial.println("\tannounce_port <port> - when a card is scanned, send a notification to this port");
+    }
+    Serial.println("\tdoor_keep_open_time <milliseconds> - how long to hold the door open for, in milliseconds");
+  }
+  Serial.println("\tannounce_mode <mode id> - how this acnode announces stuff: 0 - no announcements, 1 - broadcast, 2 - mqtt");
+  if(acsettings.announce_mode == 2)
+  {
+    Serial.println("\tmqtt_server <server> - set the mqtt server to connect to");
+    Serial.println("\tmqtt_port <port> - set the mqtt server port");
+    Serial.println("\tmqtt_topic_base <topic> - set the mqtt topic prefix to announce to");
   }
 }
 
@@ -562,6 +578,99 @@ int mrlexecute (int argc, const char * const * argv)
         }
       } else {
         Serial.println("announce_port <port>");
+      }
+    }
+    else if (strcmp (argv[i], _CMD_ANNOUNCE_MODE) == 0) {
+      if ((++i) < argc) { // if value preset
+        int mode = atoi(argv[i]);
+        if (mode > -1 && mode < 4) {
+          acsettings.announce_mode = mode;
+          Serial.print("new announce mode: ");
+          Serial.println(mode);
+        } else {
+          Serial.println("Invalid mode.");
+        }
+      } else {
+        Serial.println("announce_mode <mode id>");
+      }
+    }
+    else if (strcmp (argv[i], _CMD_MQTT_SERVER) == 0) {
+      if ((++i) < argc) { // if value preset
+        if (strlen (argv[i]) < SERVERNAMELEN) {
+          Serial.print("new mqtt server: ");
+          Serial.println(argv[i]);
+          strncpy(acsettings.mqtt_server, argv[i], SERVERNAMELEN);
+        } else {
+          Serial.println("server name too long!");
+        }
+      }
+      else {
+        Serial.println("mqtt_server <hostname>");
+      }
+    }
+    else if (strcmp (argv[i], _CMD_MQTT_PORT) == 0) {
+        if ((++i) < argc) { // if value preset
+            if ( strlen(argv[i]) < 6) {
+                Serial.print("new mqtt port: ");
+                Serial.println(argv[i]);
+                errno = 0;
+                int ret;
+                char *end;
+                boolean ok = true;
+                ret = strtol(argv[i], &end, 10);
+
+                if ((errno == ERANGE && (ret == LONG_MAX || ret == LONG_MIN))
+                    || (errno != 0 && ret == 0)) {
+                    perror("strtol");
+                    ok = false;
+                }
+
+                if (end == argv[i]) {
+                    fprintf(stderr, "No digits were found\n");
+                    ok = false;
+                }
+
+                if (ret <= 0 || ret > 65535) {
+                    ok = false;
+                }
+                if (ok) {
+                    acsettings.mqtt_port = ret;
+                } else {
+                    Serial.println("invalid mqtt port");
+                }
+            } else {
+                Serial.println("port too big");
+            }
+        } else {
+            Serial.println("mqtt_port <port>");
+        }
+    }
+    else if (strcmp (argv[i], _CMD_MQTT_TOPIC_BASE) == 0) {
+      if ((++i) < argc) { // if value preset
+        if (strlen (argv[i]) < MQTT_TOPIC_LEN) {
+          Serial.print("new mqtt topic base: ");
+          Serial.println(argv[i]);
+          strncpy(acsettings.mqtt_topic_base, argv[i], MQTT_TOPIC_LEN);
+        } else {
+          Serial.println("server name too long!");
+        }
+      }
+      else {
+        Serial.println("mqtt_topic <topic>");
+      }
+    }
+    else if (strcmp (argv[i], _CMD_DOOR_KEEP_OPEN_MSEC) == 0) {
+      if ((++i) < argc) { // if value preset
+        int val = atoi(argv[i]);
+        if (val > -1 && val <= UINT16_MAX) {
+          acsettings.door_keep_open_ms = val;
+          Serial.print("new door hold time: ");
+          Serial.println(val);
+        } else {
+          Serial.println("Invalid door hold time.");
+        }
+      } else {
+        Serial.println("door_keep_open_time <milliseconds>");
       }
     }
     else {

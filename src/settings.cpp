@@ -17,10 +17,10 @@ void init_settings(void) {
   }
 
   Serial.print("setting left: ");
-  Serial.println(128 - sizeof(acsettings));
+  Serial.println(384 - sizeof(acsettings));
 
-  if (sizeof(acsettings) > 128) {
-    Serial.print("acsettings wrong size, must be smaller than 128: ");
+  if (sizeof(acsettings) > 384) {
+    Serial.print("acsettings wrong size, must be smaller than 384: ");
     Serial.println(sizeof(acsettings));
     while (true) {
       ;
@@ -149,9 +149,46 @@ void dump_settings(settings acsettings) {
   }
 
   if (acsettings.role > 0) {
-    Serial.print("Announcer port: ");
-    Serial.println(acsettings.announce_port);
+    if(acsettings.announce_mode == 1) {
+        Serial.print("Announcer port: ");
+        Serial.println(acsettings.announce_port);
+    }
+    Serial.print("Door Keep Open Milliseconds: ");
+    Serial.println(acsettings.door_keep_open_ms);
   }
+
+  Serial.print("Announcer in ");
+  switch(acsettings.announce_mode) {
+      case 0:
+        Serial.print("Disabled");
+        break;
+      case 1:
+        Serial.print("Broadcast");
+        break;
+      case 2:
+        Serial.print("MQTT");
+  }
+  Serial.println(" mode");
+
+  if(acsettings.announce_mode == 2) {
+    Serial.print("MQTT Server: ");
+    if(isprint(acsettings.mqtt_server[0])) {
+      Serial.println(acsettings.mqtt_server);
+    } else {
+      Serial.println("!Invalid!");
+    }
+
+    Serial.print("MQTT Port: ");
+    Serial.println(acsettings.mqtt_port);
+
+    Serial.print("MQTT Topic Base: ");
+    if(isprint(acsettings.mqtt_topic_base[0])) {
+      Serial.println(acsettings.mqtt_topic_base);
+    } else {
+      Serial.println("!Invalid!");
+    }
+  }
+
 }
 
 settings get_settings(void) {
@@ -219,6 +256,44 @@ settings get_settings(void) {
         set_settings(acsettings);
       }
       break;
+      case ACSETTINGS44:
+          // upgrade the settings and add defaults for new settings.
+          Serial.println("Old settings (44) found, upgrading");
+          {
+            settings44 osettings;
+            memset(&osettings, 0, sizeof(osettings));
+            EEPROMRead((uint32_t *)&osettings, 0, sizeof(osettings));
+
+            memcpy(acsettings.mac, osettings.mac, 6);
+            memcpy(acsettings.servername, osettings.servername, SERVERNAMELEN);
+            memcpy(acsettings.syslogserver, osettings.syslogserver, SERVERNAMELEN);
+            memcpy(acsettings.toolname, osettings.toolname, TOOLNAMELEN);
+            acsettings.port = osettings.port;
+            acsettings.nodeid = osettings.nodeid;
+            acsettings.status = osettings.status;
+            acsettings.runtime = osettings.runtime;
+            acsettings.minontime = osettings.minontime;
+            acsettings.sdcache = osettings.sdcache;
+            acsettings.netverbose = osettings.netverbose;
+            acsettings.toolonpin_activehigh = osettings.toolonpin_activehigh;
+            acsettings.toolrunpin_activehigh = osettings.toolrunpin_activehigh;
+            memcpy(acsettings.secret, osettings.secret, KEYLEN+1);
+
+            strncpy(acsettings.mqtt_server, "mqtt.lan.london.hackspace.org.uk", SERVERNAMELEN);
+            acsettings.mqtt_port = 1883;
+            strncpy(acsettings.mqtt_topic_base, "/door/999", MQTT_TOPIC_LEN);
+            acsettings.door_keep_open_ms = 1500;
+
+            // For now, default to broadcast
+            acsettings.announce_mode = 1;
+
+            // for future use
+            acsettings.doorbell_mode = 0;
+
+            acsettings.valid = ACSETTINGSVALID;
+            set_settings(acsettings);
+          }
+          break;
     default:
       Serial.println("Settings not valid, using defaults");
       acsettings.valid = 0;
@@ -251,6 +326,16 @@ settings get_settings(void) {
       memset(acsettings.secret, 0, KEYLEN+1);
       acsettings.role = 0;
       acsettings.announce_port = 0;
+
+      strncpy(acsettings.mqtt_server, "mqtt.lan.london.hackspace.org.uk", SERVERNAMELEN);
+      acsettings.mqtt_port = 1883;
+      strncpy(acsettings.mqtt_topic_base, "/door/999", MQTT_TOPIC_LEN);
+      acsettings.door_keep_open_ms = 1500;
+      // For now, default to broadcast
+      acsettings.announce_mode = 1;
+
+      // for future use
+      acsettings.doorbell_mode = 0;
 
       // save the settings since it's a new board.
       acsettings.valid = ACSETTINGSVALID;

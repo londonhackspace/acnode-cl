@@ -22,8 +22,8 @@ extern Watchdog wdog;
 extern Cache *cache;
 
 // XXX should be elsewhere
-// the base address (begining of 3rd block)
-#define USERBASE (128)
+// the base address (begining of 7th block)
+#define USERBASE (384)
 
 
 /*
