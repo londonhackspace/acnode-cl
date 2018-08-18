@@ -10,6 +10,7 @@
 #include <OneMsTaskTimer.h>
 
 #include "broadcastannouncer.h"
+#include "mqttannouncer.h"
 #include "settings.h"
 #include "microrl.h"
 #include "cli.h"
@@ -178,10 +179,15 @@ void setup() {
 
   switch(acsettings.announce_mode) {
     case 1:
-      announcer= new BroadcastAnnouncer(acsettings.announce_port);
+      announcer = new BroadcastAnnouncer(acsettings.announce_port);
       break;
     case 2:
-      Serial.println("Warning: MQTT Announcer not currently supported! Disabling Announcements...");
+      if(network) {
+        announcer = new MQTTAnnouncer(acsettings.mqtt_server, acsettings.mqtt_port, acsettings.mqtt_topic_base);
+      } else {
+        Serial.println("Not creating MQTT announcer because there is no network connection");
+      }
+      break;
     default:
       announcer = nullptr;
   }
