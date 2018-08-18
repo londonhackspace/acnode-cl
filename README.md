@@ -179,17 +179,27 @@ You can send a signal to the acnode via pin PE_4 to say when your tool is actual
 Other ACnode PCBs are available
 
 * P1 connector (numbers rising towards on-board relay, P1_1 is furthest from it)
-* P1_1 GND
-* P1_2 +3.3V
-* P1_3 PP0 RX  -> PN532 TXD
-* P1_4 PP1 TX  -> PN532 RXD
+* P1_1 GND -> CAT5 WHITE/ORANGE
+* P1_2 +3.3V    NOT CONNECTED
+* P1_3 PP0 RX ->  CAT5 WHITE/GREEN -> PN532 TXD
+* P1_4 PP1 TX -> CAT5 GREEN -> PN532 RXD
 
 * P3 connector (numbers rising towards reset button)
 * P3_1 +3.3V
-* P3_2 Red LED
-* P3_3 Green LED
-* P3_4 Blue LED
+* P3_2 Red LED -> CAT5 BLUE
+* P3_3 Green LED -> CAT5 WHITE/BROWN
+* P3_4 Blue LED -> CAT5 BROWN
 
+* P4 connector (numbers rising away from reset button)
+* P4_1 +5V -> CAT5 WHITE/ORANGE
+* P4_2 
+* P4_3 GND
+
+Button connector
+* PM7 SWITCH -> CAT5 WHTE/BLUE
+* GND 
+
+* 
 Note that Deek-Robot branded PN532 boards need +5V not +3.3v to function. 
 Use the pinouts labelled on the back of the board.
 Other boards (Elechouse NFC module v3) sort of work at +3.3V, but may not give sufficient juice to the NFC target to energise certain types of cards.
