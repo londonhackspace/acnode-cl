@@ -50,7 +50,8 @@ void MQTTAnnouncer::START() {
 
 void MQTTAnnouncer::sendMessage(aJsonObject* object, int type)
 {
-  char topic[MQTT_TOPIC_LEN] = { 0 };
+  // Double the topic base length since we're adding some long strings
+  char topic[2*MQTT_TOPIC_LEN] = { 0 };
   switch(type) {
     case MSG_ANNOUNCE: {
       sprintf(topic, "%s/announcements", topic_base);
