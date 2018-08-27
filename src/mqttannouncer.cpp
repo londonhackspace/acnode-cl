@@ -13,7 +13,8 @@ MQTTAnnouncer::MQTTAnnouncer(char* server, uint16_t port, const char* topic_base
   server(server),
   port(port),
   mqttClient(network,2000), // keep the timeout short - it'll either work or fail in this time
-  topic_base(topic_base)
+  topic_base(topic_base),
+  lastYield(0)
 {
 
 }
@@ -27,16 +28,9 @@ void MQTTAnnouncer::RFID(char *cardId) {
 }
 
 void MQTTAnnouncer::START() {
-  Serial.println("Connecting to MQTT server...");
-  // this connection can take a while if the server doesn't exist
-  wdog.feed();
-  if(network.connect(server, port) <= 0) {
-    Serial.print("Failed to connect to MQTT server ");
-    Serial.println(server);
-  } else {
-    wdog.feed();
-    Serial.println("Starting MQTT session");
-    mqttClient.connect();
+  connect();
+
+  if(mqttClient.isConnected()) {
     aJsonObject* root = aJson.createObject();
     aJson.addStringToObject(root, "Type", "START");
     aJson.addStringToObject(root, "Version", ACVERSION);
@@ -45,6 +39,29 @@ void MQTTAnnouncer::START() {
       aJson.addStringToObject(root, "Cause", "Watchdog");
     }
     sendMessage(root, MSG_STATUS);
+  }
+}
+
+void MQTTAnnouncer::run() {
+  if((millis() - lastYield) > 2000) {
+    mqttClient.yield(50);
+    lastYield = millis();
+  }
+}
+
+void MQTTAnnouncer::connect() {
+  Serial.println("Connecting to MQTT server...");
+  // this connection can take a while if the server doesn't exist
+  wdog.feed();
+  if(network.connect(server, port) <= 0) {
+    Serial.print("Failed to connect to MQTT server ");
+    Serial.print(server);
+    Serial.print(" on port ");
+    Serial.println(port);
+  } else {
+    wdog.feed();
+    Serial.println("Starting MQTT session");
+    mqttClient.connect();
   }
 }
 
@@ -68,6 +85,12 @@ void MQTTAnnouncer::sendMessage(aJsonObject* object, int type)
     }
   }
 
+  if(!mqttClient.isConnected()) {
+    connect();
+  }
+  if(!mqttClient.isConnected()) {
+    Serial.println("MQTT Disconnected - Not publishing");
+  }
   Serial.print("Publishing MQTT message to ");
   Serial.println(topic);
   aJson.addStringToObject(object, "Source", "ACNode");

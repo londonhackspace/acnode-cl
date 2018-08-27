@@ -18,12 +18,16 @@ public:
   void RFID(char * card) override;
   void START() override;
   void BELL() override;
+
+  void run() override;
 private:
   void sendMessage(aJsonObject*, int);
+  void connect();
 
   char* server;
   uint16_t port;
   const char* topic_base;
+  int lastYield;
 
   EthernetStack network;
   MQTT::Client<EthernetStack, Countdown> mqttClient;

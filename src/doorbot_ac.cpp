@@ -12,6 +12,7 @@ void DoorbotWithAccessControl::run() {
   } else {
     led.solid(BLUE);
   }
+  announcer->run();
 }
 
 void DoorbotWithAccessControl::handleCardPresent(Card c) {
