@@ -1,13 +1,18 @@
 #include "doorbot.h"
 
-Doorbot::Doorbot(Door &d, Watchdog &w, PN532 &n, RGB &l) :
+Doorbot::Doorbot(Door &d, Watchdog &w, PN532 &n, RGB &l, int button_pin, int door_release_pin) :
   Role(n),
   door(d),
   wdog(w),
-  led(l)
+  led(l),
+  button(button_pin),
+  door_release_button(door_release_pin)
   {
+    Serial.println("Doorbot role starting");
     this->announcer = NULL;
-};
+    button.begin();
+    door_release_button.begin();
+  };
 
 void Doorbot::enableAnnouncer(Announcer* announcer) {
   if (this->announcer) {
@@ -25,6 +30,27 @@ void Doorbot::run() {
     led.solid(GREEN);
   } else {
     led.solid(BLUE);
+  }
+  int poll = button.poll();
+  switch (poll) {
+    case SHORT_PRESS:
+    case LONG_PRESS:
+      announcer->BELL();
+      Serial.println("BING BONG ");
+        led.solid(ORANGE);
+        delay(ACCESS_DENIED_LED_ON_TIME/2);
+        led.solid(BLUE);
+        delay(ACCESS_DENIED_LED_ON_TIME/2);
+        led.solid(ORANGE);
+      break;
+  }
+  int poll_release = door_release_button.poll();
+  switch (poll_release) {
+    case SHORT_PRESS:
+    case LONG_PRESS:
+    announcer->EXIT();
+    Serial.println("Door release");
+    grantAccess();
   }
   announcer->run();
 };

@@ -7,6 +7,7 @@ enum msgType {
   MSG_ANNOUNCE,
   MSG_STATUS,
   MSG_DOORBELL,
+  MSG_EXIT,
 };
 
 MQTTAnnouncer::MQTTAnnouncer(char* server, uint16_t port, const char* topic_base) :
@@ -79,6 +80,10 @@ void MQTTAnnouncer::sendMessage(aJsonObject* object, int type)
     case MSG_DOORBELL: {
       sprintf(topic, "%s/bell", topic_base);
     } break;
+    case MSG_EXIT: {
+      sprintf(topic, "%s/exit", topic_base);
+      break;
+    }
     default: {
       Serial.print("Unknown message type ");
       Serial.println(type);
@@ -104,5 +109,13 @@ void MQTTAnnouncer::BELL() {
   aJson.addStringToObject(root, "Type", "BELL");
   aJson.addStringToObject(root, "Message", "RINGGGGGG!!!!!!");
   sendMessage(root, MSG_DOORBELL);
+  aJson.deleteItem(root);
+}
+
+void MQTTAnnouncer::EXIT() {
+  aJsonObject* root = aJson.createObject();
+  aJson.addStringToObject(root, "Type", "EXIT");
+  aJson.addStringToObject(root, "Message", "Door opened by exit button");
+  sendMessage(root, MSG_EXIT);
   aJson.deleteItem(root);
 }

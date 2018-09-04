@@ -30,3 +30,9 @@ void BroadcastAnnouncer::BELL() {
   _udp.write("BELL\n\n");
   _udp.endPacket();
 }
+
+void BroadcastAnnouncer::EXIT() {
+  _udp.beginPacket(_host, _port);
+  _udp.write("EXIT\n\n");
+  _udp.endPacket();
+}

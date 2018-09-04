@@ -60,6 +60,7 @@ ACNode *acnode = NULL;
 int active_role;
 
 #define BUTTON_PIN PM_7
+#define DOOR_RELEASE_PIN PM_6
 #define SD_CS_PIN PC_7
 #define ACNODE_DIR "ACNODE"
 
@@ -202,11 +203,11 @@ void setup() {
   active_role = acsettings.role;
   switch (active_role) {
     case 1:
-      doorbot = new Doorbot(*door, wdog, nfc, rgb);
+      doorbot = new Doorbot(*door, wdog, nfc, rgb, BUTTON_PIN, DOOR_RELEASE_PIN);
       doorbot->enableAnnouncer(announcer);
       break;
     case 2:
-      doorbot = new DoorbotWithAccessControl(*door, wdog, nfc, rgb);
+      doorbot = new DoorbotWithAccessControl(*door, wdog, nfc, rgb, BUTTON_PIN, DOOR_RELEASE_PIN);
       doorbot->enableAnnouncer(announcer);
       break;
     default:

@@ -9,6 +9,8 @@ Button::Button(int pin) {
 
 void Button::begin() {
   pinMode(_pin, INPUT_PULLUP);
+  Serial.print("Button init on pin ");
+  Serial.println(_pin, DEC);
   state = WAITING;
   last_sample = millis();
 }

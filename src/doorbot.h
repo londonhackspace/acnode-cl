@@ -11,6 +11,7 @@
 #include "every.h"
 #include "PN532.h"
 #include "cache.h"
+#include "button.h"
 
 extern Cache *cache;
 
@@ -18,7 +19,7 @@ extern Cache *cache;
 
 class Doorbot : public Role {
   public:
-    Doorbot(Door &, Watchdog &, PN532 &, RGB &l);
+    Doorbot(Door &, Watchdog &, PN532 &, RGB &l, int button_pin, int door_release_pin);
     void enableAnnouncer(Announcer* announcer);
     void run();
     void networkingError();
@@ -32,6 +33,9 @@ class Doorbot : public Role {
     RGB &led;
     Announcer *announcer;
     Card lastScanned;
+    Button button;
+    Button door_release_button;
+
     unsigned long lastScannedTime;
 };
 

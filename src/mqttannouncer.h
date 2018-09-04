@@ -18,6 +18,7 @@ public:
   void RFID(char * card) override;
   void START() override;
   void BELL() override;
+  void EXIT() override;
 
   void run() override;
 private:
