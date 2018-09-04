@@ -200,7 +200,7 @@ Button connector
 * GND 
 
 Door release button
-* PM0 SWITCH -> Normally Open
+* PM6 SWITCH -> Normally Open
 * GND
 
 * 
