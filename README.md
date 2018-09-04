@@ -199,6 +199,10 @@ Button connector
 * PM7 SWITCH -> CAT5 WHTE/BLUE
 * GND 
 
+Door release button
+* PM0 SWITCH -> Normally Open
+* GND
+
 * 
 Note that Deek-Robot branded PN532 boards need +5V not +3.3v to function. 
 Use the pinouts labelled on the back of the board.
@@ -230,6 +234,9 @@ and then `save` to save the settings.
 * Out of service, idle: flashing blue/red
 * Out of service, valid user: red (and the tool will be off)
 * Out of service, maintainer: yellow (and the tool will turn on)
+* Doorbell pressed: Long Orange / Blue / Orange / Blue
+* Door released: Green
+* Door access denied: Red
 
 # Roles
 
