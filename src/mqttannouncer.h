@@ -19,6 +19,7 @@ public:
   void START() override;
   void BELL() override;
   void EXIT() override;
+  void WEDGED() override;
 
   void run() override;
 private:

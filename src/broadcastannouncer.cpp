@@ -36,3 +36,9 @@ void BroadcastAnnouncer::EXIT() {
   _udp.write("EXIT\n\n");
   _udp.endPacket();
 }
+
+void BroadcastAnnouncer::WEDGED() {
+  _udp.beginPacket(_host, _port);
+  _udp.write("WEDGED\n\n");
+  _udp.endPacket();
+}
