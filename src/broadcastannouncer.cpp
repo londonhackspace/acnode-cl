@@ -42,3 +42,9 @@ void BroadcastAnnouncer::WEDGED() {
   _udp.write("WEDGED\n\n");
   _udp.endPacket();
 }
+
+void BroadcastAnnouncer::ALIVE() {
+  _udp.beginPacket(_host, _port);
+  _udp.write("ALIVE\n\n");
+  _udp.endPacket();
+}

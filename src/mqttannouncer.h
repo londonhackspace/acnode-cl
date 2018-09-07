@@ -20,6 +20,7 @@ public:
   void BELL() override;
   void EXIT() override;
   void WEDGED() override;
+  void ALIVE() override;
 
   void run() override;
 private:

@@ -122,3 +122,11 @@ void MQTTAnnouncer::WEDGED() {
   sendMessage(root, MSG_ANNOUNCE);
   aJson.deleteItem(root);
 }
+
+void MQTTAnnouncer::ALIVE() {
+  aJsonObject* root = aJson.createObject();
+  aJson.addStringToObject(root, "Type", "ALIVE");
+  aJson.addStringToObject(root, "Message", "I'm not dead yet");
+  sendMessage(root, MSG_STATUS);
+  aJson.deleteItem(root);
+}

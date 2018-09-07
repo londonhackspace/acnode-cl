@@ -58,6 +58,9 @@ Door *door = NULL;
 Doorbot *doorbot = NULL;
 ACNode *acnode = NULL;
 int active_role;
+Announcer* announcer = NULL;
+
+Every am_i_alive(60000);
 
 #define BUTTON_PIN PM_7
 #define DOOR_RELEASE_PIN PM_6
@@ -175,8 +178,6 @@ void setup() {
   if (wdog.was_reset()) {
     syslog.syslog(LOG_ALERT, "Alert! Was previously reset by the watchdog!");
   }
-
-  Announcer* announcer;
 
   switch(acsettings.announce_mode) {
     case 1:
@@ -306,5 +307,10 @@ void loop() {
       break;
     default:
       acnode->run();
+  }
+  if (am_i_alive.check()) {
+    if(announcer) {
+      announcer->ALIVE();
+    }
   }
 }

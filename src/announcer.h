@@ -8,6 +8,7 @@ public:
   virtual void BELL() = 0;
   virtual void EXIT() = 0;
   virtual void WEDGED() = 0;
+  virtual void ALIVE() = 0;
 
   // for maintainance tasks of the announcer
   virtual void run() {}
