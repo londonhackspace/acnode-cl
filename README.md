@@ -196,7 +196,7 @@ Other ACnode PCBs are available
 * P4_3 GND
 
 Button connector
-* PM7 SWITCH -> CAT5 WHTE/BLUE
+* PF_1 SWITCH -> CAT5 WHTE/BLUE
 * GND 
 
 Door release button

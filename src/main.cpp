@@ -62,7 +62,7 @@ Announcer* announcer = NULL;
 
 Every am_i_alive(60000);
 
-#define BUTTON_PIN PM_7
+#define BUTTON_PIN PF_1
 #define DOOR_RELEASE_PIN PM_6
 #define SD_CS_PIN PC_7
 #define ACNODE_DIR "ACNODE"
