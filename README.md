@@ -179,7 +179,7 @@ You can send a signal to the acnode via pin PE_4 to say when your tool is actual
 Other ACnode PCBs are available
 
 * P1 connector (numbers rising towards on-board relay, P1_1 is furthest from it)
-* P1_1 GND -> CAT5 WHITE/ORANGE
+* P1_1 GND -> CAT5 ORANGE
 * P1_2 +3.3V    NOT CONNECTED
 * P1_3 PP0 RX ->  CAT5 WHITE/GREEN -> PN532 TXD
 * P1_4 PP1 TX -> CAT5 GREEN -> PN532 RXD
