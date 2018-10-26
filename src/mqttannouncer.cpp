@@ -97,6 +97,7 @@ void MQTTAnnouncer::sendMessage(aJsonObject* object, int type)
   char* message = aJson.print(object);
   wdog.feed();
   mqttClient.publish(topic, (void*)message, strlen(message));
+  free(message);
 }
 
 void MQTTAnnouncer::BELL() {
