@@ -19,10 +19,11 @@ MQTTAnnouncer::MQTTAnnouncer(char* server, uint16_t port, const char* topic_base
 
 }
 
-void MQTTAnnouncer::RFID(char *cardId) {
+void MQTTAnnouncer::RFID(char *cardId, int granted) {
   aJsonObject* root = aJson.createObject();
   aJson.addStringToObject(root, "Type", "RFID");
   aJson.addStringToObject(root, "Card", cardId);
+  aJson.addNumberToObject(root, "Granted", granted);
   sendMessage(root, MSG_ANNOUNCE);
   aJson.deleteItem(root);
 }

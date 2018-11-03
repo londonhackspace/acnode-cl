@@ -27,7 +27,7 @@ class Doorbot : public Role {
     void handleCardPresent(Card c);
     void denyAccess();
     void grantAccess();
-    void announceCard(Card c);
+    void announceCard(Card c, int granted);
     Door& door;
     Watchdog &wdog;
     RGB &led;

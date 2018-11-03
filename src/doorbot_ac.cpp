@@ -45,14 +45,17 @@ void DoorbotWithAccessControl::handleCardPresent(Card c) {
     status = networking::querycard(c);
   }
 
-  announceCard(c);
+  
 
   if(status > 0) {
     cache->set(c);
     grantAccess();
+    announceCard(c, 1);
   } else if(status == -1) {
     denyAccess();
+    announceCard(c, 0);
   } else {
     networkingError();
+    announceCard(c, -1);
   }
 }

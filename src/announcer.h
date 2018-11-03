@@ -3,7 +3,7 @@
 
 class Announcer {
 public:
-  virtual void RFID(char *) = 0;
+  virtual void RFID(char *, int granted) = 0;
   virtual void START() = 0;
   virtual void BELL() = 0;
   virtual void EXIT() = 0;

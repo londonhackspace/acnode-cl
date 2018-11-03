@@ -63,26 +63,28 @@ void Doorbot::handleCardPresent(Card c) {
   } else {
     status = networking::querycard(c);
   }
-  announceCard(c);
 
   if(status >= 0) {
     cache->set(c);
     grantAccess();
+    announceCard(c,1);
   } else if(status == -1) {
     denyAccess();
+    announceCard(c,0);
   } else {
     networkingError();
+    announceCard(c,-1);
   }
 }
 
-void Doorbot::announceCard(Card c) {
+void Doorbot::announceCard(Card c, int granted) {
   if(!announcer)
     return;
   // Debouncing.
   if (this->lastScanned != c || millis() - this->lastScannedTime > 5000) {
     char buffer[14];
     c.str(buffer);
-    this->announcer->RFID(buffer);
+    this->announcer->RFID(buffer, granted);
     this->lastScanned = c;
     this->lastScannedTime = millis();
   }

@@ -15,7 +15,7 @@
 class MQTTAnnouncer : public Announcer{
 public:
   MQTTAnnouncer(char* server, uint16_t port, const char* topic_base);
-  void RFID(char * card) override;
+  void RFID(char * card, int granted) override;
   void START() override;
   void BELL() override;
   void EXIT() override;

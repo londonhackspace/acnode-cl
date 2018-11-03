@@ -9,9 +9,14 @@ BroadcastAnnouncer::BroadcastAnnouncer(int port) {
   _udp.begin(8888);
 }
 
-void BroadcastAnnouncer::RFID(char *cardId) {
-  char message[6 + 14];
+void BroadcastAnnouncer::RFID(char *cardId, int granted) {
+  char message[8 + 14];
   memset(message, 0x0, 6 + 14);
+  switch ( granted ) {
+    case 0 : sprintf(message, "DENY\n%s\n", cardId);
+    case 1 : sprintf(message, "RFID\n%s\n", cardId);
+    case -1 : sprintf(message, "NETERR\n%s\n", cardId);
+  }
   sprintf(message, "RFID\n%s\n", cardId);
 
   _udp.beginPacket(_host, _port);
