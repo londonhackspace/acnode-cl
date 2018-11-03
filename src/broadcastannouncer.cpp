@@ -14,8 +14,11 @@ void BroadcastAnnouncer::RFID(char *cardId, int granted) {
   memset(message, 0x0, 6 + 14);
   switch ( granted ) {
     case 0 : sprintf(message, "DENY\n%s\n", cardId);
+      break;
     case 1 : sprintf(message, "RFID\n%s\n", cardId);
+      break;
     case -1 : sprintf(message, "NETERR\n%s\n", cardId);
+      break;
   }
   sprintf(message, "RFID\n%s\n", cardId);
 
