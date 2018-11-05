@@ -15,7 +15,7 @@ public:
     int _port;
 
     BroadcastAnnouncer(int);
-    void RFID(char *, int granted) override;
+    void RFID(char *cardId, int granted) override;
     void START() override;
     void BELL() override;
     void EXIT() override;
