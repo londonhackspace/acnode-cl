@@ -69,8 +69,8 @@ void Doorbot::handleCardPresent(Card c) {
     grantAccess();
     announceCard(c,1);
   } else if(status == -1) {
-    denyAccess();
     announceCard(c,0);
+    denyAccess();
   } else {
     networkingError();
     announceCard(c,-1);
