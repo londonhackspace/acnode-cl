@@ -58,7 +58,7 @@ Card EEPromCache::get(Card u) {
 void EEPromCache::set(const Card u) {
   int address;
 
-  Serial.println("Storeing user: ");
+  Serial.println("Storing user: ");
   u.dump();
 
   // the user might already exists, don't store it more then once...

@@ -312,7 +312,7 @@ int mrlexecute (int argc, const char * const * argv)
       }
     }
     else if (strcmp (argv[i], _CMD_SAVE) == 0) {
-      Serial.print("Saveing Settings... ");
+      Serial.print("Saving Settings... ");
       int ret;
       ret = set_settings(acsettings);
       if (ret == 0) {

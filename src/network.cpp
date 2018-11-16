@@ -12,23 +12,29 @@ namespace networking {
 
   void log(int l) {
 #ifdef LOGGING
+  if (acsettings.netverbose == 1) {
     Serial.print("> ");
     Serial.println(l);
+  }
 #endif
   }
 
   void log(uint8_t *data) {
 #ifdef LOGGING
-  Serial.print("> ");
-  Serial.println((char*)data);
-#endif
+  if (acsettings.netverbose == 1) {
+    Serial.print("> ");
+    Serial.println((char*)data);
+  }
+  #endif
   }
 
   void log(char *d1, char *d2) {
 #ifdef LOGGING
-    Serial.print("< ");
-    Serial.print(d1);
-    Serial.println(d2);
+    if (acsettings.netverbose == 1) {
+      Serial.print("< ");
+      Serial.print(d1);
+      Serial.println(d2);
+    }
 #endif
   }
 

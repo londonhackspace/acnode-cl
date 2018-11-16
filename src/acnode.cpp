@@ -19,7 +19,9 @@ bool ACNode::card_has_access() {
   Card cached = cache->get(card_on_reader);
 
   if (cached.compare_uid(card_on_reader)) {
-    Serial.println("Card has been seen before (cached)");
+    if (acsettings.netverbose == 1) {
+      Serial.println("Card has been seen before (cached)");
+    }
     // Use the cached version (TODO: restructure this)
     card_on_reader = cached;
     return cached.is_user() || cached.is_maintainer();
@@ -86,8 +88,10 @@ void ACNode::run() {
     }
   } else {
     if (card_present()) {
-      Serial.print("Card on reader: ");
-      card_on_reader.dump();
+      if (acsettings.netverbose == 1) {
+        Serial.print("Card on reader: ");
+        card_on_reader.dump();
+      }
 
       // This is the entry point to the menu.
       if (card_has_access()) {
