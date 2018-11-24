@@ -33,7 +33,7 @@ private:
   int lastYield;
 
   EthernetStack network;
-  MQTT::Client<EthernetStack, Countdown> mqttClient;
+  MQTT::Client<EthernetStack, Countdown, 256> mqttClient;
 };
 
 #endif

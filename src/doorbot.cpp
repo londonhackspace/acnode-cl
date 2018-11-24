@@ -82,7 +82,7 @@ void Doorbot::announceCard(Card c, int granted) {
     return;
   // Debouncing.
   if (this->lastScanned != c || millis() - this->lastScannedTime > 5000) {
-    char buffer[14];
+    char buffer[15];
     c.str(buffer);
     this->announcer->RFID(buffer, granted);
     this->lastScanned = c;
