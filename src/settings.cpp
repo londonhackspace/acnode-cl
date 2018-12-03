@@ -284,8 +284,8 @@ settings get_settings(void) {
             strncpy(acsettings.mqtt_topic_base, "/door/999", MQTT_TOPIC_LEN);
             acsettings.door_keep_open_ms = 1500;
 
-            // For now, default to broadcast
-            acsettings.announce_mode = 1;
+            // London Hackspace has now migrated all listeners to MQTT. Default changed
+            acsettings.announce_mode = 2;
 
             // for future use
             acsettings.doorbell_mode = 0;
