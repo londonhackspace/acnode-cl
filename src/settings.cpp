@@ -285,6 +285,9 @@ settings get_settings(void) {
             acsettings.door_keep_open_ms = 1500;
 
             // London Hackspace has now migrated all listeners to MQTT. Default changed
+            // Keeping old broadcast announcer code for now in case any other
+            // hackspaces are using our code and still use UDP broadcast listeners
+            
             acsettings.announce_mode = 2;
 
             // for future use
