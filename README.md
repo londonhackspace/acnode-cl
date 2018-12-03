@@ -317,6 +317,14 @@ The tool does not (or does) have a working network connection to the acserver. T
 * acserver VM running, but no acserver running
 * acserver running, but crashing or having problems (e.g. database down, no cards in database)
 
+## Nice to have services
+
+The list of dependencies that are nice to have, but not strictly necessary
+
+* mqtt server should be up, if announce_mode is set to mqtt (now default on new installs)
+
 ## In service and Out of service
 
 Manually set by a maintainer or user - users can set a tool out of service, only a maintainer can put a tool in service, in/out of service state is kept in the acserver database and on the ACNode it's self
+In doorbot or doorbot access control roles, in-service or out of service has no meaning, and has no way of setting this state, other than via the acserver itself.
+
