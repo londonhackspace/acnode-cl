@@ -131,15 +131,16 @@ https://pointless.net/photos/id/1419334749/
 
 ![pn532 connected](pictures/pn532_connection.jpg)
 
-1. carefully unsolder the 0 ohm resistor jumper from the HIS0 connector, then resolder it (or just bridge the pads with solder) so that the '0' side is connected rather than the 1, this puts the reader in HSU mode.
+1. Cooqrobot boards: Carefully unsolder the 0 ohm resistor jumper from the HIS0 connector, then resolder it (or just bridge the pads with solder) so that the '0' side is connected rather than the 1, this puts the reader in HSU mode.
+  Elechouse boards: Set the DIP switches both to the right (This is as shipped from the factory) to put the reader into HSU mode.
 
-2. Solder headers onto the 8 pin connector on the board where the tx/rx pins are, you need at least tx,rx,3.3v,gnd. N.B. you can't use the SCL/SDA pins on the 4 pin connector because they have pullups on them...
+2. Solder headers onto the 8 pin connector on the board where the TX/RX pins are, you need at least TX,RX,5V,GND. N.B. Cooqrobot boards: you can't use the SCL/SDA pins on the 4 pin connector because they have pullups on them...
 
-2. Connect 3.3v and gnd to somewhere convenient on the connected launchpad
+2. Connect 5v and GND to somewhere convenient on the connected launchpad
 
 4. This sketch uses Serial6 which uses PP0 and PP1, AKA pins 43 and 44 on the connected launchpad, connect those too, PP0 goes to TX on the board and PP1 to RX.
 
-5. Check the labels on the card reader boards carefully, one cheap reader board has the pins for the FTDI cable pinouts *backwards* on the top (component) side of the board. Also some card readers label TX and RX the other way round...
+5. Check the labels on the card reader boards carefully, one cheap reader board has the pins for the FTDI cable pinouts *backwards* on the top (component) side of the board. Also some card readers label TX and RX the other way round... Do not use cheap Elechouse NFC Reader V3 clones - they often have the wrong component values in their antenna matching stage, and cannot energise cards well. Genuine Elechouse NFC Reader V4 (Direct from Elechouse, work well, the extra price is worth it for avoiding the hassle of deploying an under-performing reader).
 
 See here for the Connected Launchpad pinouts:
 
@@ -195,7 +196,7 @@ Other ACnode PCBs are available
 * P4_2 
 * P4_3 GND
 
-Button connector
+Button connector / Doorbell or ACnode menu button
 * PF_1 SWITCH -> CAT5 WHTE/BLUE
 * GND 
 
@@ -203,10 +204,13 @@ Door release button
 * PM6 SWITCH -> Normally Open
 * GND
 
-* 
-Note that Deek-Robot branded PN532 boards need +5V not +3.3v to function. 
+* Note that Deek-Robot and Elechouse branded PN532 boards need +5V not +3.3v to function. 
 Use the pinouts labelled on the back of the board.
-Other boards (Elechouse NFC module v3) sort of work at +3.3V, but may not give sufficient juice to the NFC target to energise certain types of cards.
+Other boards (Genuine Elechouse NFC module v3) sort of work at +3.3V, but may not give sufficient juice to the NFC target to energise certain types of cards.
+
+# Reader installation
+
+For convenience of installation (acnode), and added security (doorbot), we recommend the reader module itself should be connected via an 8 wire cable, such as CAT5, and housed with a pushbutton NO switch and RGB LED in its own enclosure. This way, any intruder can't attack the reader and easily gain access. CAT5 (or above) wiring as above. Note the requirement for 220 ohm resistors on the Red/Green/Blue LED pins to prevent LED burnout. For operational convenience, it is advised to keep a spare reader that can be swapped out. Readers for doorbot enclosures can fit into standard single EN 60670-1 socket boxes with blanking plates, or outdoor junction boxes. For outdoor fitting, ensure that any holes for the button are suitably sealed against moisture ingress. Ditto for ACnode readers in a dusty or dirty environment.
 
 # using the CLI
 
