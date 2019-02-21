@@ -1401,7 +1401,7 @@
   (gr_circle (center 63.2 84.89) (end 63.82 85.43) (layer F.SilkS) (width 0.2))
   (gr_circle (center 103.17 80.68) (end 103.93 80.27) (layer F.SilkS) (width 0.2))
   (gr_circle (center 85.09 139.7) (end 85.725 139.7) (layer F.SilkS) (width 0.2))
-  (gr_text "LHS\nACNode/\nDoorbot PCB" (at 83.185 71.755) (layer F.SilkS)
+  (gr_text "LHS\nACNode/\nDoorbot PCB\nRev 1.1" (at 81.73 68.83) (layer F.SilkS)
     (effects (font (size 1.5 1.5) (thickness 0.3)))
   )
   (gr_line (start 106.68 40.64) (end 106.68 165.1) (layer Edge.Cuts) (width 0.1))
