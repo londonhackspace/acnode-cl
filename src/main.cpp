@@ -59,6 +59,7 @@ Doorbot *doorbot = NULL;
 ACNode *acnode = NULL;
 int active_role;
 Announcer* announcer = NULL;
+int alive_check_count = 0;
 
 Every am_i_alive(60000);
 
@@ -311,6 +312,21 @@ void loop() {
   if (am_i_alive.check()) {
     if(announcer) {
       announcer->ALIVE();
+    }
+    // Some of the cache methods don't store time-to-live, so we will want to verify all cached entries every 30 times we do the alive announcement, which works out about every half an hour
+    // For those that do store time-to-live, this has the useful side-effect of refreshing the TTL, which means a bit more useful runtime if networking to the acserver is lost.
+    if (network) {
+      if (alive_check_count > 29) {
+        alive_check_count = 0;
+        wdog.feed();
+        rgb.flashing(BLUE);
+        cache->verify();
+        rgb.solid(BLUE);
+      }
+      alive_check_count++;
+      if ((door->isOpen()) || (tool.status())) {
+        alive_check_count=0; // Because verifying all the users takes a while, we want to do it at quiet times
+      }
     }
   }
 }
