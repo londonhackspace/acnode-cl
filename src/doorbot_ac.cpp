@@ -43,6 +43,12 @@ void DoorbotWithAccessControl::handleCardPresent(Card c) {
     status = 1;
   } else {
     status = networking::querycard(c);
+    switch (status) {
+        case 2:
+          c.set_maintainer(true);
+        case 1:
+          c.set_user(true);
+    }
   }
 
   
