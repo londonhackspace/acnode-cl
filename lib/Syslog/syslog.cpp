@@ -45,7 +45,7 @@ void Syslog::begin(const char *server, const char * ident, int fac) {
   }
 
   if(ip.addr == IPADDR_NONE) {
-    Serial.print("unable to find ip for: ");
+    Serial.print("unable to find ip for syslog server: ");
     Serial.println(_server);
 
     _server = NULL;
