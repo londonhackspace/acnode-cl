@@ -112,6 +112,7 @@ void RAMCache::verify() {
         default:
           entry->expire();
       }
+      entry->touch(now);
     }
   }
 }
