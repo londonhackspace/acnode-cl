@@ -42,6 +42,7 @@ void DoorbotWithAccessControl::handleCardPresent(Card c) {
   if (cached.compare_uid(c) && cached.is_valid()) {
     status = 1;
   } else {
+    led.solid(MAUVE);
     status = networking::querycard(c);
     switch (status) {
         case 2:

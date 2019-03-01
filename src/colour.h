@@ -15,6 +15,7 @@ extern Colour YELLOW;
 extern Colour ORANGE;
 extern Colour WHITE;
 extern Colour BLACK;
+extern Colour MAUVE;
 extern Colour RAINBOW[];
 
 #endif

@@ -107,12 +107,17 @@ void RAMCache::verify() {
       switch (status) {
         case 2:
           entry->card.set_maintainer(true);
+          entry->touch(now);
+          break;
         case 1:
           entry->card.set_user(true);
+          entry->touch(now);
+          break;
         default:
+          entry->touch(now);
           entry->expire();
+          break;
       }
-      entry->touch(now);
     }
   }
 }
