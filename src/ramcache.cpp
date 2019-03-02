@@ -113,6 +113,9 @@ void RAMCache::verify() {
           entry->card.set_user(true);
           entry->touch(now);
           break;
+        case -99: // Networking error
+          entry->touch(now);
+          break;
         default:
           entry->touch(now);
           entry->expire();
