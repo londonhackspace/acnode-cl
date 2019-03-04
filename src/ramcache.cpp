@@ -113,12 +113,15 @@ void RAMCache::verify() {
           entry->card.set_user(true);
           entry->touch(now);
           break;
+        case -1: // Card is not known at all - actually, this is returned for expired members too
+          entry->touch(now);
+          entry->expire();
+          break;
         case -99: // Networking error
           entry->touch(now);
           break;
         default:
           entry->touch(now);
-          entry->expire();
           break;
       }
     }
