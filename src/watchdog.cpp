@@ -37,14 +37,14 @@ void Watchdog::begin() {
   
   if (rc) {
     Serial.print("Last reset was from: ");
-    if (rc & SYSCTL_CAUSE_LDO) {
-      Serial.print("LDO ");
+    if (rc & SYSCTL_CAUSE_WDOG1) {
+      Serial.print("WDOG1 ");
     }
     if (rc & SYSCTL_CAUSE_SW) {
       Serial.print("SW ");
     }
-    if (rc & SYSCTL_CAUSE_WDOG) {
-      Serial.print("WDOG ");
+    if (rc & SYSCTL_CAUSE_WDOG0) {
+      Serial.print("WDOG0 ");
        _was_wdog_reset = true;
     }
     if (rc & SYSCTL_CAUSE_BOR) {
@@ -57,8 +57,8 @@ void Watchdog::begin() {
       Serial.print("EXT ");
     }
     Serial.println();
-    SysCtlResetCauseClear(SYSCTL_CAUSE_LDO | SYSCTL_CAUSE_SW |
-                          SYSCTL_CAUSE_WDOG | SYSCTL_CAUSE_BOR |
+    SysCtlResetCauseClear(SYSCTL_CAUSE_WDOG1 | SYSCTL_CAUSE_SW |
+                          SYSCTL_CAUSE_WDOG0 | SYSCTL_CAUSE_BOR |
                           SYSCTL_CAUSE_POR | SYSCTL_CAUSE_EXT);
   }
   

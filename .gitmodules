@@ -1,0 +1,9 @@
+[submodule "targets/tivac-launchpad/tivac-core"]
+	path = targets/tivac-launchpad/tivac-core
+	url = https://github.com/energia/tivac-core.git
+[submodule "lib/PN532"]
+	path = lib/PN532
+	url = https://github.com/londonhackspace/PN532.git
+[submodule "lib/HttpClient"]
+	path = lib/HttpClient
+	url = https://github.com/zlalanne/HttpClient.git
