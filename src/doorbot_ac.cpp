@@ -41,7 +41,7 @@ void DoorbotWithAccessControl::handleCardPresent(Card c) {
   Card cached = cache->get(c);
   if (cached.compare_uid(c) && cached.is_valid()) {
     status = 1;
-  } else {
+  } else if(lwIPLinkActive()) {
     led.solid(MAUVE);
     status = networking::querycard(c);
     switch (status) {
@@ -50,6 +50,9 @@ void DoorbotWithAccessControl::handleCardPresent(Card c) {
         case 1:
           c.set_user(true);
     }
+  } else {
+    Serial.println("No network link - not querying server");
+    status = -127;
   }
 
   

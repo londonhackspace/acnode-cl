@@ -71,9 +71,7 @@ void Doorbot::handleCardPresent(Card c) {
         case 1:
           c.set_user(true);
     }
-  }
-  else
-  {
+  } else {
     Serial.println("No network link - not querying server");
     status = -127;
   }
