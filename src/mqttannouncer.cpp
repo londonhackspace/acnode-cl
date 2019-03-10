@@ -45,14 +45,25 @@ void MQTTAnnouncer::START() {
 
 void MQTTAnnouncer::run() {
   if((millis() - lastYield) > 2000) {
-    mqttClient.yield(50);
+    if(lwIPLinkActive()) {
+      mqttClient.yield(50);
+    } else {
+      if(mqttClient.isConnected()) {
+        Serial.println("Disconnecting from MQTT server - no link");
+        mqttClient.disconnect();
+      }
+    }
     lastYield = millis();
   }
 }
 
 void MQTTAnnouncer::connect() {
-  Serial.println("Connecting to MQTT server...");
+  if(!lwIPLinkActive()) {
+    Serial.println("Not connecting to MQTT server - no link");
+    return;
+  }
   // this connection can take a while if the server doesn't exist
+  Serial.println("Connecting to MQTT server...");
   wdog.feed();
   if(network.connect(server, port) <= 0) {
     Serial.print("Failed to connect to MQTT server ");
@@ -68,6 +79,11 @@ void MQTTAnnouncer::connect() {
 
 void MQTTAnnouncer::sendMessage(aJsonObject* object, int type)
 {
+  if(!lwIPLinkActive()) {
+    Serial.println("Not sending to MQTT server - no link");
+    mqttClient.disconnect();
+    return;
+  }
   // Double the topic base length since we're adding some long strings
   char topic[2*MQTT_TOPIC_LEN] = { 0 };
   switch(type) {
@@ -97,7 +113,25 @@ void MQTTAnnouncer::sendMessage(aJsonObject* object, int type)
   aJson.addStringToObject(object, "Source", "ACNode");
   char* message = aJson.print(object);
   wdog.feed();
-  mqttClient.publish(topic, (void*)message, strlen(message));
+  if(mqttClient.publish(topic, (void*)message, strlen(message)) != 0)
+  {
+    // try one more time since sometimes this triggers it to notice
+    // the server went missing
+    Serial.println("Failed to send MQTT message - trying once more");
+    if(!mqttClient.isConnected()) {
+      connect();
+    }
+    if(!mqttClient.isConnected()) {
+      Serial.println("MQTT Disconnected - Not publishing");
+    }
+    else
+    {
+      if(mqttClient.publish(topic, (void*)message, strlen(message)) != 0)
+      {
+        Serial.println("MQTT Publish failed - Giving up.");
+      }
+    }
+  }
   free(message);
 }
 

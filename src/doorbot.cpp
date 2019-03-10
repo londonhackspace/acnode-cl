@@ -1,5 +1,7 @@
 #include "doorbot.h"
 
+#include <Ethernet.h>
+
 Doorbot::Doorbot(Door &d, Watchdog &w, PN532 &n, RGB &l, int button_pin, int door_release_pin) :
   Role(n),
   door(d),
@@ -60,8 +62,7 @@ void Doorbot::handleCardPresent(Card c) {
   Card cached = cache->get(c);
   if (cached.compare_uid(c) && cached.is_valid()) {
     status = 1;
-  } else {
-    led.solid(MAUVE);
+  } else if(lwIPLinkActive()) {
     status = networking::querycard(c);
     switch (status) {
         case 2:
@@ -69,6 +70,11 @@ void Doorbot::handleCardPresent(Card c) {
         case 1:
           c.set_user(true);
     }
+  }
+  else
+  {
+    Serial.println("No network link - not querying server");
+    status = -127;
   }
 
   if(status >= 0) {
