@@ -1,5 +1,7 @@
 #include "doorbot_ac.h"
 
+#include <Ethernet.h>
+
 DoorbotWithAccessControl::DoorbotWithAccessControl(Door &d, Watchdog &w, PN532 &n, RGB &l, int button_pin, int door_release_pin) : Doorbot(d, w, n, l, button_pin, door_release_pin) { }
 
 void DoorbotWithAccessControl::run() {
