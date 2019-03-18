@@ -9,6 +9,7 @@ public:
   virtual void EXIT() = 0;
   virtual void WEDGED() = 0;
   virtual void ALIVE() = 0;
+  virtual void TOOL_DEACTIVATE() = 0;
 
   // for maintainance tasks of the announcer
   virtual void run() {}

@@ -13,6 +13,7 @@
 #include "microrl.h"
 #include "network.h"
 #include "menu.h"
+#include "announcer.h"
 
 // put these things here so more things can use it.
 extern EthernetClient client;
@@ -38,7 +39,9 @@ extern Cache *cache;
 class ACNode : public Role {
 public:
   ACNode(PN532 &, RGB &, Tool &, int button_pin);
+  void enableAnnouncer(Announcer* announcer);
   void run();
+  void announceCard(Card c, int granted);
 protected:
   void feed_incoming_character();
   bool card_present();
@@ -56,6 +59,11 @@ private:
   Card card_on_reader;
   unsigned long last_status_checked_at;
   bool enabled;
+  Announcer *announcer;
+  Card lastScanned;
+  unsigned long lastScannedTime;
+  unsigned long cardLastSeenTime;
+  bool deactivationAnnounced;
 };
 
 #endif

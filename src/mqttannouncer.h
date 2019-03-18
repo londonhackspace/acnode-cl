@@ -21,6 +21,7 @@ public:
   void EXIT() override;
   void WEDGED() override;
   void ALIVE() override;
+  void TOOL_DEACTIVATE() override;
 
   void run() override;
 private:

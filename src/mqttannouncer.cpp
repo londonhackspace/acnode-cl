@@ -166,3 +166,11 @@ void MQTTAnnouncer::ALIVE() {
   sendMessage(root, MSG_STATUS);
   aJson.deleteItem(root);
 }
+
+void MQTTAnnouncer::TOOL_DEACTIVATE() {
+  aJsonObject* root = aJson.createObject();
+  aJson.addStringToObject(root, "Type", "DEACTIVATED");
+  aJson.addStringToObject(root, "Message", "Tool deactivated");
+  sendMessage(root, MSG_STATUS);
+  aJson.deleteItem(root);
+}
