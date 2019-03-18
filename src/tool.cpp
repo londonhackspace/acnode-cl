@@ -64,8 +64,6 @@ void Tool::poll() {
         // if so we can turn off now
         _turnoff = false;
 
-        // report to the acserver that we're done with this tool
-        networking::reportToolUse(tool_user, 0);
         off();
       }
   }
@@ -237,6 +235,8 @@ void Tool::off() {
     if (!_toolrunpin) {
       stoprunning();
     }
+    // report to the acserver that we're done with this tool
+    networking::reportToolUse(tool_user, 0);
 
     _toolon = false;
     _turnoff = false;
