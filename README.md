@@ -230,7 +230,7 @@ and then `save` to save the settings.
 
 # Button status/colours:
 
-* Starting up: yellow
+* Starting up: rainbow cycling
 * In service, idle: blue
 * In service, valid user, tool on: green
 * In service, invalid user: red
