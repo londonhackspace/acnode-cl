@@ -55,6 +55,7 @@ void mrlprint(const char * str) {
 #define _CMD_MQTT_PORT "mqtt_port"
 #define _CMD_MQTT_TOPIC_BASE "mqtt_topic_base"
 #define _CMD_DOOR_KEEP_OPEN_MSEC "door_keep_open_time"
+#define _CMD_MEMSTATS "memstats"
 
 #define _NUM_OF_CMD 25
 #define _NUM_OF_VER_SCMD 2
@@ -66,7 +67,7 @@ const char *keyworld [] = {
   _CMD_HELP, _CMD_SHOW, _CMD_MAC, _CMD_SERVER, _CMD_NODEID, _CMD_PORT, _CMD_VER, _CMD_SAVE, _CMD_CLEAR,
   _CMD_LIST, _CMD_REBOOT, _CMD_NUKE, _CMD_SYSLOG, _CMD_NAME, _CMD_RTIME, _CMD_FILL, _CMD_VERIFY,
   _CMD_MINONTIME, _CMD_CACHE, _CMD_NETVERBOSE, _CMD_TOOLONPIN, _CMD_TOOLRUNPIN, _CMD_SECRET, _CMD_ROLE, _CMD_ANNOUNCE_PORT,
-  _CMD_ANNOUNCE_MODE, _CMD_MQTT_SERVER, _CMD_MQTT_PORT, _CMD_MQTT_TOPIC_BASE, _CMD_DOOR_KEEP_OPEN_MSEC
+  _CMD_ANNOUNCE_MODE, _CMD_MQTT_SERVER, _CMD_MQTT_PORT, _CMD_MQTT_TOPIC_BASE, _CMD_DOOR_KEEP_OPEN_MSEC, _CMD_MEMSTATS
 };
 // version subcommands
 const char * ver_keyworld [] = {
@@ -108,6 +109,7 @@ void print_help ()
   Serial.println ("\ttoolrunpin {high | low} - set toolrun pin to be active high or low.");
   Serial.println ("\tsecret <secret> - 8 char secret for authenticating with the acserver.");
   Serial.println ("\trole <role id> - how this acnode behaves: 0 - regular acnode, 1 - doorbot, 2 - doorbot with access control, 3 - audit only");
+  Serial.println ("\t memstats - get the current memory statistics of the node.");
   if (acsettings.role > 0) {
     if(acsettings.announce_mode == 1) {
       Serial.println("\tannounce_port <port> - when a card is scanned, send a notification to this port");
@@ -388,6 +390,14 @@ int mrlexecute (int argc, const char * const * argv)
     else if (strcmp (argv[i], _CMD_VERIFY) == 0) {
       Serial.println("Verifying card cache");
       cache->verify();
+    }
+    else if (strcmp (argv[i], _CMD_MEMSTATS) == 0) {
+      Serial.print("Current Heap usage: ");
+      Serial.print(get_used_heap_mem());
+      Serial.println(" bytes");
+      Serial.print("Remaining Heap memory: ");
+      Serial.print(get_remaining_heap_mem());
+      Serial.println(" bytes");
     }
     else if (strcmp (argv[i], _CMD_MINONTIME) == 0) {
       if ((++i) < argc) { // if value preset

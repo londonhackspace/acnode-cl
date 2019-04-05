@@ -163,6 +163,12 @@ void MQTTAnnouncer::ALIVE() {
   aJsonObject* root = aJson.createObject();
   aJson.addStringToObject(root, "Type", "ALIVE");
   aJson.addStringToObject(root, "Message", "I'm not dead yet");
+  
+  aJsonObject* mem = aJson.createObject();
+  aJson.addNumberToObject(mem, "heap_free", (int)get_remaining_heap_mem());
+  aJson.addNumberToObject(mem, "heap_used", (int)get_used_heap_mem());
+
+  aJson.addItemToObject(root, "mem", mem);
   sendMessage(root, MSG_STATUS);
   aJson.deleteItem(root);
 }
