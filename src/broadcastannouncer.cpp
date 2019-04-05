@@ -19,8 +19,9 @@ void BroadcastAnnouncer::RFID(char *cardId, int granted) {
       break;
     case -1 : sprintf(message, "NETERR\n%s\n", cardId);
       break;
+    default: sprintf(message, "RFID\n%s\n", cardId);
+      break;    
   }
-  sprintf(message, "RFID\n%s\n", cardId);
 
   _udp.beginPacket(_host, _port);
   _udp.write(message);
@@ -54,5 +55,11 @@ void BroadcastAnnouncer::WEDGED() {
 void BroadcastAnnouncer::ALIVE() {
   _udp.beginPacket(_host, _port);
   _udp.write("ALIVE\n\n");
+  _udp.endPacket();
+}
+
+void BroadcastAnnouncer::TOOL_DEACTIVATE() {
+  _udp.beginPacket(_host, _port);
+  _udp.write("DEACTIVATED\n\n");
   _udp.endPacket();
 }

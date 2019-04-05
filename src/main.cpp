@@ -139,7 +139,7 @@ void setup() {
   // start the Ethernet connection. If the network is down this takes some time (60 secs?)
   // so disable the watchdog while it's happening
   wdog.disable();
-  if (!Ethernet.begin(acsettings.mac)) {
+  if (!Ethernet.begin(acsettings.mac)) {  
     Serial.println("Failed to configure Ethernet using DHCP");
   } else {
     network = true;
@@ -179,23 +179,34 @@ void setup() {
   if (wdog.was_reset()) {
     syslog.syslog(LOG_ALERT, "Alert! Was previously reset by the watchdog!");
   }
-
+  wdog.feed();
+  Serial.println("Determining announce_mode");
   switch(acsettings.announce_mode) {
     case 1:
-      announcer = new BroadcastAnnouncer(acsettings.announce_port);
+      Serial.println("Broadcast announcer");
+      if (network) {
+        announcer = new BroadcastAnnouncer(acsettings.announce_port);
+      } else {
+        Serial.println("Would be Broadcast but no network");
+        announcer = nullptr;
+      }
       break;
     case 2:
       if(network) {
+        Serial.println("MQTT announcer");
         announcer = new MQTTAnnouncer(acsettings.mqtt_server, acsettings.mqtt_port, acsettings.mqtt_topic_base);
       } else {
         Serial.println("Not creating MQTT announcer because there is no network connection");
+        announcer = nullptr;
       }
       break;
     default:
+      Serial.println("No announcer");
       announcer = nullptr;
   }
 
   if(announcer) {
+    Serial.println("Announcer starting");
     announcer->START();
   }
 
@@ -205,15 +216,19 @@ void setup() {
   active_role = acsettings.role;
   switch (active_role) {
     case 1:
+      Serial.println("Starting regular Doorbot role");
       doorbot = new Doorbot(*door, wdog, nfc, rgb, BUTTON_PIN, DOOR_RELEASE_PIN);
       doorbot->enableAnnouncer(announcer);
       break;
     case 2:
+      Serial.println("Starting restricted Doorbot role");
       doorbot = new DoorbotWithAccessControl(*door, wdog, nfc, rgb, BUTTON_PIN, DOOR_RELEASE_PIN);
       doorbot->enableAnnouncer(announcer);
       break;
     default:
+      Serial.println("Starting acnode role");
       acnode = new ACNode(nfc, rgb, tool, BUTTON_PIN);
+      acnode->enableAnnouncer(announcer);
       break;
   }
 
@@ -320,6 +335,7 @@ void loop() {
         alive_check_count = 0;
         wdog.feed();
         rgb.flashing(BLUE);
+        Serial.println("Cache refreshing");
         cache->verify();
         rgb.solid(BLUE);
       }
