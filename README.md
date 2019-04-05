@@ -152,15 +152,7 @@ You can send a signal to the acnode via pin PE_4 to say when your tool is actual
 
 # Building and flashing the firmware
 
-* Install [PlatformIO](http://platformio.org)
-* Clone this repository.
-* Run `rm -rf ~/.platformio/packages/framework-energiativa/libraries/AIR430*`
-* Run `patch ~/.platformio/packages/framework-energiativa/libraries/OneMsTaskTimer/OneMsTaskTimer.cpp -i enable-onemstasktimer.patch`.
-* Open the cloned repository by going to `PlatformIO | Open Project folder...`.
-* Choose `PlatformIO | Build` or `PlatformIO | Upload`.
-* All dependencies will be installed automatically prior to the first build.
-
-(non-PlatformIO version, tested on MacOS and Ubuntu 18.04)
+(non-PlatformIO version, tested on MacOS 10.12.6, 10.14.4 and Ubuntu 18.04)
 
 * Install git for your platform if you haven't already
 * Install cmake for your platform (http://cmake.org , debian/ubuntu package: cmake, MacOS homebrew: `brew install cmake`)
