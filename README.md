@@ -158,11 +158,11 @@ You can send a signal to the acnode via pin PE_4 to say when your tool is actual
 * Install cmake for your platform (http://cmake.org , debian/ubuntu package: cmake, MacOS homebrew: `brew install cmake`)
 * Create a build directory `mkdir build`
 * Run `./gettoolchain.sh`
+* Update/initialise the git submodules `git submodule update --init`
 * Use cmake to make a Makefile, and define your target board (EK-TM4C1294XL)
   `cd build && cmake .. -DCMAKE_TOOLCHAIN_FILE=../targets/tivac-launchpad/EK-TM4C1294XL.cmake`
   If building on MacOS, you may need to put the cmake binary on your path if you downloaded it manually or refer to it as
   /Applications/CMake.app/Contents/bin/cmake
-* Update/initialise the git submodules `git submodule update --init`
 * Use Gnu make to actually run the dependencies, compile and link: `make -j`
 * When ready to upload the resultant elf binary to the Launchpad, `make -j flash`
 
