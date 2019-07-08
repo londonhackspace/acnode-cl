@@ -1,14 +1,20 @@
-language: python
-python:
-  - "2.7"
-sudo: false
+language: cpp
+
+env:
+  - RUN_TESTS=false OPTIONS=-DCMAKE_TOOLCHAIN_FILE=../targets/tivac-launchpad/EK-TM4C1294XL.cmake
+
 cache:
   directories:
-    - "~/.platformio"
+    - toolchain
+
 install:
-  - pip install -U platformio
-script:
-  - platformio update
-  - rm -rf ~/.platformio/packages/framework-energiativa/libraries/AIR430*
-  - patch ~/.platformio/packages/framework-energiativa/libraries/OneMsTaskTimer/OneMsTaskTimer.cpp -i enable-onemstasktimer.patch
-  - platformio run
+  - if [ $RUN_TESTS != "true" ]; then ./getToolchain.sh; fi
+
+before_script:
+  - mkdir build
+  - cd build
+  - cmake ..  $OPTIONS
+
+script: 
+  - make
+- if [ $RUN_TESTS == "true" ]; then make test; fi
