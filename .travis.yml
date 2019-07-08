@@ -17,4 +17,4 @@ before_script:
 
 script: 
   - make
-- if [ $RUN_TESTS == "true" ]; then make test; fi
+  - if [ $RUN_TESTS == "true" ]; then make test; fi
