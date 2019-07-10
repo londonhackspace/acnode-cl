@@ -324,6 +324,12 @@ void loop() {
     default:
       acnode->run();
   }
+  
+  if(announcer)
+  {
+    announcer->run();
+  }
+
   if (am_i_alive.check()) {
     if(announcer) {
       announcer->ALIVE();

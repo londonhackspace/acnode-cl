@@ -54,10 +54,6 @@ void Doorbot::run() {
     Serial.println("Door release");
     grantAccess();
   }
-  if(announcer)
-  {
-    announcer->run();
-  }
 };
 
 void Doorbot::handleCardPresent(Card c) {
