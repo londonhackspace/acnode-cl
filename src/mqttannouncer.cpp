@@ -2,6 +2,7 @@
 #include "acnode.h"
 #include "mqttannouncer.h"
 #include "version.h"
+#include "utils.h"
 
 enum msgType {
   MSG_ANNOUNCE,
@@ -35,6 +36,7 @@ void MQTTAnnouncer::START() {
     aJsonObject* root = aJson.createObject();
     aJson.addStringToObject(root, "Type", "START");
     aJson.addStringToObject(root, "Version", ACVERSION);
+    aJson.addStringToObject(root, "Git", STRINGIFY(GIT_REVISION));
     if(wdog.was_reset())
     {
       aJson.addStringToObject(root, "Cause", "Watchdog");
