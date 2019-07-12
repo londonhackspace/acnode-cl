@@ -1,9 +1,10 @@
 #include "network.h"
 #include "acnode.h"
 #include "version.h"
+#include "utils.h"
 
 #define HTTP_TIMEOUT 3000
-#define USER_AGENT "ACNode rev " GIT_REVISION
+#define USER_AGENT "ACNode rev " STRINGIFY(GIT_REVISION)
 
 namespace networking {
   const char *user_agent() {

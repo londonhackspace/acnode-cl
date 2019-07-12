@@ -381,7 +381,7 @@ int clear_settings(void) {
 
 void print_buildinfo() {
   Serial.print("Revision: ");
-  Serial.println(GIT_REVISION);
+  Serial.println(STRINGIFY(GIT_REVISION));
   Serial.print("Built on ");
   Serial.print(__DATE__);
   Serial.print(" ");

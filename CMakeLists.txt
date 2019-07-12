@@ -4,6 +4,8 @@ project (ACNode-CL)
 set(CMAKE_C_STANDARD 11)
 set(CMAKE_CXX_STANDARD 11)
 
+find_package(Git)
+
 execute_process(COMMAND
   "${GIT_EXECUTABLE}" describe --match=NeVeRmAtCh --always --abbrev=40 --dirty
   WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}"
