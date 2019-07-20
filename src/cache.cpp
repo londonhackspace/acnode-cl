@@ -1,6 +1,10 @@
 #include "cache.h"
 #include "acnode.h"
 
+Cache::~Cache() {
+
+}
+
 // fill the card cache with junk users to see how well we cope with runing out of space.
 void Cache::fill(void) {
   fill(1000);

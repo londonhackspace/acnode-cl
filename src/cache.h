@@ -15,6 +15,8 @@ unsigned int            :3; // pad to a whole byte
 
 struct Cache {
   public:
+    virtual ~Cache();
+
     virtual void begin() = 0;
 
     // look up a uid in the cache and return a user struct
