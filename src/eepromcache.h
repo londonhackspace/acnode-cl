@@ -6,7 +6,7 @@
 #include "cache.h"
 
 
-class EEPromCache: public Cache {
+class EEPromCache: public CacheBase {
   public:
     EEPromCache();
 

@@ -19,7 +19,7 @@ public:
   Card card;
 };
 
-class RAMCache : public Cache {
+class RAMCache : public CacheBase {
 public:
   virtual void begin();
   virtual Card get(Card u);

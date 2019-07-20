@@ -6,11 +6,11 @@ Cache::~Cache() {
 }
 
 // fill the card cache with junk users to see how well we cope with runing out of space.
-void Cache::fill(void) {
+void CacheBase::fill(void) {
   fill(1000);
 }
 
-void Cache::fill(const int count) {
+void CacheBase::fill(const int count) {
   int i;
   uint8_t uid[7];
 
@@ -29,7 +29,7 @@ void list_callback(Card c) {
   c.dump();
 }
 
-void Cache::list(void) {
+void CacheBase::list(void) {
   int count = each(&list_callback);
   Serial.print("currently storing: ");
   Serial.print(count);

@@ -3,7 +3,7 @@
 
 #include "cache.h"
 
-class NoCache: public Cache {
+class NoCache: public CacheBase {
   public:
     NoCache();
     virtual void begin();

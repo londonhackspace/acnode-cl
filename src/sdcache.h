@@ -13,7 +13,7 @@
  * for hardware instructions
  */
 
-class SDCache: public Cache {
+class SDCache: public CacheBase {
   protected:
     char *_filename; // should be const, but SD lib needs updating as well.
 
