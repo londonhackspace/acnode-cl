@@ -113,6 +113,12 @@ void dump_settings(settings acsettings) {
   }
   Serial.println(" to cache cards.");
 
+  if(acsettings.maintainer_cache) {
+    Serial.println("Maintainer cache enabled.");
+  } else {
+    Serial.println("Maintainer cache disabled.");
+  }
+
   if (acsettings.netverbose) {
     Serial.println("Verbose network messages.");
   } else {
@@ -293,6 +299,46 @@ settings get_settings(void) {
             // for future use
             acsettings.doorbell_mode = 0;
 
+            // use persistent maintainer cache?
+            acsettings.maintainer_cache = 0;
+
+            acsettings.valid = ACSETTINGSVALID;
+            set_settings(acsettings);
+          }
+          break;
+      case ACSETTINGS45:
+          // upgrade the settings and add defaults for new settings.
+          Serial.println("Old settings (45) found, upgrading");
+          {
+            settings45 osettings;
+            memset(&osettings, 0, sizeof(osettings));
+            EEPROMRead((uint32_t *)&osettings, 0, sizeof(osettings));
+
+            memcpy(acsettings.mac, osettings.mac, 6);
+            memcpy(acsettings.servername, osettings.servername, SERVERNAMELEN);
+            memcpy(acsettings.syslogserver, osettings.syslogserver, SERVERNAMELEN);
+            memcpy(acsettings.toolname, osettings.toolname, TOOLNAMELEN);
+            acsettings.port = osettings.port;
+            acsettings.nodeid = osettings.nodeid;
+            acsettings.status = osettings.status;
+            acsettings.runtime = osettings.runtime;
+            acsettings.minontime = osettings.minontime;
+            acsettings.sdcache = osettings.sdcache;
+            acsettings.netverbose = osettings.netverbose;
+            acsettings.toolonpin_activehigh = osettings.toolonpin_activehigh;
+            acsettings.toolrunpin_activehigh = osettings.toolrunpin_activehigh;
+            memcpy(acsettings.secret, osettings.secret, KEYLEN+1);
+
+            strncpy(acsettings.mqtt_server, osettings.mqtt_server, SERVERNAMELEN);
+            acsettings.mqtt_port = osettings.mqtt_port;
+            strncpy(acsettings.mqtt_topic_base, osettings.mqtt_topic_base, MQTT_TOPIC_LEN);
+            acsettings.door_keep_open_ms = osettings.door_keep_open_ms;
+            acsettings.announce_mode = osettings.announce_mode;
+            acsettings.doorbell_mode = osettings.doorbell_mode;
+
+            // use persistent maintainer cache?
+            acsettings.maintainer_cache = 0;
+
             acsettings.valid = ACSETTINGSVALID;
             set_settings(acsettings);
           }
@@ -339,6 +385,9 @@ settings get_settings(void) {
 
       // for future use
       acsettings.doorbell_mode = 0;
+
+      // use persistent maintainer cache?
+      acsettings.maintainer_cache = 0;
 
       // save the settings since it's a new board.
       acsettings.valid = ACSETTINGSVALID;

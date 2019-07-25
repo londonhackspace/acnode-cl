@@ -56,8 +56,9 @@ void mrlprint(const char * str) {
 #define _CMD_MQTT_TOPIC_BASE "mqtt_topic_base"
 #define _CMD_DOOR_KEEP_OPEN_MSEC "door_keep_open_time"
 #define _CMD_MEMSTATS "memstats"
+#define _CMD_MAINTAINERCACHE "maintainercache"
 
-#define _NUM_OF_CMD 25
+#define _NUM_OF_CMD 26
 #define _NUM_OF_VER_SCMD 2
 #define _NUM_OF_CACHE_SCMD 2
 #define _NUM_OF_PIN_SCMD 2
@@ -67,7 +68,8 @@ const char *keyworld [] = {
   _CMD_HELP, _CMD_SHOW, _CMD_MAC, _CMD_SERVER, _CMD_NODEID, _CMD_PORT, _CMD_VER, _CMD_SAVE, _CMD_CLEAR,
   _CMD_LIST, _CMD_REBOOT, _CMD_NUKE, _CMD_SYSLOG, _CMD_NAME, _CMD_RTIME, _CMD_FILL, _CMD_VERIFY,
   _CMD_MINONTIME, _CMD_CACHE, _CMD_NETVERBOSE, _CMD_TOOLONPIN, _CMD_TOOLRUNPIN, _CMD_SECRET, _CMD_ROLE, _CMD_ANNOUNCE_PORT,
-  _CMD_ANNOUNCE_MODE, _CMD_MQTT_SERVER, _CMD_MQTT_PORT, _CMD_MQTT_TOPIC_BASE, _CMD_DOOR_KEEP_OPEN_MSEC, _CMD_MEMSTATS
+  _CMD_ANNOUNCE_MODE, _CMD_MQTT_SERVER, _CMD_MQTT_PORT, _CMD_MQTT_TOPIC_BASE, _CMD_DOOR_KEEP_OPEN_MSEC, _CMD_MEMSTATS,
+  _CMD_MAINTAINERCACHE
 };
 // version subcommands
 const char * ver_keyworld [] = {
@@ -104,6 +106,7 @@ void print_help ()
   Serial.println ("\tverify - verify the card cache contents against the acserver");
   Serial.println ("\tminontime <time> - minimum time in seconds to keep the tool on for, up to 254 seconds");
   Serial.println ("\tcache {eeprom | sdcard} - set where to cache cards.");
+  Serial.println ("\tmaintainercache - Toggle use of maintainer cache.");
   Serial.println ("\tnetverbose - Toggle verbosity of network debugging messages.");
   Serial.println ("\ttoolonpin {high | low} - Set tool on pin to be active high or low.");
   Serial.println ("\ttoolrunpin {high | low} - set toolrun pin to be active high or low.");
@@ -462,8 +465,15 @@ int mrlexecute (int argc, const char * const * argv)
       else {
         Serial.print ("cache needs 1 parameter, see help\n\r");
       }
-    }
-    else if (strcmp (argv[i], _CMD_NETVERBOSE) == 0) {
+    } else if (strcmp (argv[i], _CMD_MAINTAINERCACHE) == 0) {
+      if (acsettings.maintainer_cache) {
+        acsettings.maintainer_cache = 0;
+        Serial.println("Maintainer Cache Disabled.");
+      } else {
+        acsettings.maintainer_cache = 1;
+        Serial.println("Maintainer Cache Enabled.");
+      }
+    } else if (strcmp (argv[i], _CMD_NETVERBOSE) == 0) {
       if (acsettings.netverbose) {
         acsettings.netverbose = 0;
         Serial.println("Network debugging will be quiet now.");

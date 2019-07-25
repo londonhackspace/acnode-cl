@@ -14,6 +14,7 @@
 #include "settings.h"
 #include "microrl.h"
 #include "cli.h"
+#include "cacheoverlay.h"
 #include "card.h"
 #include "utils.h"
 #include "tool.h"
@@ -120,11 +121,18 @@ void setup() {
       Serial.println("SD card could not be accessed");
       Serial.println("Please fix the SD card and try again. Caching cards in RAM for now.");
       cache = new RAMCache();
+
+      if(acsettings.maintainer_cache) {
+        // insert overlay
+        Cache* persistent = new EEPromCache();
+        cache = new CacheOverlay(cache, persistent);
+      }
     }
   } else {
       Serial.println("Using the eeprom to cache cards");
       cache = new EEPromCache();
   }
+
   cache->begin();
 
   microrl_init (prl, mrlprint);
