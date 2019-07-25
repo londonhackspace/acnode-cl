@@ -3,6 +3,7 @@
 #include "mqttannouncer.h"
 #include "version.h"
 #include "utils.h"
+#include "settings.h"
 
 enum msgType {
   MSG_ANNOUNCE,
@@ -38,6 +39,7 @@ void MQTTAnnouncer::START() {
     aJson.addStringToObject(root, "Version", ACVERSION);
     aJson.addStringToObject(root, "Git", STRINGIFY(GIT_REVISION));
     aJson.addNumberToObject(root, "SettingsVersion", acsettings.valid);
+    aJson.addNumberToObject(root, "EEPROMSettingsVersion", get_settings_version());
     if(wdog.was_reset())
     {
       aJson.addStringToObject(root, "Cause", "Watchdog");

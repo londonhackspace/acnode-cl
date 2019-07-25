@@ -197,6 +197,12 @@ void dump_settings(settings acsettings) {
 
 }
 
+uint8_t get_settings_version(void) {
+  uint32_t scratch;
+  EEPROMRead((uint32_t *)&scratch, 0, sizeof(scratch));
+  return scratch & 0xff;
+}
+
 settings get_settings(void) {
   memset(&acsettings, 0, sizeof(acsettings));
 
