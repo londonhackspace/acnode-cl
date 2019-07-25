@@ -3,7 +3,7 @@ set(COMMON_FLAGS "-g -Os -w -ffunction-sections -fdata-sections -nostdlib -fno-t
 
 set(CMAKE_C_FLAGS "${COMMON_FLAGS}" CACHE STRING "")
 set(CMAKE_CXX_FLAGS "${COMMON_FLAGS}"  CACHE STRING "")
-set(CMAKE_EXE_LINKER_FLAGS "-nostartfiles -nostdlib -T ${LINKER_SCRIPT} -Wl,--check-sections -Wl,--gc-sections -Wl,--entry=ResetISR -Wl,--unresolved-symbols=report-all -Wl,--warn-common -mthumb -mcpu=cortex-m4 -mfloat-abi=hard -mfpu=fpv4-sp-d16 -fsingle-precision-constant -Wl,--start-group -lc -lm -lgcc" CACHE STRING "")
+set(CMAKE_EXE_LINKER_FLAGS "-nostartfiles -nostdlib -T ${LINKER_SCRIPT} -Wl,--check-sections -Wl,--gc-sections -Wl,--entry=ResetISR -Wl,--unresolved-symbols=report-all -Wl,--warn-common -mthumb -mcpu=cortex-m4 -mfloat-abi=hard -mfpu=fpv4-sp-d16 -fsingle-precision-constant -Wl,--start-group -Wl,-Map,${CMAKE_PROJECT_NAME}.map -lc -lm -lgcc" CACHE STRING "")
 
 set(ENERGIA_CORE ${CMAKE_SOURCE_DIR}/targets/tivac-launchpad/tivac-core)
 set(TIVA_SYSTEMLIB ${CMAKE_SOURCE_DIR}/targets/tivac-launchpad/tivac-core/system/driverlib/libdriverlib.a)
