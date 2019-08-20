@@ -2,6 +2,8 @@
 #include "acnode.h"
 #include "version.h"
 #include "utils.h"
+#include "ACServer/RealACServer.h"
+#include "ACServer/DataRecords.h"
 
 #define HTTP_TIMEOUT 3000
 #define USER_AGENT "ACNode rev " STRINGIFY(GIT_REVISION)
@@ -106,12 +108,16 @@ int post_url(char *path) {
 // https://wiki.london.hackspace.org.uk/view/Project:Tool_Access_Control/Solexious_Proposal#Get_card_permissions
 int querycard(Card card)
 {
-  char path[11 + 10 + 14 + 1];
-  int result = -100;
-  sprintf(path, "/%d/card/", acsettings.nodeid);
-  card.str(path + strlen(path));
+  RealACServer acs(client, acsettings.servername, acsettings.port, acsettings.nodeid);
+  char cardId[15];
+  card.str(cardId);
+  CardRecord* cr = acs.queryCard(cardId);
 
-  result = get_url(path);
+  int result = -1;
+  if(cr)
+  {
+    result = cr->numericStatus;
+  }
 
   Serial.print("acserver said: ");
   Serial.println(result);
