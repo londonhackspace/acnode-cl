@@ -1,5 +1,8 @@
 # build for core Energia libraries
 
+# for now, disable warnings since they were disabled for a long time and need easing back in
+add_compile_options(-w)
+
 AddVendorLibrary(
     NAMESPACE ConnectedLaunchpad
     TARGET Core
