@@ -117,6 +117,7 @@ int querycard(Card card)
   if(cr)
   {
     result = cr->numericStatus;
+    delete cr;
   }
 
   Serial.print("acserver said: ");

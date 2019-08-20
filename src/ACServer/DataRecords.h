@@ -10,7 +10,7 @@ struct BaseRecord
 
     bool isSuccess() const { return numericStatus > 0; }
 
-    uint8_t numericStatus;
+    int numericStatus;
     char* error;
 };
 

@@ -17,7 +17,6 @@
 #include "../acnode.h"
 #define HTTP_TIMEOUT 3000
 #define USER_AGENT "ACNode rev " STRINGIFY(GIT_REVISION)
-
 // End old parts
 
 ACServer::~ACServer() {}
@@ -106,6 +105,8 @@ CardRecord* RealACServer::queryCard(const char* uid)
     {
         retVal->error = new char[strlen(errorField->valuestring)];
         strcpy(retVal->error, errorField->valuestring);
+        Serial.print("Error field: ");
+        Serial.println(retVal->error);
     }
 
     aJsonObject* nameField = aJson.getObjectItem(jsonObj, "user_name");
