@@ -68,7 +68,45 @@ aJsonObject* RealACServer::getRequest(const char* path)
 
     http.skipResponseHeaders();
     aJsonClientStream jsonStream(&http);
-    return aJson.parse(&jsonStream);
+    aJsonObject* retJson = aJson.parse(&jsonStream);
+    http.stop();
+    return retJson;
+}
+
+void RealACServer::handleCommon(BaseRecord* retVal, aJsonObject* jsonObj)
+{
+    if(!handleIntField(jsonObj, "numeric_status", &retVal->numericStatus))
+    {
+        Serial.println("Failed to extract numeric_status");
+    }
+
+    handleStringField(jsonObj, "error", &retVal->error);
+    if(retVal->error)
+    {
+        Serial.print("Error field: ");
+        Serial.println(retVal->error);
+    }
+}
+
+void RealACServer::handleStringField(aJsonObject* jsonObj, const char* name, char** data)
+{
+    aJsonObject* field = aJson.getObjectItem(jsonObj, name);
+    if(field && field->type == aJson_String)
+    {
+        *data = new char[strlen(field->valuestring)];
+        strcpy(*data, field->valuestring);
+    }
+}
+
+bool RealACServer::handleIntField(aJsonObject* jsonObj, const char* name, int* data)
+{
+    aJsonObject* field = aJson.getObjectItem(jsonObj, name);
+    if(field && field->type == aJson_Int)
+    {
+        *data = field->valueint;
+        return true;
+    }
+    return false;
 }
 
 CardRecord* RealACServer::queryCard(const char* uid)
@@ -90,37 +128,40 @@ CardRecord* RealACServer::queryCard(const char* uid)
 
     CardRecord* retVal = new CardRecord();
 
-    aJsonObject* numericValField = aJson.getObjectItem(jsonObj, "numeric_status");
-    if(numericValField && numericValField->type == aJson_Int)
-    {
-        retVal->numericStatus = numericValField->valueint;
-    }
-    else
-    {
-        Serial.println("Failed to extract numeric_status");
-    }
+    handleCommon(retVal, jsonObj);
 
-    aJsonObject* errorField = aJson.getObjectItem(jsonObj, "error");
-    if(errorField && errorField->type == aJson_String)
-    {
-        retVal->error = new char[strlen(errorField->valuestring)];
-        strcpy(retVal->error, errorField->valuestring);
-        Serial.print("Error field: ");
-        Serial.println(retVal->error);
-    }
-
-    aJsonObject* nameField = aJson.getObjectItem(jsonObj, "user_name");
-    if(nameField && nameField->type == aJson_String)
-    {
-        retVal->error = new char[strlen(errorField->valuestring)];
-        strcpy(retVal->error, errorField->valuestring);
-    }
+    handleStringField(jsonObj, "user_name", &retVal->userName);
     
-    aJsonObject* idField = aJson.getObjectItem(jsonObj, "user_id");
-    if(idField && idField->type == aJson_Int)
+    handleIntField(jsonObj, "user_id", &retVal->userId);
+
+    // important: clear up after ourself
+    aJson.deleteItem(jsonObj);
+
+    return retVal;
+}
+
+StatusRecord* RealACServer::queryNodeStatus()
+{
+    static const char* pathformat = "/%d/status/";
+    char buffer[9+10+1];    // 9 chars of static content,
+                            // 10 chars of tool id
+                            // 1 null terminator
+    sprintf(buffer, pathformat, toolId);
+    
+    aJsonObject* jsonObj = getRequest(buffer);
+
+    if(!jsonObj)
     {
-        retVal->userId = idField->valueint;
+        Serial.println("Failed to get json");
+        return nullptr;
     }
+
+    StatusRecord* retVal = new StatusRecord();
+
+    handleCommon(retVal, jsonObj);
+
+    handleStringField(jsonObj, "status", &retVal->status);
+    handleStringField(jsonObj, "status_message", &retVal->statusMessage);
 
     // important: clear up after ourself
     aJson.deleteItem(jsonObj);

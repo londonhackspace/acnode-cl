@@ -73,21 +73,6 @@ int handle_response(int success, HttpClient &http) {
   return result;
 }
 
-int get_url(char *path) {
-    int result;
-    HttpClient http(client);
-    http.setHttpWaitForDataDelay(200);
-    http.setHttpResponseTimeout(HTTP_TIMEOUT);
-    http.beginRequest();
-
-    log("GET ", path);
-    wdog.feed();
-    result = handle_response(http.get(acsettings.servername, acsettings.port, path, user_agent()), http);
-    http.stop();
-    log(result);
-    return result;
-}
-
 int post_url(char *path) {
   int result;
   HttpClient http(client);
@@ -129,11 +114,15 @@ int querycard(Card card)
 // https://wiki.london.hackspace.org.uk/view/Project:Tool_Access_Control/Solexious_Proposal#Check_tool_status
 int networkCheckToolStatus()
 {
-  char path[13 + 10 + 1];
   int result = -1;
-  sprintf(path, "/%d/status/", acsettings.nodeid);
-
-  result = get_url(path);
+  RealACServer acs(client, acsettings.servername, acsettings.port, acsettings.nodeid);
+  StatusRecord* sr = acs.queryNodeStatus();
+  
+  if(sr)
+  {
+    result = sr->numericStatus;
+    delete sr;
+  }
 
   return result;
 }

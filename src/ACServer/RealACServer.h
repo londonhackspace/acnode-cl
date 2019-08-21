@@ -19,9 +19,13 @@ public:
     ~RealACServer();
 
     CardRecord* queryCard(const char* uid) override;
+    StatusRecord* queryNodeStatus() override;
 
 private:
     aJsonObject* getRequest(const char* path);
+    void handleCommon(BaseRecord* retVal, aJsonObject* jsonObj);
+    void handleStringField(aJsonObject* jsonObj, const char* name, char** data);
+    bool handleIntField(aJsonObject* jsonObj, const char* name, int* data);
 
     Client& aClient;
     const char* server;

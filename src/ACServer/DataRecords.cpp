@@ -22,3 +22,16 @@ CardRecord::~CardRecord()
 {
     delete[] userName;
 }
+
+StatusRecord::StatusRecord() :
+    status(nullptr),
+    statusMessage(nullptr)
+{
+
+}
+
+StatusRecord::~StatusRecord()
+{
+    delete[] status;
+    delete[] statusMessage;
+}

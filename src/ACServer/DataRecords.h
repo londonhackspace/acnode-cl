@@ -23,4 +23,13 @@ struct CardRecord : public BaseRecord
     int userId;
 };
 
+struct StatusRecord : public BaseRecord
+{
+    StatusRecord();
+    ~StatusRecord();
+
+    char* status;
+    char* statusMessage;
+};
+
 #endif
