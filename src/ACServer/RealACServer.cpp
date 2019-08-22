@@ -139,6 +139,9 @@ void RealACServer::handleCommon(BaseRecord* retVal, aJsonObject* jsonObj)
         Serial.print("Error field: ");
         Serial.println(retVal->error);
     }
+
+    Serial.print("Numeric Status is ");
+    Serial.println(retVal->numericStatus);
 }
 
 void RealACServer::handleStringField(aJsonObject* jsonObj, const char* name, char** data)
@@ -146,7 +149,7 @@ void RealACServer::handleStringField(aJsonObject* jsonObj, const char* name, cha
     aJsonObject* field = aJson.getObjectItem(jsonObj, name);
     if(field && field->type == aJson_String)
     {
-        *data = new char[strlen(field->valuestring)];
+        *data = new char[strlen(field->valuestring)+1];
         strcpy(*data, field->valuestring);
     }
 }
@@ -178,17 +181,15 @@ CardRecord* RealACServer::queryCard(const char* uid)
         Serial.println("Failed to get json");
         return nullptr;
     }
-
     CardRecord* retVal = new CardRecord();
 
     handleCommon(retVal, jsonObj);
-
     handleStringField(jsonObj, "user_name", &retVal->userName);
-    
     handleIntField(jsonObj, "user_id", &retVal->userId);
-
     // important: clear up after ourself
     aJson.deleteItem(jsonObj);
+    Serial.print("queryCard returning ");
+    Serial.println(retVal->numericStatus);
 
     return retVal;
 }
@@ -222,17 +223,9 @@ StatusRecord* RealACServer::queryNodeStatus()
     return retVal;
 }
 
-ResultRecord* RealACServer::setToolStatus(uint8_t status, const char* cardUid)
+ResultRecord* RealACServer::sendAndReceivePost(const char* url)
 {
-    static const char* pathformat = "/%d/status/%d/by/%s";
-    char buffer[9+10+3+14+1];    // 9 chars of static content,
-                            // 10 chars of tool id
-                            // 3 digits of status
-                            // 14 digits of card uid
-                            // 1 null terminator
-    sprintf(buffer, pathformat, toolId, status, cardUid);
-
-    aJsonObject* jsonObj = postRequest(buffer);
+    aJsonObject* jsonObj = postRequest(url);
 
     if(!jsonObj)
     {
@@ -250,4 +243,56 @@ ResultRecord* RealACServer::setToolStatus(uint8_t status, const char* cardUid)
     aJson.deleteItem(jsonObj);
 
     return retVal;
+}
+
+ResultRecord* RealACServer::setToolStatus(uint8_t status, const char* cardUid)
+{
+    static const char* pathformat = "/%d/status/%d/by/%s";
+    char buffer[9+10+3+14+1];   // 9 chars of static content,
+                                // 10 chars of tool id
+                                // 3 digits of status
+                                // 14 digits of card uid
+                                // 1 null terminator
+    sprintf(buffer, pathformat, toolId, status, cardUid);
+
+    return sendAndReceivePost(buffer);
+}
+
+ResultRecord* RealACServer::reportToolUseTime(int time, const char* cardUid)
+{
+    static const char* pathformat = "/%d/tooluse/time/for/%s/%d";
+    char buffer[20+10+14+10+1]; // 20 chars of static content,
+                                // 10 chars of tool id
+                                // 14 digits of card uid
+                                // 10 of time (32-bit int)
+                                // 1 null terminator
+    sprintf(buffer, pathformat, toolId, cardUid, time);
+
+    return sendAndReceivePost(buffer);
+}
+
+ResultRecord* RealACServer::reportToolUse(const char* cardUid, uint8_t state)
+{
+    static const char* pathformat = "/%d/tooluse/%d/%s";
+    char buffer[11+10+3+14+1];  // 11 chars of static content,
+                                // 10 chars of tool id
+                                // 3 digits of state
+                                // 14 digits of card uid
+                                // 1 null terminator
+    sprintf(buffer, pathformat, toolId, state, cardUid);
+
+    return sendAndReceivePost(buffer);
+}
+
+ResultRecord* RealACServer::addNewUser(const char* maintainerUid, const char* userUid)
+{
+    static const char* pathformat = "/%d/grant-to-card/%s/by-card/%s";
+    char buffer[11+10+14+14+1];  // 25 chars of static content,
+                                // 10 chars of tool id
+                                // 14 digits of card uid
+                                // 14 digits of card uid
+                                // 1 null terminator
+    sprintf(buffer, pathformat, toolId, userUid, maintainerUid);
+
+    return sendAndReceivePost(buffer);
 }

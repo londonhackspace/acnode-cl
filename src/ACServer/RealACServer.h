@@ -22,7 +22,9 @@ public:
     CardRecord* queryCard(const char* uid) override;
     StatusRecord* queryNodeStatus() override;
     ResultRecord* setToolStatus(uint8_t status, const char* cardUid) override;
-
+    ResultRecord* reportToolUseTime(int time, const char* cardUid) override;
+    ResultRecord* reportToolUse(const char* cardUid, uint8_t state) override;
+    ResultRecord* addNewUser(const char* maintainerUid, const char* userUid) override;
 private:
     HttpClient makeHttpClient();
     void sendHeaders(HttpClient& http);
@@ -31,6 +33,9 @@ private:
     void handleCommon(BaseRecord* retVal, aJsonObject* jsonObj);
     void handleStringField(aJsonObject* jsonObj, const char* name, char** data);
     bool handleIntField(aJsonObject* jsonObj, const char* name, int* data);
+
+    // There is more than one endpoint that uses this pattern
+    ResultRecord* sendAndReceivePost(const char* url);
 
     Client& aClient;
     const char* server;
