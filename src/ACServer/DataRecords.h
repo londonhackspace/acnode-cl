@@ -32,4 +32,12 @@ struct StatusRecord : public BaseRecord
     char* statusMessage;
 };
 
+struct ResultRecord : public BaseRecord
+{
+    ResultRecord();
+    ~ResultRecord();
+
+    char* successMesage;
+};
+
 #endif

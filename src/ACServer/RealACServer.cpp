@@ -35,12 +35,28 @@ RealACServer::~RealACServer()
 
 }
 
-aJsonObject* RealACServer::getRequest(const char* path)
+HttpClient RealACServer::makeHttpClient()
 {
     HttpClient http(aClient);
     http.setHttpWaitForDataDelay(200);
     http.setHttpResponseTimeout(HTTP_TIMEOUT);
     http.beginRequest();
+    return http;
+}
+
+void RealACServer::sendHeaders(HttpClient& http)
+{
+    if (strlen(acsettings.secret) > 0)
+    {
+        http.sendHeader("X-AC-Key", acsettings.secret);
+    }
+    // Put ACServer into the newer, more sane mode
+    http.sendHeader("X-AC-JSON", "1");
+}
+
+aJsonObject* RealACServer::getRequest(const char* path)
+{
+    HttpClient http = makeHttpClient();
 
     int ret = http.get(server, port, path, USER_AGENT);
     if(ret)
@@ -50,15 +66,52 @@ aJsonObject* RealACServer::getRequest(const char* path)
         return nullptr;
     }
 
-    if (strlen(acsettings.secret) > 0)
-    {
-        http.sendHeader("X-AC-Key", acsettings.secret);
-    }
-    // Put ACServer into the newer, more sane mode
-    http.sendHeader("X-AC-JSON", "1");
+    sendHeaders(http);
+    
+    int start = millis();
     http.endRequest();
 
     int responseCode = http.responseStatusCode();
+    int diff = millis() - start;
+    Serial.print("HTTP result in ");
+    Serial.print(diff);
+    Serial.println("ms");
+    if(responseCode < 200 || responseCode > 299)
+    {
+        Serial.print("Error: Response code was ");
+        Serial.println(responseCode);
+        return nullptr;
+    }
+
+    http.skipResponseHeaders();
+    aJsonClientStream jsonStream(&http);
+    aJsonObject* retJson = aJson.parse(&jsonStream);
+    http.stop();
+    return retJson;
+}
+
+aJsonObject* RealACServer::postRequest(const char* path)
+{
+    HttpClient http = makeHttpClient();
+
+    int ret = http.post(server, port, path, USER_AGENT);
+    if(ret)
+    {
+        Serial.print("Error connecting to ");
+        Serial.println(server);
+        return nullptr;
+    }
+
+    sendHeaders(http);
+    
+    int start = millis();
+    http.endRequest();
+
+    int responseCode = http.responseStatusCode();
+    int diff = millis() - start;
+    Serial.print("HTTP result in ");
+    Serial.print(diff);
+    Serial.println("ms");
     if(responseCode < 200 || responseCode > 299)
     {
         Serial.print("Error: Response code was ");
@@ -162,6 +215,36 @@ StatusRecord* RealACServer::queryNodeStatus()
 
     handleStringField(jsonObj, "status", &retVal->status);
     handleStringField(jsonObj, "status_message", &retVal->statusMessage);
+
+    // important: clear up after ourself
+    aJson.deleteItem(jsonObj);
+
+    return retVal;
+}
+
+ResultRecord* RealACServer::setToolStatus(uint8_t status, const char* cardUid)
+{
+    static const char* pathformat = "/%d/status/%d/by/%s";
+    char buffer[9+10+3+14+1];    // 9 chars of static content,
+                            // 10 chars of tool id
+                            // 3 digits of status
+                            // 14 digits of card uid
+                            // 1 null terminator
+    sprintf(buffer, pathformat, toolId, status, cardUid);
+
+    aJsonObject* jsonObj = postRequest(buffer);
+
+    if(!jsonObj)
+    {
+        Serial.println("Failed to get json");
+        return nullptr;
+    }
+
+    ResultRecord* retVal = new ResultRecord();
+
+    handleCommon(retVal, jsonObj);
+
+    handleStringField(jsonObj, "success", &retVal->successMesage);
 
     // important: clear up after ourself
     aJson.deleteItem(jsonObj);

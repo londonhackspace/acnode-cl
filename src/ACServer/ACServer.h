@@ -5,6 +5,9 @@
 struct BaseRecord;
 struct CardRecord;
 struct StatusRecord;
+struct ResultRecord;
+
+#include <stdint.h>
 
 /**
  * Interface to talk to an ACServer
@@ -27,6 +30,12 @@ public:
      * \returns a StatusRecord (which you must free) or NULL if the lookup failed
      */
     virtual StatusRecord* queryNodeStatus()=0;
+
+    /**
+     * Set the status of the tool
+     *
+     */
+    virtual ResultRecord* setToolStatus(uint8_t status, const char* cardUid)=0;
 };
 
 #endif

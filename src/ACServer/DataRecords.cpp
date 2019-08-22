@@ -35,3 +35,14 @@ StatusRecord::~StatusRecord()
     delete[] status;
     delete[] statusMessage;
 }
+
+ResultRecord::ResultRecord() :
+    successMesage(nullptr)
+{
+
+}
+
+ResultRecord::~ResultRecord()
+{
+    delete[] successMesage;
+}

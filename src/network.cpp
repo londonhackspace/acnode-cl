@@ -131,13 +131,19 @@ int networkCheckToolStatus()
 int setToolStatus(int status, Card card) {
   int ret = -1;
 
-  Serial.println("Setting tool status:");
-  // /[nodeID]/status/[new_status]/by/[cardWithAdminPermissions]
-  char url[64];
-  sprintf(url, "/%d/status/%d/by/", acsettings.nodeid, status);
-  card.str(url + strlen(url));
+  RealACServer acs(client, acsettings.servername, acsettings.port, acsettings.nodeid);
+  
+  char cardId[15];
+  card.str(cardId);
 
-  ret = post_url(url);
+  ResultRecord* rr = acs.setToolStatus(status, cardId);
+  
+  if(rr)
+  {
+    ret = rr->numericStatus;
+    delete rr;
+  }  
+
   return ret;
 }
 
