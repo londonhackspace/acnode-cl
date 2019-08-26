@@ -1,4 +1,5 @@
 #include "DataRecords.h"
+#include <cstring>
 
 BaseRecord::BaseRecord() : 
     numericStatus(-1),
@@ -45,4 +46,20 @@ ResultRecord::ResultRecord() :
 ResultRecord::~ResultRecord()
 {
     delete[] successMesage;
+}
+
+MaintainerListRecord::MaintainerListRecord() :
+    success(false),
+    error(nullptr),
+    count(0)
+{
+    memset(maintainers, 0, sizeof(maintainers));
+}
+
+MaintainerListRecord::~MaintainerListRecord()
+{
+    if(!success)
+    {
+        delete[] error;
+    }
 }

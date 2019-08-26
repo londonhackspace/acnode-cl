@@ -40,4 +40,19 @@ struct ResultRecord : public BaseRecord
     char* successMesage;
 };
 
+// This one doesn't use the usual pattern of numeric status
+// it's a bit under 4kb in total, so not completely crazy
+// on this size of microcontroller.
+struct MaintainerListRecord
+{
+    MaintainerListRecord();
+    ~MaintainerListRecord();
+    bool isSuccess() { return success; }
+
+    bool success;
+    char* error;
+    char maintainers[255][15];
+    uint8_t count;
+};
+
 #endif

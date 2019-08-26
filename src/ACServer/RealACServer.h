@@ -25,6 +25,7 @@ public:
     ResultRecord* reportToolUseTime(int time, const char* cardUid) override;
     ResultRecord* reportToolUse(const char* cardUid, uint8_t state) override;
     ResultRecord* addNewUser(const char* maintainerUid, const char* userUid) override;
+    MaintainerListRecord* getToolMaintainers() override;
 private:
     HttpClient makeHttpClient();
     void sendHeaders(HttpClient& http);

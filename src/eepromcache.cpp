@@ -250,6 +250,7 @@ user EEPromCache::card_to_struct(const Card u) {
     nu.uidlen = 0;
   }
   nu.end = 0;
+  nu.invalid = u.is_valid() ? 0 : 1;
 
   u.get_uid(nu.uid);
   return nu;
@@ -257,5 +258,6 @@ user EEPromCache::card_to_struct(const Card u) {
 
 Card EEPromCache::struct_to_card(const user u) {
   Card nc(u.uid, u.uidlen, u.status, u.maintainer);
+  nc.set_valid(!u.invalid);
   return nc;
 }

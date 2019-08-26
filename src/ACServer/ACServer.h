@@ -6,6 +6,7 @@ struct BaseRecord;
 struct CardRecord;
 struct StatusRecord;
 struct ResultRecord;
+struct MaintainerListRecord;
 
 #include <stdint.h>
 
@@ -74,6 +75,13 @@ public:
      *          success/failure of the request or NULL if it failed to make the request
      */
     virtual ResultRecord* addNewUser(const char* maintainerUid, const char* userUid)=0;
+
+    /**
+     * \brief gets a list of maintainers for this tool
+     *
+     * \returns a MaintainerListRecord (which you must free), or NULL if the request failed
+     */
+    virtual MaintainerListRecord* getToolMaintainers()=0;
 };
 
 #endif

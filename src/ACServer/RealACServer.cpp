@@ -114,6 +114,8 @@ aJsonObject* RealACServer::postRequest(const char* path)
     Serial.println("ms");
     if(responseCode < 200 || responseCode > 299)
     {
+        Serial.print("Error getting path: ");
+        Serial.println(path);
         Serial.print("Error: Response code was ");
         Serial.println(responseCode);
         return nullptr;
@@ -295,4 +297,68 @@ ResultRecord* RealACServer::addNewUser(const char* maintainerUid, const char* us
     sprintf(buffer, pathformat, toolId, userUid, maintainerUid);
 
     return sendAndReceivePost(buffer);
+}
+
+MaintainerListRecord* RealACServer::getToolMaintainers()
+{
+    static const char* pathformat = "/%d/maintainers";
+    char buffer[14+10+1];   // 14 chars of static content,
+                            // 10 chars of tool id
+                            // 1 null terminator
+    sprintf(buffer, pathformat, toolId);
+
+    aJsonObject* jsonObj = getRequest(buffer);
+
+    if(!jsonObj)
+    {
+        Serial.println("Failed to get json");
+        return nullptr;
+    }
+
+    MaintainerListRecord* retVal = new MaintainerListRecord();
+
+    handleStringField(jsonObj, "error", &retVal->error);
+    if(retVal->error)
+    {
+        Serial.print("Error field: ");
+        Serial.println(retVal->error);
+
+        // important: clear up after ourself
+        aJson.deleteItem(jsonObj);
+        retVal->success = false;
+        return retVal;
+    }
+
+    if(jsonObj->type != aJson_Array)
+    {
+        Serial.println("Error: Data not in expected format");
+
+        // important: clear up after ourself
+        aJson.deleteItem(jsonObj);
+        delete retVal;
+        return nullptr;
+    }
+
+    unsigned char count = aJson.getArraySize(jsonObj);
+    int outCursor = 0;
+    for(unsigned char i = 0; i < count; ++i)
+    {
+        aJsonObject* entry = aJson.getArrayItem(jsonObj, i);
+        if(entry->type != aJson_String)
+        {
+            Serial.println("Skipping maintainer entry - not a string!");
+            continue;
+        }
+        strcpy(retVal->maintainers[outCursor++], entry->valuestring);
+    }
+
+    Serial.print("Got maintainers: ");
+    Serial.println(outCursor);
+    retVal->success = true;
+    retVal->count = outCursor;
+
+    // important: clear up after ourself
+    aJson.deleteItem(jsonObj);
+
+    return retVal;
 }

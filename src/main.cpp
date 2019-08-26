@@ -32,6 +32,8 @@
 #include "ramcache.h"
 #include "doorbot.h"
 #include "doorbot_ac.h"
+#include "maintainercachemaintainer.h"
+#include "ACServer/RealACServer.h"
 
 // create microrl object and pointer on it
 microrl_t rl;
@@ -54,6 +56,8 @@ RGB rgb(PM_0, PM_1, PM_2);
 Watchdog wdog;
 
 Cache *cache = NULL;
+MaintainerCacheMaintainer* mcmaintainer = nullptr;
+ACServer* acserver = nullptr;
 
 Door *door = NULL;
 Doorbot *doorbot = NULL;
@@ -126,6 +130,8 @@ void setup() {
         // insert overlay
         Cache* persistent = new EEPromCache();
         cache = new CacheOverlay(cache, persistent);
+        acserver = new RealACServer(client, acsettings.servername, acsettings.port, acsettings.nodeid);
+        mcmaintainer = new MaintainerCacheMaintainer(persistent, acserver);
       }
     }
   } else {
@@ -336,6 +342,11 @@ void loop() {
   if(announcer)
   {
     announcer->run();
+  }
+
+  if(mcmaintainer && network)
+  {
+    mcmaintainer->run();
   }
 
   if (am_i_alive.check()) {
