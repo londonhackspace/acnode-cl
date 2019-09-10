@@ -313,13 +313,6 @@ void setup() {
 
   wdog.feed();
 
-  // For now, just purge the cache. Checking a card against the server at startup
-  // takes ~3s per card. TODO: Add code to check against the server when card is
-  // scanned and TTL is deemed to be expired.
-  cache->purge();
-
-  wdog.feed();
-
   Serial.println("press enter for a prompt");
 }
 
