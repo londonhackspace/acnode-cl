@@ -15,6 +15,8 @@ public:
 
     void begin() override;
     Card get(Card u) override;
+    Card get(size_t n) override;
+    size_t count() override;
     void set(const Card u) override;
     void purge(void) override;
     int each(void( *callback)(Card u)) override;

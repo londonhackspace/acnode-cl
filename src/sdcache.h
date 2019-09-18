@@ -22,6 +22,8 @@ class SDCache: public CacheBase {
     SDCache();
     virtual void begin();
     virtual Card get(Card u);
+    virtual Card get(size_t n) override;
+    virtual size_t count() override;
     virtual void set(const Card u);
     virtual void purge(void);
     virtual int each(void( *callback)(Card c));

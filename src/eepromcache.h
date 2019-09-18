@@ -14,6 +14,8 @@ class EEPromCache: public CacheBase {
 
     // the returned user must be freed by the caller
     virtual Card get(const Card u);
+    virtual Card get(size_t n) override;
+    virtual size_t count() override;
     virtual void set(const Card u);
     virtual void purge(void);
     virtual int each(void( *callback)(Card c));

@@ -33,6 +33,14 @@ Card CacheOverlay::get(Card u) {
     return base->get(u);
 }
 
+Card CacheOverlay::get(size_t n) {
+    return base->get(n);
+}
+
+size_t CacheOverlay::count() {
+    return base->count();
+}
+
 void CacheOverlay::set(const Card u) {
     base->set(u);
 }

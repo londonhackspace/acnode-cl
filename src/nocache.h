@@ -9,6 +9,8 @@ class NoCache: public CacheBase {
     virtual void begin();
     virtual Card get(const Card u);
     virtual void set(const Card u);
+    virtual Card get(size_t n) override;
+    virtual size_t count() override;
     virtual void purge(void);
     virtual int each(void( *callback)(Card c));
     virtual void verify(void);

@@ -44,6 +44,22 @@ Card EEPromCache::get(Card u) {
   return struct_to_card(nu);
 }
 
+Card EEPromCache::get(size_t n) {
+
+  int address = n * sizeof(user);
+  user nu;
+
+  EEPROMRead((uint32_t *)&nu, address, sizeof(user));
+
+  return struct_to_card(nu);
+}
+
+size_t EEPromCache::count() {
+  uint32_t eesize;
+
+  eesize = EEPROMSizeGet();
+  return (eesize - USERBASE) / sizeof(user);
+}
 
 /*
  * 3 ways we could want to store a user:

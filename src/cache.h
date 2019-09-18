@@ -23,6 +23,11 @@ struct Cache {
     // the returned user must be freed by the caller
     virtual Card get(Card u) = 0;
 
+    virtual Card get(size_t n) = 0;
+
+    // Get a count of entries in our cache
+    virtual size_t count() = 0;
+
     // add a card to the cache
     virtual void set(const Card u) = 0;
 
