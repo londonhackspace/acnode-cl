@@ -148,10 +148,14 @@ void MQTTAnnouncer::BELL() {
   aJson.deleteItem(root);
 }
 
-void MQTTAnnouncer::EXIT() {
+void MQTTAnnouncer::EXIT(int doorbellack) {
   aJsonObject* root = aJson.createObject();
   aJson.addStringToObject(root, "Type", "EXIT");
-  aJson.addStringToObject(root, "Message", "Door opened by exit button");
+  if (doorbellack == 1) {
+    aJson.addStringToObject(root, "Message", "Doorbell acknowledged");
+  } else {
+    aJson.addStringToObject(root, "Message", "Door opened by exit button");
+  }
   sendMessage(root, MSG_ANNOUNCE);
   aJson.deleteItem(root);
 }

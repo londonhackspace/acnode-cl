@@ -18,6 +18,7 @@ void DoorbotWithAccessControl::run() {
   switch (poll) {
     case SHORT_PRESS:
     case LONG_PRESS:
+      this->lastDoorbellTime = millis();
       announcer->BELL();
       Serial.println("BING BONG ");
         led.solid(ORANGE);
@@ -31,9 +32,17 @@ void DoorbotWithAccessControl::run() {
   switch (poll_release) {
     case SHORT_PRESS:
     case LONG_PRESS:
-    announcer->EXIT();
     Serial.println("Door release");
     grantAccess();
+    if ((millis() - this->lastDoorbellTime) < (1000*60*3)) {
+      // Three minutes. We'll announce a doorbell acknowledgement rather than just an exit
+        announcer->EXIT(1);
+        Serial.println('Door release with ack');
+        this->lastDoorbellTime = millis() - (1000*60*3);
+    } else {
+          announcer->EXIT(0);
+          Serial.print("Door release");
+    }
   }
   announcer->run();
 }
