@@ -18,7 +18,7 @@ public:
   void RFID(char * card, int granted) override;
   void START() override;
   void BELL() override;
-  void EXIT() override;
+  void EXIT(int doorbellack) override;
   void WEDGED() override;
   void ALIVE() override;
   void TOOL_DEACTIVATE() override;

@@ -35,7 +35,6 @@ bool ACNode::card_has_access() {
     }
     // Use the cached version (TODO: restructure this)
     card_on_reader = cached;
-    announceCard(card_on_reader, 1);
     return cached.is_user() || cached.is_maintainer();
   }
 
@@ -70,10 +69,12 @@ void ACNode::activate() {
   if (card_on_reader.is_maintainer()) {
     rgb.solid(ORANGE);
     tool.on(card_on_reader);
+    announceCard(card_on_reader, 1);
   } else {
     if (is_enabled()) {
       rgb.solid(GREEN);
       tool.on(card_on_reader);
+      announceCard(card_on_reader, 1);
     } else {
       rgb.solid(RED);
     }

@@ -14,6 +14,7 @@ Doorbot::Doorbot(Door &d, Watchdog &w, PN532 &n, RGB &l, int button_pin, int doo
     this->announcer = NULL;
     button.begin();
     door_release_button.begin();
+    this->lastDoorbellTime = millis() - (1000*60*3);
   };
 
 void Doorbot::enableAnnouncer(Announcer* announcer) {
@@ -37,6 +38,7 @@ void Doorbot::run() {
   switch (poll) {
     case SHORT_PRESS:
     case LONG_PRESS:
+      this->lastDoorbellTime = millis();
       announcer->BELL();
       Serial.println("BING BONG ");
         led.solid(ORANGE);
@@ -50,11 +52,17 @@ void Doorbot::run() {
   switch (poll_release) {
     case SHORT_PRESS:
     case LONG_PRESS:
-    announcer->EXIT();
-    Serial.println("Door release");
     grantAccess();
+    if ((millis() - this->lastDoorbellTime) < (1000*60*3)) {
+      // Three minutes. We'll announce a doorbell acknowledgement rather than just an exit
+        announcer->EXIT(1);
+        Serial.println('Door release with ack');
+        this->lastDoorbellTime = millis() - (1000*60*3);
+    } else {
+          announcer->EXIT(0);
+          Serial.print("Door release");
+    }
   }
-  announcer->run();
 };
 
 void Doorbot::handleCardPresent(Card c) {

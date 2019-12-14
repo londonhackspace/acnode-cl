@@ -13,7 +13,7 @@
  * for hardware instructions
  */
 
-class SDCache: public Cache {
+class SDCache: public CacheBase {
   protected:
     char *_filename; // should be const, but SD lib needs updating as well.
 
@@ -22,6 +22,8 @@ class SDCache: public Cache {
     SDCache();
     virtual void begin();
     virtual Card get(Card u);
+    virtual Card get(size_t n) override;
+    virtual size_t count() override;
     virtual void set(const Card u);
     virtual void purge(void);
     virtual int each(void( *callback)(Card c));

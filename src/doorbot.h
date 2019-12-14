@@ -35,6 +35,7 @@ class Doorbot : public Role {
     Card lastScanned;
     Button button;
     Button door_release_button;
+    unsigned long lastDoorbellTime;
 
     unsigned long lastScannedTime;
 };

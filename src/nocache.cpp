@@ -11,6 +11,16 @@ Card NoCache::get(const Card u) {
   return Card();
 }
 
+Card NoCache::get(size_t n)
+{
+  return Card();
+}
+
+size_t NoCache::count()
+{
+  return 0;
+}
+
 void NoCache::set(const Card u) {
   warn();
 }

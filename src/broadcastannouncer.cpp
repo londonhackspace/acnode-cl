@@ -40,9 +40,13 @@ void BroadcastAnnouncer::BELL() {
   _udp.endPacket();
 }
 
-void BroadcastAnnouncer::EXIT() {
+void BroadcastAnnouncer::EXIT(int doorbellack) {
   _udp.beginPacket(_host, _port);
-  _udp.write("EXIT\n\n");
+  if (doorbellack == 1) {
+    _udp.write("DOORBELL_ACK\n\n");
+  } else {
+    _udp.write("EXIT\n\n");
+  }
   _udp.endPacket();
 }
 

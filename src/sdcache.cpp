@@ -43,6 +43,58 @@ Card SDCache::get(Card u) {
   return nc;
 }
 
+Card SDCache::get(size_t n) {
+  if (!SD.exists(_filename)) return Card();
+
+  File f = SD.open(_filename, FILE_READ);
+  user user_entry, tu;
+  memset(tu.uid, 0, 7);
+  size_t i = 0;
+
+  bool found = false;
+  while (f.available()) {
+    f.read(&user_entry, sizeof(struct user));
+
+    if (i==n) {
+      found = true;
+      break;
+    }
+    i++;
+  }
+
+//  if (found)
+//    memcpy(ret, &user_entry, sizeof(struct user));
+  f.close();
+
+  if (!found) {
+    return Card();
+  }
+
+  Card nc(user_entry.uid, user_entry.uidlen, user_entry.status, user_entry.maintainer);
+
+  return nc;
+}
+
+size_t SDCache::count() {
+  if (!SD.exists(_filename)) return 0;
+
+  File f = SD.open(_filename, FILE_READ);
+  user user_entry, tu;
+  memset(tu.uid, 0, 7);
+  size_t i = 0;
+
+  bool found = false;
+  while (f.available()) {
+    f.read(&user_entry, sizeof(struct user));
+    i++;
+  }
+
+//  if (found)
+//    memcpy(ret, &user_entry, sizeof(struct user));
+  f.close();
+  return i;
+}
+
 void SDCache::set(const Card u) {
   File f = SD.open(_filename, FILE_WRITEREAD);
   user user_entry, nu;

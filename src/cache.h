@@ -15,11 +15,18 @@ unsigned int            :3; // pad to a whole byte
 
 struct Cache {
   public:
-    virtual void begin();
+    virtual ~Cache();
+
+    virtual void begin() = 0;
 
     // look up a uid in the cache and return a user struct
     // the returned user must be freed by the caller
     virtual Card get(Card u) = 0;
+
+    virtual Card get(size_t n) = 0;
+
+    // Get a count of entries in our cache
+    virtual size_t count() = 0;
 
     // add a card to the cache
     virtual void set(const Card u) = 0;
@@ -31,18 +38,26 @@ struct Cache {
     virtual int each(void( *callback)(Card u)) = 0;
 
     // fill up the cache with test entries
-    void fill(void);
-    void fill(int count);
+    virtual void fill(void) =0;
+    virtual void fill(int count) =0;
 
     // list the contents of the cache
-    void list(void);
+    virtual void list(void) =0;
 
     // verify each entry in the cache against the acserver
     virtual void verify(void) = 0;
 
-  protected:
-    char *_filename;
+};
 
+class CacheBase : public Cache
+{
+public:
+    void fill(void) override;
+    void fill(int count) override;
+    void list(void) override;
+
+protected:
+    char *_filename;
 };
 
 #endif

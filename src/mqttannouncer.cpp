@@ -2,6 +2,8 @@
 #include "acnode.h"
 #include "mqttannouncer.h"
 #include "version.h"
+#include "utils.h"
+#include "settings.h"
 
 enum msgType {
   MSG_ANNOUNCE,
@@ -35,6 +37,9 @@ void MQTTAnnouncer::START() {
     aJsonObject* root = aJson.createObject();
     aJson.addStringToObject(root, "Type", "START");
     aJson.addStringToObject(root, "Version", ACVERSION);
+    aJson.addStringToObject(root, "Git", STRINGIFY(GIT_REVISION));
+    aJson.addNumberToObject(root, "SettingsVersion", acsettings.valid);
+    aJson.addNumberToObject(root, "EEPROMSettingsVersion", get_settings_version());
     if(wdog.was_reset())
     {
       aJson.addStringToObject(root, "Cause", "Watchdog");
@@ -143,10 +148,16 @@ void MQTTAnnouncer::BELL() {
   aJson.deleteItem(root);
 }
 
-void MQTTAnnouncer::EXIT() {
+void MQTTAnnouncer::EXIT(int doorbellack) {
   aJsonObject* root = aJson.createObject();
   aJson.addStringToObject(root, "Type", "EXIT");
-  aJson.addStringToObject(root, "Message", "Door opened by exit button");
+  if (doorbellack == 1) {
+    aJson.addBooleanToObject(root, "doorbellack", true);
+    aJson.addStringToObject(root, "Message", "Doorbell acknowledged");
+  } else {
+    aJson.addBooleanToObject(root, "doorbellack", false);
+    aJson.addStringToObject(root, "Message", "Door opened by exit button");
+  }
   sendMessage(root, MSG_ANNOUNCE);
   aJson.deleteItem(root);
 }

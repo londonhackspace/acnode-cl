@@ -14,6 +14,7 @@
 #include "settings.h"
 #include "microrl.h"
 #include "cli.h"
+#include "cacheoverlay.h"
 #include "card.h"
 #include "utils.h"
 #include "tool.h"
@@ -31,6 +32,8 @@
 #include "ramcache.h"
 #include "doorbot.h"
 #include "doorbot_ac.h"
+#include "maintainercachemaintainer.h"
+#include "ACServer/RealACServer.h"
 
 // create microrl object and pointer on it
 microrl_t rl;
@@ -53,6 +56,8 @@ RGB rgb(PM_0, PM_1, PM_2);
 Watchdog wdog;
 
 Cache *cache = NULL;
+MaintainerCacheMaintainer* mcmaintainer = nullptr;
+ACServer* acserver = nullptr;
 
 Door *door = NULL;
 Doorbot *doorbot = NULL;
@@ -120,11 +125,20 @@ void setup() {
       Serial.println("SD card could not be accessed");
       Serial.println("Please fix the SD card and try again. Caching cards in RAM for now.");
       cache = new RAMCache();
+
+      if(acsettings.maintainer_cache) {
+        // insert overlay
+        Cache* persistent = new EEPromCache();
+        cache = new CacheOverlay(cache, persistent);
+        acserver = new RealACServer(client, acsettings.servername, acsettings.port, acsettings.nodeid);
+        mcmaintainer = new MaintainerCacheMaintainer(persistent, acserver);
+      }
     }
   } else {
       Serial.println("Using the eeprom to cache cards");
       cache = new EEPromCache();
   }
+
   cache->begin();
 
   microrl_init (prl, mrlprint);
@@ -299,13 +313,6 @@ void setup() {
 
   wdog.feed();
 
-  // For now, just purge the cache. Checking a card against the server at startup
-  // takes ~3s per card. TODO: Add code to check against the server when card is
-  // scanned and TTL is deemed to be expired.
-  cache->purge();
-
-  wdog.feed();
-
   Serial.println("press enter for a prompt");
 }
 
@@ -324,6 +331,17 @@ void loop() {
     default:
       acnode->run();
   }
+  
+  if(announcer)
+  {
+    announcer->run();
+  }
+
+  if(mcmaintainer && network)
+  {
+    mcmaintainer->run();
+  }
+
   if (am_i_alive.check()) {
     if(announcer) {
       announcer->ALIVE();

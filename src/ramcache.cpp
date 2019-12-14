@@ -51,6 +51,17 @@ Card RAMCache::get(Card u) {
   return Card();
 }
 
+Card RAMCache::get(size_t n) {
+  if (n<CACHE_CAPACITY) {
+    return entries[n].card;
+  }
+  return Card();   
+}
+
+size_t RAMCache::count() {
+  return CACHE_CAPACITY;
+}
+
 void RAMCache::set(const Card u) {
   unsigned long now = millis();
   // Card is already in the cache.

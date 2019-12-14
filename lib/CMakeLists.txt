@@ -1,4 +1,7 @@
 
+# for now, disable warnings since they were disabled for a long time and need easing back in
+add_compile_options(-w)
+
 file(GLOB PN532_SOURCES    ${CMAKE_CURRENT_SOURCE_DIR}/PN532/PN532/*.cpp)
 
 add_library(PN532 ${PN532_SOURCES})

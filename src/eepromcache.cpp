@@ -44,6 +44,22 @@ Card EEPromCache::get(Card u) {
   return struct_to_card(nu);
 }
 
+Card EEPromCache::get(size_t n) {
+
+  int address = n * sizeof(user);
+  user nu;
+
+  EEPROMRead((uint32_t *)&nu, address, sizeof(user));
+
+  return struct_to_card(nu);
+}
+
+size_t EEPromCache::count() {
+  uint32_t eesize;
+
+  eesize = EEPROMSizeGet();
+  return (eesize - USERBASE) / sizeof(user);
+}
 
 /*
  * 3 ways we could want to store a user:
@@ -67,6 +83,10 @@ void EEPromCache::set(const Card u) {
     // might be the end or an invalid slot in the middle somewhere.
     address = find_free();
   }
+  else {
+    Serial.print("Found user at ");
+    Serial.println(address);
+  }
 
   Serial.print("Will save at: ");
   Serial.println(address);
@@ -87,8 +107,9 @@ int EEPromCache::each(void( *callback)(Card u)) {
   int address = USERBASE;
   int count = 0;
   user u;
+  int eesize = EEPROMSizeGet();
 
-  while (1) {
+  while (address < eesize) {
     EEPROMRead((uint32_t *)&u, address, sizeof(user));
     wdog.feed();
 
@@ -141,7 +162,9 @@ int EEPromCache::find_user(const Card u) {
   boolean found = false;
   user tu; // this user
 
-  while (1) {
+  int eesize = EEPROMSizeGet();
+
+  while (address < eesize) {
       EEPROMRead((uint32_t *)&tu, address, sizeof(user));
       if (tu.invalid == 1 && tu.end == 0) {
         // not valid, skip it
@@ -208,6 +231,9 @@ int EEPromCache::find_free(void) {
 
   user u;
 
+  Serial.print("Finding Free slot: EEProm size is ");
+  Serial.println(eesize);
+
   while (1) {
       EEPROMRead((uint32_t *)&u, address, sizeof(user));
       if (u.invalid == 1 && u.end == 0) {
@@ -250,6 +276,7 @@ user EEPromCache::card_to_struct(const Card u) {
     nu.uidlen = 0;
   }
   nu.end = 0;
+  nu.invalid = u.is_valid() ? 0 : 1;
 
   u.get_uid(nu.uid);
   return nu;
@@ -257,5 +284,6 @@ user EEPromCache::card_to_struct(const Card u) {
 
 Card EEPromCache::struct_to_card(const user u) {
   Card nc(u.uid, u.uidlen, u.status, u.maintainer);
+  nc.set_valid(!u.invalid);
   return nc;
 }
