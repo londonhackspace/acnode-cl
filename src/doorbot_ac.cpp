@@ -18,14 +18,18 @@ void DoorbotWithAccessControl::run() {
   switch (poll) {
     case SHORT_PRESS:
     case LONG_PRESS:
-      this->lastDoorbellTime = millis();
-      announcer->BELL();
-      Serial.println("BING BONG ");
+      if (millis() - this->lastScannedTime > 2000) { // Silence doorbell button for two seconds after a card read
+        this->lastDoorbellTime = millis();
+        announcer->BELL();
+        Serial.println("BING BONG ");
         led.solid(ORANGE);
         delay(ACCESS_DENIED_LED_ON_TIME/2);
         led.solid(BLUE);
         delay(ACCESS_DENIED_LED_ON_TIME/2);
         led.solid(ORANGE);
+      } else {
+        Serial.println("Doorbell pushed within 2 seconds of card read");
+      }
       break;
   }
   int poll_release = door_release_button.poll();

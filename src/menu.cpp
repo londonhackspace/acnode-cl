@@ -87,10 +87,12 @@ void Menu::select(Card *c) {
       break;
     case READY_TO_TAKE_OFFLINE:
       take_offline(c);
+      led.solid(RED); // Immediately change the LED colour rather than wait for polling
       reset();
       break;
     case READY_TO_TAKE_ONLINE:
       take_online(c);
+      led.solid(GREEN); // Immediately change the LED colour rather than wait for polling. Strictly speaking, it should be orange for maintainer
       reset();
       break;
   }
