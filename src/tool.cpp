@@ -192,6 +192,7 @@ void Tool::on(Card user) {
     // end
     _toolon = true;
     _ontime = millis();
+    _start = millis();
     tool_user = user;
   }
 

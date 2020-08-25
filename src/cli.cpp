@@ -157,6 +157,7 @@ uint8_t fromhex(char c) {
 int mrlexecute (int argc, const char * const * argv)
 {
   int i = 0, j;
+  wdog.feed();
   // just iterate through argv word and compare it with your commands
   while (i < argc) {
     if (strcmp (argv[i], _CMD_HELP) == 0) {

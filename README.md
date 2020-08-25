@@ -183,7 +183,7 @@ You can send a signal to the acnode via pin PE_4 to say when your tool is actual
 
 # Pin assignments on ACNode shield rev 1 board (square PCB)
 
-Other ACnode PCBs are available
+Other ACnode PCBs are available, the most common at the moment is the hardware/NEW-ACNode-Dootbot-Shield designed by dawidekziaja
 
 * P1 connector (numbers rising towards on-board relay, P1_1 is furthest from it)
 * P1_1 GND -> CAT5 ORANGE
@@ -226,19 +226,24 @@ For doorbots, you will need +12V to power the door solenoid, and ideally, a batt
 # using the CLI
 
 Once the firmware has been uploaded to the connected launchpad connect with a serial terminal (if you use a real one rather than the Energia serial monitor you get command history and line editing).
+It will work a lot better if it's connected to a working ethernet port with DHCP at this point.
 
 Use `help` to see a brief description of commands. You want to set the nodeid and toolname as the minimum:
 
 ```
 nodeid <id>
-name <name>
+name <name of tool>
 server <acserver hostname>
 port <http port to use>
 secret <shared secret, see acserver tool config>
 syslog <syslog server to use>
+mqtt_topic_base <mqtt_topic_base e.g. /tool/selfclearingdesk >
+maintainercache - toggle maintainer cache mode (stores maintainers credentials in EEPROM so it should still work for maintainers after complete power loss)
 ```
 
 and then `save` to save the settings.
+
+It is good practice to make a note of the MAC address of the acnode, and reserve a DHCP reservation on the router for it, because then it can be monitored by icinga or other monitoring system.
 
 # Button status/colours:
 
