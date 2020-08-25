@@ -63,7 +63,7 @@ Table of Contents
 * 2 x crimp or solderable spade terminals for the microswitch on the arcade button
 * 2 x wires with female header socket ends (the other end doesn't matter, and will be cut off), one black & one white
 * 1 x PN532 based card reader
-* 1 x connected Launchpad
+* 1 x connected Launchpad TM4C1294XL
 * 1 x red  female to female header socket lead
 * 1 x blue female to female header socket lead
 * 1 x green female to female header socket lead
@@ -218,6 +218,11 @@ Other boards (Genuine Elechouse NFC module v3) sort of work at +3.3V, but may no
 
 For convenience of installation (acnode), and added security (doorbot), we recommend the reader module itself should be connected via an 8 wire cable, such as CAT5, and housed with a pushbutton NO switch and RGB LED in its own enclosure. This way, any intruder can't attack the reader and easily gain access. CAT5 (or above) wiring as above. Note the requirement for 220 ohm resistors on the Red/Green/Blue LED pins to prevent LED burnout. For operational convenience, it is advised to keep a spare reader that can be swapped out. Readers for doorbot enclosures can fit into standard single EN 60670-1 socket boxes with blanking plates, or outdoor junction boxes. For outdoor fitting, ensure that any holes for the button are suitably sealed against moisture ingress. Ditto for ACnode readers in a dusty or dirty environment.
 
+# Power supply
+
+For ACnodes, then a Power over Ethernet micro-USB power splitter works a treat. Feed the 5V USB power straight to the OTG micro USB connector near the ethernet jack, and jumper the Power Select to OTG. Make sure you connect to a network port that is supplied via a PoE network switch.
+For doorbots, you will need +12V to power the door solenoid, and ideally, a battery backup. Feed the +12V into the London Hackspace doorbot board so that it goes via a regulator to supply +5V to the Launchpad via the BoosterPack connector. Jumper the launchpad's Power Select to OTG.
+
 # using the CLI
 
 Once the firmware has been uploaded to the connected launchpad connect with a serial terminal (if you use a real one rather than the Energia serial monitor you get command history and line editing).
@@ -229,6 +234,7 @@ nodeid <id>
 name <name>
 server <acserver hostname>
 port <http port to use>
+secret <shared secret, see acserver tool config>
 syslog <syslog server to use>
 ```
 
