@@ -1,0 +1,4 @@
+(sym_lib_table
+  (lib (name ExtraParts)(type Legacy)(uri ${KIPRJMOD}/ExtraParts.lib)(options "")(descr ""))
+  (lib (name Launchpad)(type Legacy)(uri ${KIPRJMOD}/Launchpad.lib)(options "")(descr ""))
+)
