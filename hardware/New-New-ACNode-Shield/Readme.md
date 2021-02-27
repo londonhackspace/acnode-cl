@@ -12,3 +12,5 @@ Things to fix before the next version:
 
 * Launchpad ethernet connector fouls the shield
 * LED is... rather bright...
+* A jumper on the ISL3176 ~RE line would allow a single board to support 5V and 12V readers
+* Footprints for 3.81mm connectors are too tight - holes too small
