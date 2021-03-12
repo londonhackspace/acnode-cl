@@ -7,3 +7,6 @@
 [submodule "lib/HttpClient"]
 	path = lib/HttpClient
 	url = https://github.com/zlalanne/HttpClient.git
+[submodule "lib/littlefs"]
+	path = lib/littlefs
+	url = https://github.com/littlefs-project/littlefs.git

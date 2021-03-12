@@ -61,3 +61,9 @@ file(GLOB AJSON_SOURCES
 add_library(aJson ${AJSON_SOURCES})
 target_include_directories(aJson PUBLIC 
                                     ${CMAKE_CURRENT_SOURCE_DIR}/aJson)
+
+file(GLOB LITTLEFS_SOURCES
+                       ${CMAKE_CURRENT_SOURCE_DIR}/littlefs/*.c)
+add_library(littlefs ${LITTLEFS_SOURCES})
+target_include_directories(littlefs PUBLIC 
+                                    ${CMAKE_CURRENT_SOURCE_DIR}/littlefs)
