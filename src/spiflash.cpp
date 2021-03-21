@@ -1,4 +1,5 @@
 #include "spiflash.h"
+#include "acnode.h"
 
 #include <Energia.h>
 #include <SPI.h>
@@ -276,7 +277,11 @@ bool SPIFlash::readBasicSFDPHeader(uint32_t* table, size_t length)
 
 void SPIFlash::read(size_t start, size_t count, void* buffer) const
 {
-	while(isBusy()) sleep(1);
+	while(isBusy())
+	{
+		wdog.feed();
+		sleep(1);
+	}
 
 	digitalWrite(CSPin, LOW);
 	SPI.transfer(0x03); // Read command
@@ -318,7 +323,11 @@ void SPIFlash::write(size_t start, size_t count, const void* buffer)
 
 void SPIFlash::writeInternal(size_t start, size_t count, const void* buffer)
 {
-	while(isBusy()) sleep(1);
+	while(isBusy())
+	{
+		wdog.feed();
+		sleep(1);
+	}
 
 	writeEnable();
 
@@ -333,7 +342,12 @@ void SPIFlash::writeInternal(size_t start, size_t count, const void* buffer)
 
 void SPIFlash::eraseBlock(size_t start)
 {
-	while(isBusy()) sleep(1);
+	while(isBusy())
+	{
+		wdog.feed();
+		sleep(1);
+	}
+
 	Serial.println("SPI Flash Erasing");
 
 	writeEnable();
@@ -356,7 +370,12 @@ bool SPIFlash::isBusy() const
 
 void SPIFlash::writeEnable()
 {
-	while(isBusy()) sleep(1);
+	while(isBusy())
+	{
+		wdog.feed();
+		sleep(1);
+	}
+
 	digitalWrite(CSPin, LOW);
 	SPI.transfer(0x06); // Write Enable command
 	digitalWrite(CSPin, HIGH);
@@ -364,7 +383,11 @@ void SPIFlash::writeEnable()
 
 void SPIFlash::eraseChip()
 {
-	while(isBusy()) sleep(1);
+	while(isBusy())
+	{
+		wdog.feed();
+		sleep(1);
+	}
 	
 	writeEnable();
 

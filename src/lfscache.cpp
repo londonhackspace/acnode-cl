@@ -1,4 +1,6 @@
 #include "lfscache.h"
+#include "network.h"
+#include "acnode.h"
 
 #include <Energia.h>
 
@@ -52,6 +54,8 @@ Card LFSCache::get(Card u)
 
 	while(lfs_file_read(fs->getLfsHandle(), fp, &usr, sizeof(usr)) == sizeof(usr))
 	{
+		wdog.feed();
+
 		// skip invalid
 		if(usr.invalid)
 		{
@@ -106,6 +110,15 @@ void LFSCache::set(const Card u)
 	memset(newUser.uid, 0, 7);
 	u.get_uid(newUser.uid);
 
+	if(u.is_maintainer())
+	{
+		Serial.println("Setting maintainer card");
+	}
+	else
+	{
+		Serial.println("Setting user card");	
+	}
+
 	newUser.status = u.is_user();
 	newUser.maintainer = u.is_maintainer();
 	newUser.uidlen = u.get_longuid();
@@ -120,6 +133,8 @@ void LFSCache::set(const Card u)
 
 	while(lfs_file_read(fs->getLfsHandle(), fp, &usr, sizeof(usr)) == sizeof(usr))
 	{
+		wdog.feed();
+
 		// skip invalid
 		if(usr.invalid)
 		{
@@ -201,6 +216,7 @@ int LFSCache::each(void( *callback)(Card u))
 
 	while(lfs_file_read(fs->getLfsHandle(), fp, &usr, sizeof(usr)) == sizeof(usr))
 	{
+		wdog.feed();
 		// skip invalid
 		if(usr.invalid)
 		{
@@ -215,6 +231,62 @@ int LFSCache::each(void( *callback)(Card u))
 
 void LFSCache::verify(void)
 {
+	if(!fp)
+	{
+		return;
+	}
 
+	if(lfs_file_seek(fs->getLfsHandle(), fp, 0, LFS_SEEK_SET) < 0)
+	{
+		Serial.println("LFSCache: Error seeking to beginning of file");
+		return;
+	}
 
+	user usr;
+	wdog.feed();
+	while(lfs_file_read(fs->getLfsHandle(), fp, &usr, sizeof(usr)) == sizeof(usr))
+	{
+		wdog.feed();
+		if(usr.invalid)
+		{
+			continue;
+		}
+
+		bool update = false;
+
+		Card t(usr.uid, usr.uidlen, usr.status, usr.maintainer);
+		int status = networking::querycard(t);
+		if(status == 0)
+		{
+			Serial.print("User no longer valid: ");
+			t.dump();
+			update = true;
+		}
+		else if(status == 1 && usr.maintainer)
+		{
+			usr.maintainer = 0;
+			update = true;
+		}
+		else if(status == 2 && !usr.maintainer)
+		{
+			usr.maintainer = 1;
+			update = true;
+		}
+		if(update)
+		{
+			if(lfs_file_seek(fs->getLfsHandle(), fp, -sizeof(user), LFS_SEEK_CUR) < 0)
+			{
+				Serial.println("Error seeking while verifying");
+				return;
+			}
+
+			if(lfs_file_write(fs->getLfsHandle(), fp, &usr, sizeof(user)) < 0)
+			{
+				Serial.println("Error updating card while verifying");
+				return;
+			}
+		}
+	}
+
+	lfs_file_sync(fs->getLfsHandle(), fp);
 }
