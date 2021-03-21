@@ -3,6 +3,8 @@
 #include <Energia.h>
 #include <SPI.h>
 
+
+
 SPIFlash::SPIFlash(uint8_t CSPin) :
 	CSPin(CSPin),
 	ready(false)
@@ -143,6 +145,7 @@ bool SPIFlash::init()
 	return true;
 }
 
+// A lot of this was loosely backported from my rewrite project
 bool SPIFlash::readBasicSFDPHeader(uint32_t* table, size_t length)
 {
 	if(table[1] & 0x80000000)
@@ -159,5 +162,213 @@ bool SPIFlash::readBasicSFDPHeader(uint32_t* table, size_t length)
 	Serial.print("SPIFlash: Capacity is ");
 	Serial.print(capacity, DEC);
 	Serial.println(" bytes");
+
+	if(capacity >= 0xffffff)
+	{
+		Serial.println("SPIFlash: Limiting capacity since we only support 3-byte addresses");
+		capacity = 0xffffff;
+	}
+
+	// depending on what standard the device supports, we can
+	// get more information using the later tables however they
+	// are only present on newer devices
+	if((length/4) >= 11)
+	{
+		uint8_t n = uint8_t((table[10] >> 4) & 0xf);
+		pageSize = 1 << n;
+	}
+	else
+	{
+		if((table[0] & 0x4) == 0x4)
+		{
+			// we know the flash supports at least this.
+			// It might support more, but we can't be sure
+			pageSize = 64;
+		}
+		else
+		{
+			// Oh dear. This will be really slow.
+			pageSize = 1;
+			Serial.println("SPIFlash: Device reports it does not support 64Kb page writes");
+			Serial.println("SPIFlash: This means we must assume we can only write one byte at a time!");
+			Serial.println("SPIFlash: This will be slow!");
+		}
+	}
+
+	// do we have the higher tables? Very early implementations
+	// supposedly only had 4
+	if((length/4) < 9)
+	{
+		Serial.println("SPIFlash: SFDP table contains fewer than 9 fields - using legacy values");
+		if((table[0] & 0x3) == 1)
+		{
+			// 4Kb mode supported
+			sectorSize = 4096;
+			sectorEraseCommand = (table[0] >> 8) & 0xff;
+		}
+		else
+		{
+			Serial.println("SPIFlash: 4kb mode not supported - not enough information to proceed");
+			return false;
+		}
+	}
+	else
+	{
+		// Find the smallest block size we can erase
+		// This is all LittleFS cares about
+		uint32_t minSize = ~0;
+		uint8_t minInstruction = 0;
+
+		// There are two bytes for 4 possible sizes
+		for(int i=7; i<9; ++i)
+		{
+			// upper word
+			uint32_t size = ((table[i] >> 16) & 0xff);
+			if(size != 0)
+			{
+				size = 1 << size;
+				Serial.print("SPIFlash: Command 0x");
+				Serial.print((table[i] >> 24) & 0xff, HEX);
+				Serial.print(" can erase ");
+				Serial.print(size, DEC);
+				Serial.print(" bytes (raw 0x");
+				Serial.print(((table[i] >> 16) & 0xff), HEX);
+				Serial.println(")");
+				if(size < minSize)
+				{
+					minSize = size;
+					minInstruction = (table[i] >> 24) & 0xff;
+				}
+			}
+
+			// lower word
+			size = (table[i] & 0xff);
+			if(size != 0)
+			{
+				size = 1 << size;
+				Serial.print("SPIFlash: Command 0x");
+				Serial.print((table[i] >> 8) & 0xff, HEX);
+				Serial.print(" can erase ");
+				Serial.print(size, DEC);
+				Serial.print(" bytes (raw 0x");
+				Serial.print( (table[i]  & 0xff), HEX);
+				Serial.println(")");
+				if(size < minSize)
+				{
+					minSize = size;
+					minInstruction = (table[i] >> 8) & 0xff;
+				}
+			}
+		}
+
+		sectorEraseCommand = minInstruction;
+		sectorSize = minSize;
+
+		Serial.print("SPIFlash: Will use erase command 0x");
+		Serial.print(sectorEraseCommand, HEX);
+		Serial.print(" to erase ");
+		Serial.print(sectorSize);
+		Serial.println(" bytes at a time");
+	}
+
 	return true;
+}
+
+void SPIFlash::read(size_t start, size_t count, void* buffer) const
+{
+	while(isBusy()) sleep(1);
+
+	digitalWrite(CSPin, LOW);
+	SPI.transfer(0x03); // Read command
+	SPI.transfer((start >> 16) & 0xff);
+	SPI.transfer((start >> 8) & 0xff);
+	SPI.transfer(start & 0xff);
+	for(size_t i = 0; i < count; ++i)
+	{
+		reinterpret_cast<uint8_t*>(buffer)[i] = SPI.transfer(0x00);
+	}
+	digitalWrite(CSPin, HIGH);
+
+}
+
+
+void SPIFlash::write(size_t start, size_t count, const void* buffer)
+{
+	uint32_t progress = 0;
+
+	while(progress < count)
+	{
+		// We can write at most pageSize bytes
+		uint32_t toWrite = min(count-progress, pageSize);
+		
+		// calculate the address we write to this time
+		uint32_t dest = start + progress;
+		
+		//we can only write to the next page boundary
+		uint32_t pageOffset = dest % pageSize;
+		if((toWrite + pageOffset) > pageSize)
+		{
+			toWrite -= pageOffset;
+		}
+
+		writeInternal(dest, toWrite, reinterpret_cast<const uint8_t*>(buffer)+progress);
+		progress += toWrite;
+	}
+}
+
+void SPIFlash::writeInternal(size_t start, size_t count, const void* buffer)
+{
+	while(isBusy()) sleep(1);
+
+	writeEnable();
+
+	digitalWrite(CSPin, LOW);
+	SPI.transfer(0x02); // Write command
+	SPI.transfer((start >> 16) & 0xff);
+	SPI.transfer((start >> 8) & 0xff);
+	SPI.transfer(start & 0xff);
+	SPI.transfer(const_cast<void*>(buffer), count);
+	digitalWrite(CSPin, HIGH);
+}
+
+void SPIFlash::eraseBlock(size_t start)
+{
+	while(isBusy()) sleep(1);
+	Serial.println("SPI Flash Erasing");
+
+	writeEnable();
+	digitalWrite(CSPin, LOW);
+	SPI.transfer(sectorEraseCommand);
+	SPI.transfer((start >> 16) & 0xff);
+	SPI.transfer((start >> 8) & 0xff);
+	SPI.transfer(start & 0xff);
+	digitalWrite(CSPin, HIGH);
+}
+
+bool SPIFlash::isBusy() const
+{
+	digitalWrite(CSPin, LOW);
+	SPI.transfer(0x05);
+	uint8_t result = SPI.transfer(0x00);
+	digitalWrite(CSPin, HIGH);
+	return (result & 0x01);
+}
+
+void SPIFlash::writeEnable()
+{
+	while(isBusy()) sleep(1);
+	digitalWrite(CSPin, LOW);
+	SPI.transfer(0x06); // Write Enable command
+	digitalWrite(CSPin, HIGH);
+}
+
+void SPIFlash::eraseChip()
+{
+	while(isBusy()) sleep(1);
+	
+	writeEnable();
+
+	digitalWrite(CSPin, LOW);
+	SPI.transfer(0xc7); // Chip erase command
+	digitalWrite(CSPin, HIGH);
 }

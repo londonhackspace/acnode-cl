@@ -28,6 +28,9 @@
 #include "cache.h"
 #include "card.h"
 #include "sdcache.h"
+#include "spiflash.h"
+#include "littlefs.h"
+#include "lfscache.h"
 #include "eepromcache.h"
 #include "ramcache.h"
 #include "doorbot.h"
@@ -59,6 +62,9 @@ Cache *cache = NULL;
 MaintainerCacheMaintainer* mcmaintainer = nullptr;
 ACServer* acserver = nullptr;
 
+SPIFlash* spiFlash = nullptr;
+LittleFS* littleFS = nullptr;
+
 Door *door = NULL;
 Doorbot *doorbot = NULL;
 ACNode *acnode = NULL;
@@ -71,6 +77,7 @@ Every am_i_alive(60000);
 #define BUTTON_PIN PF_1
 #define DOOR_RELEASE_PIN PM_6
 #define SD_CS_PIN PC_7
+#define FLASH_CS_PIN PD_7
 #define ACNODE_DIR "ACNODE"
 
 void serviceLed() { rgb.run(); };
@@ -95,6 +102,17 @@ void setup() {
   // start the watchdog early in case of hangs
   wdog.begin();
 
+  if(SPIFlash::detect(FLASH_CS_PIN))
+  {
+    Serial.println("SPI Flash is available!");
+    spiFlash = SPIFlash::get(FLASH_CS_PIN);
+    littleFS = new LittleFS(spiFlash);
+  }
+  else
+  {
+    Serial.println("SPI Flash is not available");
+  }
+
   // need settings to configure the tool
   init_settings();
 
@@ -116,7 +134,10 @@ void setup() {
   wdog.feed();
 
   if (acsettings.sdcache) {
-    if (SD.begin(SD_CS_PIN, SPI_HALF_SPEED, 2)) {
+    if(littleFS && littleFS->isReady()) {
+      Serial.println("Using LittleFS cache");
+      cache = new LFSCache(littleFS);
+    } else if (SD.begin(SD_CS_PIN, SPI_HALF_SPEED, 2)) {
       Serial.println("SD card is accessible");
       SD.mkdir(ACNODE_DIR);
       cache = new SDCache("CACHE");
@@ -363,4 +384,17 @@ void loop() {
       }
     }
   }
+}
+
+extern "C"
+{
+
+// littlefs uses abort, which calls _exit - but no matter what options I try,
+// I can't get the toolchain to deal with that properly, so here's an _exit
+// implementation to keep it happy
+int _exit(int ret)
+{
+  while(1);
+}
+
 }

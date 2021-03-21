@@ -16,5 +16,6 @@ target_link_libraries(ACNodeCL  ${SYSTEM_LIBRARY}
                                 SD
                                 OneMsTaskTimer
                                 MQTTClient
-                                aJson)
+                                aJson
+                                littlefs)
 makeFlash(ACNodeCL)
