@@ -4,13 +4,14 @@
 #include "PN532.h"
 #include "card.h"
 #include "every.h"
+#include "CardReader/cardreader.h"
 
 class Role {
 public:
-  Role(PN532 &);
+  Role(CardReader*);
   virtual void run() = 0;
   void cardPresent(void (Role::*) (Card c));
-  PN532 &nfc;
+  CardReader* reader;
   Every *every_card;
 };
 

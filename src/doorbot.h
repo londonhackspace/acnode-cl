@@ -19,7 +19,7 @@ extern Cache *cache;
 
 class Doorbot : public Role {
   public:
-    Doorbot(Door &, Watchdog &, PN532 &, RGB &l, int button_pin, int door_release_pin);
+    Doorbot(Door &, Watchdog &, CardReader*, RGB &l, int button_pin, int door_release_pin);
     void enableAnnouncer(Announcer* announcer);
     void run();
     void networkingError();

@@ -2,8 +2,8 @@
 
 #include <Ethernet.h>
 
-Doorbot::Doorbot(Door &d, Watchdog &w, PN532 &n, RGB &l, int button_pin, int door_release_pin) :
-  Role(n),
+Doorbot::Doorbot(Door &d, Watchdog &w, CardReader* reader, RGB &l, int button_pin, int door_release_pin) :
+  Role(reader),
   door(d),
   wdog(w),
   led(l),
@@ -71,6 +71,8 @@ void Doorbot::run() {
 
 void Doorbot::handleCardPresent(Card c) {
   int status;
+  Serial.println("Card present");
+  c.dump();
   Card cached = cache->get(c);
   if (cached.compare_uid(c) && cached.is_valid()) {
     status = 1;

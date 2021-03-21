@@ -1,8 +1,8 @@
 #include "announcer.h"
 #include "acnode.h"
 
-ACNode::ACNode(PN532 &n, RGB &r, Tool &t, int button_pin) :
-  Role(n),
+ACNode::ACNode(CardReader* reader, RGB &r, Tool &t, int button_pin) :
+  Role(reader),
   rgb(r),
   tool(t),
   menu(r, button_pin),
@@ -154,31 +154,26 @@ Card ACNode::readcard()
   //  pnhsu.intr_check();
 
   boolean success;
-  uint8_t uid[] = { 0, 0, 0, 0, 0, 0, 0 };  // Buffer to store the returned UID
-  uint8_t uidLength;                        // Length of the UID (4 or 7 bytes depending on ISO14443A card type)
+  
+  CardId card = reader->getCard();
 
-  // Wait for an ISO14443A type cards (Mifare, etc.).  When one is found
-  // 'uid' will be populated with the UID, and uidLength will indicate
-  // if the uid is 4 bytes (Mifare Classic) or 7 bytes (Mifare Ultralight)
-  success = nfc.readPassiveTargetID(PN532_MIFARE_ISO14443A, &uid[0], &uidLength);
-
-  nfc.powerDown();
-
-  if (!success)
+  if (!card)
   {
     return Card();
   }
 
-  switch (uidLength) {
+  switch (card.length) {
     case 4:
-      return Card(uid, 0, 0, 0);
+      Serial.println("Got card 4");
+      return Card(card.uid, 0, 0, 0);
       break;
     case 7:
-      return Card(uid, 1, 0, 0);
+      Serial.println("Got card 7");
+      return Card(card.uid, 1, 0, 0);
       break;
     default:
       Serial.print("Odd card length?: ");
-      Serial.println(uidLength);
+      Serial.println(card.length);
       break;
   }
   return Card();

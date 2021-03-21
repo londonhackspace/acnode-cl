@@ -15,12 +15,16 @@
 #include "menu.h"
 #include "announcer.h"
 
+//forward declare this since not (quite) everything uses it
+class CardReader;
+
 // put these things here so more things can use it.
 extern EthernetClient client;
 extern Syslog syslog;
 extern boolean network;
 extern Watchdog wdog;
 extern Cache *cache;
+extern CardReader *cardReader;
 
 // XXX should be elsewhere
 // the base address (begining of 7th block)
@@ -38,7 +42,7 @@ extern Cache *cache;
 
 class ACNode : public Role {
 public:
-  ACNode(PN532 &, RGB &, Tool &, int button_pin);
+  ACNode(CardReader*, RGB &, Tool &, int button_pin);
   void enableAnnouncer(Announcer* announcer);
   void run();
   void announceCard(Card c, int granted);

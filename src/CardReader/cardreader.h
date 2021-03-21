@@ -10,7 +10,7 @@ public:
 
 	virtual CardId getCard()=0;
 
-	
+	virtual void init()=0;
 };
 
 #endif

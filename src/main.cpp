@@ -37,6 +37,8 @@
 #include "doorbot_ac.h"
 #include "maintainercachemaintainer.h"
 #include "ACServer/RealACServer.h"
+#include "CardReader/cardreader.h"
+#include "CardReader/pn532cardreader.h"
 
 // create microrl object and pointer on it
 microrl_t rl;
@@ -45,6 +47,8 @@ microrl_t * prl = &rl;
 // PN532_HSU pnhsu(Serial6, PD_2);
 PN532_HSU pnhsu(Serial6);
 PN532 nfc(pnhsu);
+
+CardReader* cardReader = nullptr;
 
 EthernetClient client;
 Syslog syslog;
@@ -247,55 +251,33 @@ void setup() {
 
   door = new Door(PG_1, 0, acsettings.door_keep_open_ms);
 
+  Serial.println("Initialising Card reader...");
+
+
+  cardReader = new PN532CardReader(nfc);
+  cardReader->init();
+
+  wdog.feed();
+
   // The role may change when the user changes it via settings.
   active_role = acsettings.role;
   switch (active_role) {
     case 1:
       Serial.println("Starting regular Doorbot role");
-      doorbot = new Doorbot(*door, wdog, nfc, rgb, BUTTON_PIN, DOOR_RELEASE_PIN);
+      doorbot = new Doorbot(*door, wdog, cardReader, rgb, BUTTON_PIN, DOOR_RELEASE_PIN);
       doorbot->enableAnnouncer(announcer);
       break;
     case 2:
       Serial.println("Starting restricted Doorbot role");
-      doorbot = new DoorbotWithAccessControl(*door, wdog, nfc, rgb, BUTTON_PIN, DOOR_RELEASE_PIN);
+      doorbot = new DoorbotWithAccessControl(*door, wdog, cardReader, rgb, BUTTON_PIN, DOOR_RELEASE_PIN);
       doorbot->enableAnnouncer(announcer);
       break;
     default:
       Serial.println("Starting acnode role");
-      acnode = new ACNode(nfc, rgb, tool, BUTTON_PIN);
+      acnode = new ACNode(cardReader, rgb, tool, BUTTON_PIN);
       acnode->enableAnnouncer(announcer);
       break;
   }
-
-  wdog.feed();
-
-  Serial.println("Initialising Card reader...");
-
-  nfc.begin();
-
-  uint32_t versiondata = nfc.getFirmwareVersion();
-
-  if (! versiondata) {
-    Serial.println("Didn't find PN53x board");
-    syslog.syslog(LOG_EMERG, "Couldn't find PN532 board");
-    while (1); // halt
-  }
-
-  // Got ok data, print it out!
-  Serial.print("Found chip PN5"); Serial.print((versiondata>>24) & 0xFF, HEX);
-  Serial.print(", Firmware ver. "); Serial.print((versiondata>>16) & 0xFF, DEC);
-  Serial.print('.'); Serial.println((versiondata>>8) & 0xFF, DEC);
-
-  // Set the max number of retry attempts to read from a card
-  // This prevents us from waiting forever for a card, which is
-  // the default behaviour of the PN532.
-  //
-  // with the powerdown thing we don't need a long timeout
-  // so use 16...
-  nfc.setPassiveActivationRetries(0x10);
-
-  // configure board to read RFID tags
-  nfc.SAMConfig();
 
   wdog.feed();
 

@@ -19,14 +19,14 @@ struct CardId
 		{
 			this->length = 8;
 		}
-		memset(uid, 0, 8);
+		memset(this->uid, 0, 8);
 		memcpy(this->uid, uid, this->length);
 	}
 
 	CardId(const CardId& other) :
 		length(other.length)
 	{
-		memset(uid, 0, 8);
+		memset(this->uid, 0, 8);
 		memcpy(this->uid, uid, this->length);
 	}
 
