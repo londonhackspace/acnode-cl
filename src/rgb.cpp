@@ -1,9 +1,10 @@
 #include "rgb.h"
 
-RGB::RGB(int pin_r, int pin_g, int pin_b) : colour1(BLACK), colour2(BLACK) {
+RGB::RGB(int pin_r, int pin_g, int pin_b, RemoteRGB* remote) : colour1(BLACK), colour2(BLACK), remote(remote) {
   _r = pin_r;
   _g = pin_g;
   _b = pin_b;
+  lastRemoteR = lastRemoteG = lastRemoteB = 0;
   is_flashing = false;
   flashing_on = false;
   is_rainbow = false;
@@ -67,4 +68,14 @@ void RGB::light_up(Colour &c) {
   analogWrite(_r, c.r);
   analogWrite(_g, c.g);
   analogWrite(_b, c.b);
+
+  if(remote) {
+    if(c.r != lastRemoteR || c.g != lastRemoteG || c.b != lastRemoteB) {
+      lastRemoteR = c.r;
+      lastRemoteG = c.g;
+      lastRemoteB = c.b;
+      // stupidly, we store the colours inverted
+      remote->set(255 - c.r, 255 - c.g, 255 - c.b);
+    }
+  }
 }
