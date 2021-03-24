@@ -27,7 +27,7 @@ struct CardId
 		length(other.length)
 	{
 		memset(this->uid, 0, 8);
-		memcpy(this->uid, uid, this->length);
+		memcpy(this->uid, other.uid, this->length);
 	}
 
 	bool operator==(const CardId& other) const

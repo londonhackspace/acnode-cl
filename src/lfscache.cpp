@@ -148,6 +148,11 @@ void LFSCache::set(const Card u)
 		Card currentUsr(usr.uid, usr.uidlen, usr.status, usr.maintainer);
 		if(currentUsr.compare_uid(u))
 		{
+			if(currentUsr ==  u)
+			{
+				// no update
+				return;
+			}
 			if(lfs_file_seek(fs->getLfsHandle(), fp, -sizeof(user), LFS_SEEK_CUR) < 0)
 			{
 				Serial.println("Error seeking while updating card");
