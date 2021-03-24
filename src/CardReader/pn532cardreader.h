@@ -14,6 +14,8 @@ public:
 
 	void init() override;
 
+	void poll() override;
+
 private:
 	PN532 &nfc;
 };

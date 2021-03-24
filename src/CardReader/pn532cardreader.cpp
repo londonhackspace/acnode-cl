@@ -63,3 +63,8 @@ CardId PN532CardReader::getCard()
 
 	return CardId();
 }
+
+void PN532CardReader::poll()
+{
+	
+}
