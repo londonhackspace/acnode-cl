@@ -161,13 +161,13 @@ Wire Wire Line
 $Comp
 L power:GND #PWR0112
 U 1 1 5FC29A42
-P 4050 1900
-F 0 "#PWR0112" H 4050 1650 50  0001 C CNN
-F 1 "GND" V 4055 1772 50  0000 R CNN
-F 2 "" H 4050 1900 50  0001 C CNN
-F 3 "" H 4050 1900 50  0001 C CNN
-	1    4050 1900
-	0    1    1    0   
+P 3950 2000
+F 0 "#PWR0112" H 3950 1750 50  0001 C CNN
+F 1 "GND" V 3955 1872 50  0000 R CNN
+F 2 "" H 3950 2000 50  0001 C CNN
+F 3 "" H 3950 2000 50  0001 C CNN
+	1    3950 2000
+	0    -1   -1   0   
 $EndComp
 $Comp
 L power:+3.3V #PWR0113
@@ -191,8 +191,6 @@ F 3 "" H 3900 2400 50  0001 C CNN
 	1    3900 2400
 	0    -1   -1   0   
 $EndComp
-Wire Wire Line
-	4200 1900 4050 1900
 Wire Wire Line
 	4200 2400 3900 2400
 Wire Wire Line
@@ -651,4 +649,32 @@ Text Label 10500 6050 0    61   ~ 0
 ~DoorRelease
 Wire Wire Line
 	10400 6050 10500 6050
+$Comp
+L Connector_Generic:Conn_01x03 J8
+U 1 1 6111755B
+P 3650 1900
+F 0 "J8" V 3750 1900 50  0000 C CNN
+F 1 "Conn_01x03" H 3600 2100 50  0001 C CNN
+F 2 "Connector_PinHeader_2.54mm:PinHeader_1x03_P2.54mm_Vertical" H 3650 1900 50  0001 C CNN
+F 3 "~" H 3650 1900 50  0001 C CNN
+	1    3650 1900
+	-1   0    0    1   
+$EndComp
+$Comp
+L power:+3.3V #PWR0105
+U 1 1 6112247B
+P 3900 1800
+F 0 "#PWR0105" H 3900 1650 50  0001 C CNN
+F 1 "+3.3V" V 3900 2050 50  0000 C CNN
+F 2 "" H 3900 1800 50  0001 C CNN
+F 3 "" H 3900 1800 50  0001 C CNN
+	1    3900 1800
+	0    1    1    0   
+$EndComp
+Wire Wire Line
+	4200 1900 3850 1900
+Wire Wire Line
+	3850 2000 3950 2000
+Wire Wire Line
+	3900 1800 3850 1800
 $EndSCHEMATC
