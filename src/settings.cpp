@@ -195,6 +195,9 @@ void dump_settings(settings acsettings) {
     }
   }
 
+  Serial.print("Invert Colours: ");
+  Serial.println((acsettings.invert_colours == 1) ? "on" : "off");
+
 }
 
 uint8_t get_settings_version(void) {
@@ -349,6 +352,44 @@ settings get_settings(void) {
             set_settings(acsettings);
           }
           break;
+      case ACSETTINGS46:
+          // upgrade the settings and add defaults for new settings.
+          Serial.println("Old settings (46) found, upgrading");
+          {
+            settings46 osettings;
+            memset(&osettings, 0, sizeof(osettings));
+            EEPROMRead((uint32_t *)&osettings, 0, sizeof(osettings));
+
+            memcpy(acsettings.mac, osettings.mac, 6);
+            memcpy(acsettings.servername, osettings.servername, SERVERNAMELEN);
+            memcpy(acsettings.syslogserver, osettings.syslogserver, SERVERNAMELEN);
+            memcpy(acsettings.toolname, osettings.toolname, TOOLNAMELEN);
+            acsettings.port = osettings.port;
+            acsettings.nodeid = osettings.nodeid;
+            acsettings.status = osettings.status;
+            acsettings.runtime = osettings.runtime;
+            acsettings.minontime = osettings.minontime;
+            acsettings.sdcache = osettings.sdcache;
+            acsettings.netverbose = osettings.netverbose;
+            acsettings.toolonpin_activehigh = osettings.toolonpin_activehigh;
+            acsettings.maintainer_cache = osettings.maintainer_cache;
+            acsettings.toolrunpin_activehigh = osettings.toolrunpin_activehigh;
+            memcpy(acsettings.secret, osettings.secret, KEYLEN+1);
+
+            strncpy(acsettings.mqtt_server, osettings.mqtt_server, SERVERNAMELEN);
+            acsettings.mqtt_port = osettings.mqtt_port;
+            strncpy(acsettings.mqtt_topic_base, osettings.mqtt_topic_base, MQTT_TOPIC_LEN);
+            acsettings.door_keep_open_ms = osettings.door_keep_open_ms;
+            acsettings.announce_mode = osettings.announce_mode;
+            acsettings.doorbell_mode = osettings.doorbell_mode;
+
+            // use persistent maintainer cache?
+            acsettings.invert_colours = 1;
+
+            acsettings.valid = ACSETTINGSVALID;
+            set_settings(acsettings);
+          }
+          break;
     default:
       Serial.println("Settings not valid, using defaults");
       acsettings.valid = 0;
@@ -377,6 +418,9 @@ settings get_settings(void) {
       acsettings.toolonpin_activehigh = 1;
       // the laser signal is inverted
       acsettings.toolrunpin_activehigh = 0;
+
+      // default to on for historic reasons
+      acsettings.invert_colours = 1;
 
       memset(acsettings.secret, 0, KEYLEN+1);
       acsettings.role = 0;

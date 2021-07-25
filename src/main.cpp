@@ -105,7 +105,7 @@ void setup() {
   tool.begin();
 
   // start the rgb early so we can get some feedback
-  rgb.begin();
+  rgb.begin(acsettings.invert_colours == 1);
 
   // Workaround for a missing declaration in the library
   uint32_t timer_index_ = 0;

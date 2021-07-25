@@ -10,7 +10,7 @@ class RGB
 {
   public:
     RGB(int pin_r, int pin_g, int pin_b);
-    void begin();
+    void begin(bool invert);
     void run();
     void solid(Colour &c);
     void flashing(Colour &c);
@@ -25,6 +25,7 @@ class RGB
     bool is_rainbow;
     bool is_flashing;
     bool flashing_on;
+    bool invert;
     unsigned long last_toggled_time;
     Colour colour1;
     Colour colour2;
