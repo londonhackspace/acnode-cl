@@ -1,4 +1,5 @@
 language: cpp
+dist: focal
 
 notifications:
   irc: "irc.libera.chat#londonhackspace-infrastructure"
