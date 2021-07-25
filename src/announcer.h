@@ -8,7 +8,7 @@ public:
   virtual void BELL() = 0;
   virtual void EXIT(int doorbellack) = 0;
   virtual void WEDGED() = 0;
-  virtual void ALIVE() = 0;
+  virtual void ALIVE(bool readerPresent) = 0;
   virtual void TOOL_DEACTIVATE() = 0;
 
   // for maintainance tasks of the announcer

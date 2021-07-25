@@ -20,7 +20,7 @@ public:
     void BELL() override;
     void EXIT(int doorbellack) override;
     void WEDGED() override;
-    void ALIVE() override;
+    void ALIVE(bool readerPresent) override;
     void TOOL_DEACTIVATE() override;
 };
 

@@ -344,7 +344,8 @@ void loop() {
 
   if (am_i_alive.check()) {
     if(announcer) {
-      announcer->ALIVE();
+      uint32_t firmwarever = nfc.getFirmwareVersion();
+      announcer->ALIVE(firmwarever != 0);
     }
     // Some of the cache methods don't store time-to-live, so we will want to verify all cached entries every 30 times we do the alive announcement, which works out about every half an hour
     // For those that do store time-to-live, this has the useful side-effect of refreshing the TTL, which means a bit more useful runtime if networking to the acserver is lost.

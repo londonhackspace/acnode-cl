@@ -56,7 +56,7 @@ void BroadcastAnnouncer::WEDGED() {
   _udp.endPacket();
 }
 
-void BroadcastAnnouncer::ALIVE() {
+void BroadcastAnnouncer::ALIVE(bool readerPresent) {
   _udp.beginPacket(_host, _port);
   _udp.write("ALIVE\n\n");
   _udp.endPacket();
