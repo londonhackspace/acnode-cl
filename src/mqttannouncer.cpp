@@ -1,6 +1,7 @@
 #include "announcer.h"
 #include "acnode.h"
 #include "mqttannouncer.h"
+#include "network.h"
 #include "version.h"
 #include "utils.h"
 #include "settings.h"
@@ -65,6 +66,10 @@ void MQTTAnnouncer::run() {
 void MQTTAnnouncer::connect() {
   if(!lwIPLinkActive()) {
     Serial.println("Not connecting to MQTT server - no link");
+    return;
+  }
+  if(!networking::have_valid_ip()) {
+    Serial.println("Not connecting to MQTT server - no IP address");
     return;
   }
   // this connection can take a while if the server doesn't exist

@@ -206,13 +206,8 @@ void setup() {
       }
       break;
     case 2:
-      if(network) {
-        Serial.println("MQTT announcer");
-        announcer = new MQTTAnnouncer(acsettings.mqtt_server, acsettings.mqtt_port, acsettings.mqtt_topic_base);
-      } else {
-        Serial.println("Not creating MQTT announcer because there is no network connection");
-        announcer = nullptr;
-      }
+      Serial.println("MQTT announcer");
+      announcer = new MQTTAnnouncer(acsettings.mqtt_server, acsettings.mqtt_port, acsettings.mqtt_topic_base);
       break;
     default:
       Serial.println("No announcer");
