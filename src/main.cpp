@@ -344,7 +344,8 @@ void loop() {
     }
     // Some of the cache methods don't store time-to-live, so we will want to verify all cached entries every 30 times we do the alive announcement, which works out about every half an hour
     // For those that do store time-to-live, this has the useful side-effect of refreshing the TTL, which means a bit more useful runtime if networking to the acserver is lost.
-    if (network) {
+    if (networking::have_valid_ip()) {
+      syslog.online();
       if (alive_check_count > 29) {
         alive_check_count = 0;
         wdog.feed();
@@ -357,6 +358,8 @@ void loop() {
       if ((door->isOpen()) || (tool.status())) {
         alive_check_count=0; // Because verifying all the users takes a while, we want to do it at quiet times
       }
+    } else {
+      syslog.offline();
     }
   }
 }
