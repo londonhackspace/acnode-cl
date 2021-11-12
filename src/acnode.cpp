@@ -9,7 +9,8 @@ ACNode::ACNode(PN532 &n, RGB &r, Tool &t, int button_pin) :
   last_status_checked_at(-30000),
   cardLastSeenTime(-10000),
   deactivationAnnounced(false),
-  enabled(false)
+  enabled(false),
+  cardAnnounced(false)
 {
   this->announcer = NULL;
 }
@@ -131,6 +132,7 @@ void ACNode::run() {
         rgb.solid(RED);
       }
     } else {
+      cardAnnounced = false;
       deactivate();
     }
   }
@@ -188,7 +190,8 @@ void ACNode::announceCard(Card c, int granted) {
   if(!announcer)
     return;
   // Debouncing.
-  if (this->lastScanned != c || millis() - this->lastScannedTime > 5000) {
+  if (!cardAnnounced) {
+    cardAnnounced = true;
     char buffer[15];
     c.str(buffer);
     this->announcer->RFID(buffer, granted);

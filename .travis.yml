@@ -1,7 +1,8 @@
 language: cpp
+dist: focal
 
 notifications:
-  irc: "chat.freenode.net#london-hack-space-infrastructure"
+  irc: "irc.libera.chat#londonhackspace-infrastructure"
 
 env:
   - RUN_TESTS=false OPTIONS=-DCMAKE_TOOLCHAIN_FILE=../targets/tivac-launchpad/EK-TM4C1294XL.cmake

@@ -57,6 +57,9 @@ void mrlprint(const char * str) {
 #define _CMD_DOOR_KEEP_OPEN_MSEC "door_keep_open_time"
 #define _CMD_MEMSTATS "memstats"
 #define _CMD_MAINTAINERCACHE "maintainercache"
+#define _CMD_INVERT "invert"
+#define _SCMD_ON "on"
+#define _SCMD_OFF "off"
 
 #define _NUM_OF_CMD 26
 #define _NUM_OF_VER_SCMD 2
@@ -69,7 +72,7 @@ const char *keyworld [] = {
   _CMD_LIST, _CMD_REBOOT, _CMD_NUKE, _CMD_SYSLOG, _CMD_NAME, _CMD_RTIME, _CMD_FILL, _CMD_VERIFY,
   _CMD_MINONTIME, _CMD_CACHE, _CMD_NETVERBOSE, _CMD_TOOLONPIN, _CMD_TOOLRUNPIN, _CMD_SECRET, _CMD_ROLE, _CMD_ANNOUNCE_PORT,
   _CMD_ANNOUNCE_MODE, _CMD_MQTT_SERVER, _CMD_MQTT_PORT, _CMD_MQTT_TOPIC_BASE, _CMD_DOOR_KEEP_OPEN_MSEC, _CMD_MEMSTATS,
-  _CMD_MAINTAINERCACHE
+  _CMD_MAINTAINERCACHE, _CMD_INVERT
 };
 // version subcommands
 const char * ver_keyworld [] = {
@@ -126,6 +129,7 @@ void print_help ()
     Serial.println("\tmqtt_port <port> - set the mqtt server port");
     Serial.println("\tmqtt_topic_base <topic> - set the mqtt topic prefix to announce to");
   }
+  Serial.println("\tinvert {on|off} - Set the LED to be inverted or not");
 }
 
 bool ishex(char c) {
@@ -692,6 +696,19 @@ int mrlexecute (int argc, const char * const * argv)
         }
       } else {
         Serial.println("door_keep_open_time <milliseconds>");
+      }
+    }
+    else if (strcmp (argv[i], _CMD_INVERT) == 0) {
+      if((++i) < argc) {
+        if(strcmp(argv[i], _SCMD_ON) == 0) {
+          acsettings.invert_colours = 1;
+        } else if(strcmp(argv[i], _SCMD_OFF) == 0) {
+          acsettings.invert_colours = 0;
+        } else {
+          Serial.println("invert <on|off>");
+        }
+      } else {
+        Serial.println("invert <on|off>");
       }
     }
     else {

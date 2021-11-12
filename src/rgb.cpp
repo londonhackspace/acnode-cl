@@ -7,13 +7,15 @@ RGB::RGB(int pin_r, int pin_g, int pin_b) : colour1(BLACK), colour2(BLACK) {
   is_flashing = false;
   flashing_on = false;
   is_rainbow = false;
+  invert = false;
 }
 
-void RGB::begin() {
+void RGB::begin(bool invert) {
   // Move this into the constructor?
   pinMode(_r, OUTPUT);
   pinMode(_g, OUTPUT);
   pinMode(_b, OUTPUT);
+  this->invert = invert;
   run();
 }
 
@@ -64,7 +66,18 @@ void RGB::off() {
 }
 
 void RGB::light_up(Colour &c) {
-  analogWrite(_r, c.r);
-  analogWrite(_g, c.g);
-  analogWrite(_b, c.b);
+  uint8_t localR = c.r;
+  uint8_t localG = c.g;
+  uint8_t localB = c.b;
+  
+  if(invert)
+  {
+    localR = 255 - localR;
+    localG = 255 - localG;
+    localB = 255 - localB;
+  }
+
+  analogWrite(_r, localR);
+  analogWrite(_g, localG);
+  analogWrite(_b, localB);
 }

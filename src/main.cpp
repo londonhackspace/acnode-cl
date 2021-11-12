@@ -105,7 +105,7 @@ void setup() {
   tool.begin();
 
   // start the rgb early so we can get some feedback
-  rgb.begin();
+  rgb.begin(acsettings.invert_colours == 1);
 
   // Workaround for a missing declaration in the library
   uint32_t timer_index_ = 0;
@@ -206,13 +206,8 @@ void setup() {
       }
       break;
     case 2:
-      if(network) {
-        Serial.println("MQTT announcer");
-        announcer = new MQTTAnnouncer(acsettings.mqtt_server, acsettings.mqtt_port, acsettings.mqtt_topic_base);
-      } else {
-        Serial.println("Not creating MQTT announcer because there is no network connection");
-        announcer = nullptr;
-      }
+      Serial.println("MQTT announcer");
+      announcer = new MQTTAnnouncer(acsettings.mqtt_server, acsettings.mqtt_port, acsettings.mqtt_topic_base);
       break;
     default:
       Serial.println("No announcer");
@@ -344,11 +339,13 @@ void loop() {
 
   if (am_i_alive.check()) {
     if(announcer) {
-      announcer->ALIVE();
+      uint32_t firmwarever = nfc.getFirmwareVersion();
+      announcer->ALIVE(firmwarever != 0);
     }
     // Some of the cache methods don't store time-to-live, so we will want to verify all cached entries every 30 times we do the alive announcement, which works out about every half an hour
     // For those that do store time-to-live, this has the useful side-effect of refreshing the TTL, which means a bit more useful runtime if networking to the acserver is lost.
-    if (network) {
+    if (networking::have_valid_ip()) {
+      syslog.online();
       if (alive_check_count > 29) {
         alive_check_count = 0;
         wdog.feed();
@@ -361,6 +358,8 @@ void loop() {
       if ((door->isOpen()) || (tool.status())) {
         alive_check_count=0; // Because verifying all the users takes a while, we want to do it at quiet times
       }
+    } else {
+      syslog.offline();
     }
   }
 }

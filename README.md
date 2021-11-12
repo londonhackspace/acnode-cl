@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/londonhackspace/acnode-cl.svg?branch=master)](https://travis-ci.org/londonhackspace/acnode-cl)
+[![Build Status](https://travis-ci.com/londonhackspace/acnode-cl.svg?branch=master)](https://travis-ci.com/londonhackspace/acnode-cl)
 
 Table of Contents
 =================

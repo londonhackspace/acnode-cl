@@ -145,4 +145,17 @@ int reportToolUse(Card card, int status) {
   return ret;
 }
 
+bool have_valid_ip() {
+  IPAddress addr = Ethernet.localIP();
+  if(addr == INADDR_NONE) {
+    return false;
+  }
+
+  if(addr[0] == 169 && addr[1] == 254) {
+    return false;
+  }
+
+  return true;
+}
+
 }

@@ -13,6 +13,8 @@ namespace networking {
   void addNewUser(Card card, Card maintainer);
   int toolUseTime(Card card, int time);
   int reportToolUse(Card card, int status);
+
+  bool have_valid_ip();
 }
 
 #endif

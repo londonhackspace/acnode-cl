@@ -1,6 +1,7 @@
 #include "announcer.h"
 #include "acnode.h"
 #include "mqttannouncer.h"
+#include "network.h"
 #include "version.h"
 #include "utils.h"
 #include "settings.h"
@@ -65,6 +66,10 @@ void MQTTAnnouncer::run() {
 void MQTTAnnouncer::connect() {
   if(!lwIPLinkActive()) {
     Serial.println("Not connecting to MQTT server - no link");
+    return;
+  }
+  if(!networking::have_valid_ip()) {
+    Serial.println("Not connecting to MQTT server - no IP address");
     return;
   }
   // this connection can take a while if the server doesn't exist
@@ -170,10 +175,15 @@ void MQTTAnnouncer::WEDGED() {
   aJson.deleteItem(root);
 }
 
-void MQTTAnnouncer::ALIVE() {
+void MQTTAnnouncer::ALIVE(bool readerPresent) {
   aJsonObject* root = aJson.createObject();
   aJson.addStringToObject(root, "Type", "ALIVE");
-  aJson.addStringToObject(root, "Message", "I'm not dead yet");
+
+  if(readerPresent) {
+    aJson.addStringToObject(root, "Message", "I'm not dead yet");
+  } else {
+    aJson.addStringToObject(root, "Message", "My Reader is Missing");
+  }
   
   aJsonObject* mem = aJson.createObject();
   aJson.addNumberToObject(mem, "heap_free", (int)get_remaining_heap_mem());

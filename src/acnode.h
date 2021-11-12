@@ -64,6 +64,7 @@ private:
   unsigned long lastScannedTime;
   unsigned long cardLastSeenTime;
   bool deactivationAnnounced;
+  bool cardAnnounced;
 };
 
 #endif

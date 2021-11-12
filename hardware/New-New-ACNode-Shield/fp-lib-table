@@ -1,0 +1,4 @@
+(fp_lib_table
+  (lib (name ExtraParts)(type KiCad)(uri ${KIPRJMOD}/ExtraParts.pretty)(options "")(descr ""))
+  (lib (name Launchpad)(type KiCad)(uri ${KIPRJMOD}/Launchpad.pretty)(options "")(descr ""))
+)
