@@ -135,6 +135,8 @@ void EEPromCache::verify(void) {
   while (1) {
     EEPROMRead((uint32_t *)&u, address, sizeof(user));
 
+    wdog.feed();
+
     if (u.end == 1) {
       break;
     }
