@@ -36,7 +36,17 @@ You will require
 - Some CAT5 or higher wiring and connectors to run a cable to the reader module.
 - Knowledge of the tool that you are providing access control to. Ideally, you'd be switching a low(er) voltage control circuit like an e-stop, rather than turning full power on and off to the tool. For high current switching, use an external suitably sized mains contactor.
 - optional: a tool-running input, like on the laser cutter, the AC node can log the time the tool was running.
-- suitable enclosure, or suitable space within the tool for the board. DIN rail mounting is recommended, 3D printed DIN-rail clips have been known to work with the board glued to the clips.
+- suitable enclosure, or suitable space within the tool for the board. DIN rail mounting is recommended, 3D printed DIN-rail clips have been known to work with the board glued to the clips. Where we need a standalone enclosure, we have used TA 241911 ENCLOSURE BOX, GREY, IP65, 240X191X107MM, Farnell Part number 1422671
 - A micro-USB to laptop cable, of suitable length, for configuration and flashing the software.
 
 Set the power select jumper on the Launchpad board to 'OTG', and plug your USB power supply into the 'OTG' interface, we'll use that to provide power to the microcontroller.
+
+## Reader enclosure
+
+Typically used for ACnode roles.
+Can use any suitable enclosure, but ideally one deep enough for the arcade button, and a RJ45 modular connector.
+For a laser-cut card holder front-end, see the dxf files in this repository's hardware/ directory. These will need M2.5 nylon nuts to hold the stack of laser cut acrylic together through to the front cover of the reader.
+We have typically used arcade microswitch buttons with LED. " Ultralux RGB Illuminated Arcade Button " from Arcade World UK. https://www.arcadeworlduk.com/products/ultralux-rgb-illuminated-arcade-button.html
+
+For doorbot roles, we typically build the readers into standard socket boxes with blanking plates. Exterior card readers will need a suitably watertight enclosure with a watertight button.
+RJ45 termination to a modular jack is typically within the enclosure rather than external as on most of the acnode role readers.
