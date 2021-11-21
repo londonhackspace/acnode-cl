@@ -50,3 +50,4 @@ We have typically used arcade microswitch buttons with LED. " Ultralux RGB Illum
 
 For doorbot roles, we typically build the readers into standard socket boxes with blanking plates. Exterior card readers will need a suitably watertight enclosure with a watertight button.
 RJ45 termination to a modular jack is typically within the enclosure rather than external as on most of the acnode role readers.
+PN532 RFID reader module: Set to HSS mode. Elechouse V4. Order direct from Elechouse. Do not skimp on ordering from aliexpress or ebay, because there are huge numbers of clones with AWFUL antenna matching circuitry.
