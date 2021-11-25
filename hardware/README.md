@@ -10,7 +10,7 @@ There are plans for an all-new doorbot/acnode board together with a reader modul
 The board features an on-board 5V coil relay that is suitable for switching up to 10A of 230V. If you need to switch anything greater, then use it to
 energise the coil of an appropriate contactor.
 
-Build up the ACnode board as per kicad schematics. On rev 1.1b, component values are silkscreened for easy assembly. You will require long header pins so that the Launchpad board sits above the relay.
+Build up the ACnode board as per kicad schematics. On rev 1.1b, component values are silkscreened for easy assembly. You will require long header pins so that the Launchpad board sits above the relay. Hint when soldering the long header pins into this board - use a Launchpad upside-down as a jig to hold the pins, place the pins, place the ACnode board upside-down, then solder them. Once soldered, a blob of hot glue is advised to keep the long header pins spaced and prevent bending them when handling in future.
 When building the board for the ACnode role, you may omit the LM7805 voltage regulator if you're only going to be providing it with +5V power.
 
 Always ensure that any metal enclosure is suitably earthed.
