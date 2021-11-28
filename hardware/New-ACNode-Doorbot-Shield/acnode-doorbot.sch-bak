@@ -1,6 +1,6 @@
 EESchema Schematic File Version 4
 LIBS:acnode-doorbot-cache
-EELAYER 29 0
+EELAYER 26 0
 EELAYER END
 $Descr A4 11693 8268
 encoding utf-8
@@ -441,7 +441,7 @@ Wire Wire Line
 Wire Wire Line
 	6050 3250 5650 3250
 $Comp
-L acnode-doorbot-rescue:SANYOU_SRD_Form_C-Relay K1
+L Relay:SANYOU_SRD_Form_C K1
 U 1 1 5BA8473C
 P 8250 3700
 F 0 "K1" H 8680 3746 50  0000 L CNN
@@ -632,7 +632,7 @@ Wire Wire Line
 Wire Wire Line
 	3200 5900 3450 5900
 $Comp
-L acnode-doorbot-rescue:Micro_SD_Card-Connector J9
+L Connector:Micro_SD_Card J9
 U 1 1 5BBB9B69
 P 3100 6900
 F 0 "J9" H 3050 6083 50  0000 C CNN
