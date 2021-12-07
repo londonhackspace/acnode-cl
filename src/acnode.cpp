@@ -43,7 +43,6 @@ bool ACNode::card_has_access() {
   switch (status) {
     case 2: // maintainer
       card_on_reader.set_maintainer(true);
-      announceCard(card_on_reader, 0);
     case 1: // user
       card_on_reader.set_user(true);
       Serial.println("Card has access");
