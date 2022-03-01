@@ -218,6 +218,16 @@ Other boards (Genuine Elechouse NFC module v3) sort of work at +3.3V, but may no
 
 For convenience of installation (acnode), and added security (doorbot), we recommend the reader module itself should be connected via an 8 wire cable, such as CAT5, and housed with a pushbutton NO switch and RGB LED in its own enclosure. This way, any intruder can't attack the reader and easily gain access. CAT5 (or above) wiring as above. Note the requirement for 220 ohm resistors on the Red/Green/Blue LED pins to prevent LED burnout. For operational convenience, it is advised to keep a spare reader that can be swapped out. Readers for doorbot enclosures can fit into standard single EN 60670-1 socket boxes with blanking plates, or outdoor junction boxes. For outdoor fitting, ensure that any holes for the button are suitably sealed against moisture ingress. Ditto for ACnode readers in a dusty or dirty environment.
 
+Pin Assignments
+* +5V : RJ45_1 : WHITE/ORANGE : +5V
+* GND : RJ45_2 : ORANGE : GND
+* PP_0 : RJ45_3 : WHITE/GREEN : -> PN532 TXD
+* PM_0 : RJ45_4 : BLUE : VIA R220 - RGB RED 
+* PF_1 : RJ45_5 : WHITE/BLUE : the button, active low (uses internal pulllup), input
+* PP_1 : RJ45_6 : GREEN : PN532 RXD
+* PM_1 : RJ45_7 : WHITE/BROWN : VIA R220 - RGB Green
+* PM_2 : RJ45_8 : BROWN : VIA R220 - RGB BLUE
+
 # Power supply
 
 For ACnodes, then a Power over Ethernet micro-USB power splitter works a treat. Feed the 5V USB power straight to the OTG micro USB connector near the ethernet jack, and jumper the Power Select to OTG. Make sure you connect to a network port that is supplied via a PoE network switch.
