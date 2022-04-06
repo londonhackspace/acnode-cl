@@ -44,10 +44,11 @@ Set the power select jumper on the Launchpad board to 'OTG', and plug your USB p
 ## Reader enclosure
 
 Typically used for ACnode roles.
-Can use any suitable enclosure, but ideally one deep enough for the arcade button, and a RJ45 modular connector.
+Can use any suitable enclosure, but ideally one deep enough for the arcade button, and a RJ45 modular connector. https://uk.farnell.com/schneider-electric/dpn10-10/box-abs-103x103x56mm/dp/161706 has worked well.
 For a laser-cut card holder front-end, see the dxf files in this repository's hardware/ directory. These will need M2.5 nylon nuts to hold the stack of laser cut acrylic together through to the front cover of the reader.
 We have typically used arcade microswitch buttons with LED. " Ultralux RGB Illuminated Arcade Button " from Arcade World UK. https://www.arcadeworlduk.com/products/ultralux-rgb-illuminated-arcade-button.html
 
 For doorbot roles, we typically build the readers into standard socket boxes with blanking plates. Exterior card readers will need a suitably watertight enclosure with a watertight button.
+Drilling a standard EN 60670-1 thermosetting plastic blanking plate to fit LED and buttons makes them prone to cracking. Start with a tiny pilot drill, ideally in a drill press, and work up sizes. Fortunately, they are cheap and very easy to come by (wilko,screwfix,B&Q).
 RJ45 termination to a modular jack is typically within the enclosure rather than external as on most of the acnode role readers.
 PN532 RFID reader module: Set to HSS mode. Elechouse V4. Order direct from Elechouse. Do not skimp on ordering from aliexpress or ebay, because there are huge numbers of clones with AWFUL antenna matching circuitry.
