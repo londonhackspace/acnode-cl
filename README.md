@@ -216,7 +216,33 @@ Other boards (Genuine Elechouse NFC module v3) sort of work at +3.3V, but may no
 
 # Reader installation
 
-For convenience of installation (acnode), and added security (doorbot), we recommend the reader module itself should be connected via an 8 wire cable, such as CAT5, and housed with a pushbutton NO switch and RGB LED in its own enclosure. This way, any intruder can't attack the reader and easily gain access. CAT5 (or above) wiring as above. Note the requirement for 220 ohm resistors on the Red/Green/Blue LED pins to prevent LED burnout. For operational convenience, it is advised to keep a spare reader that can be swapped out. Readers for doorbot enclosures can fit into standard single EN 60670-1 socket boxes with blanking plates, or outdoor junction boxes. For outdoor fitting, ensure that any holes for the button are suitably sealed against moisture ingress. Ditto for ACnode readers in a dusty or dirty environment.
+For convenience of installation (acnode), and added security (doorbot), we recommend the reader module itself should be connected via an 8 wire cable, such as CAT5, and housed with a pushbutton NO switch and RGB LED in its own enclosure. This way, any intruder can't attack the reader and easily gain access. CAT5 (or above) wiring as above. Note the requirement for 220 ohm resistors on the Red/Green/Blue LED pins to prevent LED burnout. For operational convenience, it is advised to keep a spare reader that can be swapped out. Readers for doorbot enclosures can fit into standard single EN 60670-1 socket boxes with blanking plates, or outdoor junction boxes. For outdoor fitting, ensure that any holes for the button are suitably sealed against moisture ingress. Ditto for ACnode readers in a dusty or dirty environment. 
+
+# Common reader enclosures
+
+## ACnode role
+Schneider Electric P/N SL00925 100x100x500 junction box smooth walls has been used for ACnode enclosures in the past. (Farnell DPN10/10 161706)
+[ Internal free space 80x80x35mm to brim, there's 10mm outside of this area, compromised by the  mounting posts for the cover ]
+[ Cover free space 80x80x16mm to brim, there's 10mm outside of this area, compromised by the mounting posts for the cover ]
+Arcade Button with 5V Common Cathode RGB LED, from https://www.arcadeworlduk.com/, e.g. Ultralux RGB Illuminated Arcade Button, mounting hole required 28mm diameter hole in side of enclosure.
+Mount PN532 reader and breakout board on the lid
+(Optional - use RJ45 modular jack on the side of the enclosure and run a small patch lead to the breakout board, or find a suitable way of terminating the CAT5). Ideally, the readers are easily swappable between ACnodes, so mod jack on the side is a good plan.
+Mount modular jack on opposide side of enclosure box to arcade button.
+
+## Internal doorbot role
+
+BS EN 60670-1 45mm deep single socket box with blanking plate
+5V Common Cathode RGB LED
+N/O SPST push button for doorbell. Choose one that doesn't accidentally get triggered while swiping.
+Mount PN532 reader and breakout board on the blanking plate. Wire RJ45 CAT5 cable within walls.
+## External doorbot role
+
+British General WPJBS IP55 external junction box from B&Q
+[ Internal free space 50x60x35mm, 8mm outide this space, compromised by the mounting posts for the cover ]
+5V Common Cathode RGB LED
+N/O SPST push button, *water resistant*. Choose one that doesn't accidentally get triggered while swiping.
+Run CAT5 cable through a sealed grommit on the rear through the wall.
+
 
 Pin Assignments
 * +5V : RJ45_1 : WHITE/ORANGE : +5V
