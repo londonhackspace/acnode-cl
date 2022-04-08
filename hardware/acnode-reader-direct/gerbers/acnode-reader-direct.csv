@@ -1,0 +1,8 @@
+"Id";"Designator";"Package";"Quantity";"Designation";"Supplier and ref";
+1;"J3";"TerminalBlock_TE_282834-3_1x03_P2.54mm_Horizontal";1;"BUTTON N/O";;;
+2;"J1";"RJ45_Amphenol_RJHSE5380";1;"RJ45";;;
+3;"EN 60670-1,EN 60670-1";"MountingHole_3.7mm";2;"MountingHole_3.7mm";;;
+4;"R1,R2,R3";"R_Axial_DIN0309_L9.0mm_D3.2mm_P12.70mm_Horizontal";3;"R220";;;
+5;"J2";"TerminalBlock_TE_282834-4_1x04_P2.54mm_Horizontal";1;"R- +5 G- B-";;;
+6;"LED HOLE";"MountingHole_5.3mm_M5";1;"MountingHole_5.3mm_M5";;;
+7;"J4";"PinSocket_1x04_P2.54mm_Horizontal";1;"Conn_01x04";;;
