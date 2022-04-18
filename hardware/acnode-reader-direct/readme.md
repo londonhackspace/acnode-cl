@@ -1,5 +1,5 @@
 # AC node / doorbot breakout board
-rev 1.1
+rev 1.1a
 
 Designed in kicad 6
 
@@ -13,6 +13,8 @@ There's no reason not to use them for acnodes as well, but a near-future revisio
 will include support for the existing boxes used for AC node builds with the massive arcade buttons, by means of different
 mounting holes.
 
+![Blanking Plate build](mounting_plate_build.jpg)
+
 # Errata
 
-rev 1.1: J2 RGB LED silkscreen is labelled backwards. Should read B- G- +5 R-, with R- closest to the middle of the board.
+rev 1.1: J2 RGB LED silkscreen is labelled backwards. Should read B- G- +5 R-, with R- closest to the middle of the board, corrected in rev 1.1a
