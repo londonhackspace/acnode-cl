@@ -15,10 +15,10 @@
 
 class SDCache: public CacheBase {
   protected:
-    char *_filename; // should be const, but SD lib needs updating as well.
+    const char *_filename; // should be const, but SD lib needs updating as well.
 
   public:
-    SDCache(char *filename);
+    SDCache(const char *filename);
     SDCache();
     virtual void begin();
     virtual Card get(Card u);

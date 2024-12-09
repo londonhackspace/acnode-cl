@@ -18,7 +18,7 @@ BUGS and TODO:
 
 //#define DBG(...) fprintf(stderr, "\033[33m");fprintf(stderr,__VA_ARGS__);fprintf(stderr,"\033[0m");
 
-char * prompt_default = _PROMPT_DEFAULT;
+const char * prompt_default = _PROMPT_DEFAULT;
 
 #ifdef _USE_HISTORY
 
@@ -428,7 +428,7 @@ static int escape_process (microrl_t * pThis, char ch)
 
 //*****************************************************************************
 // insert len char of text at cursor position
-static int microrl_insert_text (microrl_t * pThis, char * text, int len)
+static int microrl_insert_text (microrl_t * pThis, const char * text, int len)
 {
 	int i;
 	if (pThis->cmdlen + len < _COMMAND_LINE_LEN) {

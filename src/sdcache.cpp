@@ -5,7 +5,7 @@
 SDCache::SDCache() {
 }
 
-SDCache::SDCache(char *filename) {
+SDCache::SDCache(const char *filename) {
   _filename = filename;
 }
 
