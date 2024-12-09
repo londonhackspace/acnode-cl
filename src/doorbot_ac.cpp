@@ -41,7 +41,7 @@ void DoorbotWithAccessControl::run() {
     if ((millis() - this->lastDoorbellTime) < (1000*60*3)) {
       // Three minutes. We'll announce a doorbell acknowledgement rather than just an exit
         announcer->EXIT(1);
-        Serial.println('Door release with ack');
+        Serial.println("Door release with ack");
         this->lastDoorbellTime = millis() - (1000*60*3);
     } else {
           announcer->EXIT(0);
