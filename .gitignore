@@ -9,3 +9,7 @@ toolchain
 .vscode/launch.json
 build
 
+hardware/New-New-ACNode-Shield/New-New-ACNode-Shield-rescue.kicad_sym
+hardware/New-New-ACNode-Shield/New-New-ACNode-Shield.kicad_prl
+hardware/New-New-ACNode-Shield/New-New-ACNode-Shield.kicad_pro
+hardware/New-New-ACNode-Shield/New-New-ACNode-Shield-backups/New-New-ACNode-Shield-2024-10-26_160728.zip
