@@ -388,7 +388,6 @@ int MQTT::Client<Network, Timer, MAX_MQTT_PACKET_SIZE, b>::readPacket(Timer& tim
     MQTTHeader header = {0};
     int len = 0;
     int rem_len = 0;
-	int read = 0;
 
     /* 1. read the header byte.  This has the packet type in it */
     if (ipstack.read(readbuf, 1, timer.left_ms()) != 1)

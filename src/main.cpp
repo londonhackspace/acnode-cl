@@ -108,7 +108,6 @@ void setup() {
   rgb.begin(acsettings.invert_colours == 1);
 
   // Workaround for a missing declaration in the library
-  uint32_t timer_index_ = 0;
   OneMsTaskTimer::add(&ledBlinker);
   rgb.rainbow();
   OneMsTaskTimer::start();

@@ -7,9 +7,9 @@ ACNode::ACNode(PN532 &n, RGB &r, Tool &t, int button_pin) :
   tool(t),
   menu(r, button_pin),
   last_status_checked_at(-30000),
+  enabled(false),
   cardLastSeenTime(-10000),
   deactivationAnnounced(false),
-  enabled(false),
   cardAnnounced(false)
 {
   this->announcer = NULL;

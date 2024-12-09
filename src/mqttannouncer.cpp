@@ -15,9 +15,9 @@ enum msgType {
 MQTTAnnouncer::MQTTAnnouncer(char* server, uint16_t port, const char* topic_base) :
   server(server),
   port(port),
-  mqttClient(network,2000), // keep the timeout short - it'll either work or fail in this time
   topic_base(topic_base),
-  lastYield(0)
+  lastYield(0),
+  mqttClient(network,2000) // keep the timeout short - it'll either work or fail in this time
 {
 
 }

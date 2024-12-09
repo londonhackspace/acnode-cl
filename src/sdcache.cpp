@@ -83,7 +83,6 @@ size_t SDCache::count() {
   memset(tu.uid, 0, 7);
   size_t i = 0;
 
-  bool found = false;
   while (f.available()) {
     f.read(&user_entry, sizeof(struct user));
     i++;
