@@ -43,6 +43,8 @@ void Menu::run(Card *c) {
     case ADDING_USER:
       led.solid(YELLOW);
       break;
+    case IDLE:
+      break;
   }
 
   if (state == ADDING_USER) {
@@ -94,6 +96,9 @@ void Menu::select(Card *c) {
       take_online(c);
       led.solid(GREEN); // Immediately change the LED colour rather than wait for polling. Strictly speaking, it should be orange for maintainer
       reset();
+      break;
+    case ADDING_USER:
+    case IDLE:
       break;
   }
 }
