@@ -72,7 +72,7 @@ public:
 
     int getNext()
     {
-        return next = (next == MAX_PACKET_ID) ? 1 : ++next;
+        return (next == MAX_PACKET_ID) ? 1 : next + 1;
     }
 
 private:

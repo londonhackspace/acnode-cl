@@ -470,10 +470,10 @@ static void microrl_backspace (microrl_t * pThis)
 //*****************************************************************************
 static int common_len (char ** arr)
 {
-	int i;
-	int j;
+	size_t i;
+	size_t j;
 	char *shortest = arr[0];
-	int shortlen = strlen(shortest);
+	size_t shortlen = strlen(shortest);
 
 	for (i = 0; arr[i] != NULL; ++i)
 		if (strlen(arr[i]) < shortlen) {

@@ -420,7 +420,7 @@ int mrlexecute (int argc, const char * const * argv)
           boolean ok = true;
           ret = strtoul(argv[i], &end, 10);
 
-          if ((errno == ERANGE && (ret == LONG_MAX || ret == LONG_MIN))
+          if ((errno == ERANGE && ret == LONG_MAX)
                    || (errno != 0 && ret == 0)) {
             perror("strtol");
             ok = false;
