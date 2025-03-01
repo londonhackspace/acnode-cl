@@ -21,6 +21,7 @@ public:
 
     CardRecord* queryCard(const char* uid) override;
     StatusRecord* queryNodeStatus() override;
+    ResultRecord* doorEvent(uint8_t status, const char* cardUid) override;
     ResultRecord* setToolStatus(uint8_t status, const char* cardUid) override;
     ResultRecord* reportToolUseTime(int time, const char* cardUid) override;
     ResultRecord* reportToolUse(const char* cardUid, uint8_t state) override;

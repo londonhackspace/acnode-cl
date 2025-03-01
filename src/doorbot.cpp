@@ -102,13 +102,17 @@ void Doorbot::handleCardPresent(Card c) {
 }
 
 void Doorbot::announceCard(Card c, int granted) {
-  if(!announcer)
-    return;
+  Serial.println("Announce card");
   // Debouncing.
   if (this->lastScanned != c || millis() - this->lastScannedTime > 5000) {
     char buffer[15];
     c.str(buffer);
-    this->announcer->RFID(buffer, granted);
+    if (announcer) {
+       this->announcer->RFID(buffer, granted);
+    }
+    if (network) {
+        networking::doorEvent(granted > 0 ? 1 : 0, c);
+    }
     this->lastScanned = c;
     this->lastScannedTime = millis();
   }

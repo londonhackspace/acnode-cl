@@ -247,6 +247,19 @@ ResultRecord* RealACServer::sendAndReceivePost(const char* url)
     return retVal;
 }
 
+ResultRecord* RealACServer::doorEvent(uint8_t status, const char* cardUid)
+{
+    static const char* pathformat = "/%d/doorevent/%d/%s";
+    char buffer[9+10+3+14+1];   // 9 chars of static content,
+                                // 10 chars of tool id
+                                // 3 digits of status
+                                // 14 digits of card uid
+                                // 1 null terminator
+    sprintf(buffer, pathformat, toolId, status, cardUid);
+
+    return sendAndReceivePost(buffer);
+}
+
 ResultRecord* RealACServer::setToolStatus(uint8_t status, const char* cardUid)
 {
     static const char* pathformat = "/%d/status/%d/by/%s";

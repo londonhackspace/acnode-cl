@@ -14,6 +14,7 @@
 #include "button.h"
 
 extern Cache *cache;
+extern boolean network;
 
 #define ACCESS_DENIED_LED_ON_TIME 2000
 

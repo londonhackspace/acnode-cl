@@ -35,6 +35,16 @@ public:
     virtual StatusRecord* queryNodeStatus()=0;
 
     /**
+     * \brief Announce a door access attempt
+     *
+     * \param status 1 for opened, 0 for denied
+     *
+     * \returns a ResultRecord (which you must free) indicating the 
+     *          success/failure of the request or NULL if it failed to make the request
+     */
+    virtual ResultRecord* doorEvent(uint8_t status, const char* cardUid)=0;
+
+    /**
      * \brief Set the status of the tool
      *
      * \param status 1 for in service, 0 for out of service

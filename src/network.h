@@ -9,6 +9,7 @@ namespace networking {
   int get_url(char * path);
   int querycard(Card card);
   int networkCheckToolStatus();
+  int doorEvent(int status, Card card);
   int setToolStatus(int status, Card card);
   void addNewUser(Card card, Card maintainer);
   int toolUseTime(Card card, int time);

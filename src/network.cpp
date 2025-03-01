@@ -70,6 +70,26 @@ int setToolStatus(int status, Card card) {
   return ret;
 }
 
+// https://wiki.london.hackspace.org.uk/view/Project:Tool_Access_Control/Solexious_Proposal#Report_door_access
+int doorEvent(int status, Card card) {
+  int ret = -1;
+
+  RealACServer acs(client, acsettings.servername, acsettings.port, acsettings.nodeid);
+  
+  char cardId[15];
+  card.str(cardId);
+
+  ResultRecord* rr = acs.doorEvent(status, cardId);
+  
+  if(rr)
+  {
+    ret = rr->numericStatus;
+    delete rr;
+  }  
+
+  return ret;
+}
+
 // https://wiki.london.hackspace.org.uk/view/Project:Tool_Access_Control/Solexious_Proposal#Add_card
 void addNewUser(Card card, Card maintainer)
 {
