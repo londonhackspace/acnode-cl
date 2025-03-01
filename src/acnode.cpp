@@ -117,7 +117,31 @@ void ACNode::run() {
       }
     }
   } else {
+    if (!card_present()) {
+      // card removed
+      if ((millis() - cardLastSeenTime) > 1000) {
+        // card absent for more than one second
+        if (tool.status()) {
+          Serial.print("Card absent for over a second ");
+          Serial.println(millis() - cardLastSeenTime);
+        }
+        cardAnnounced = false;
+        deactivate(); 
+      } else {
+          Serial.print("Card absent for ");
+          Serial.print(millis() - cardLastSeenTime);
+          Serial.println(" ms");
+       // One second debounce limit not met
+      }
+    } else if (!cache->get(card_on_reader).compare_uid(card_on_reader)) {
+      // card has changed
+      Serial.println("Card has changed");
+      cardAnnounced = false;
+      deactivate();
+    }
     if (card_present()) {
+      cardLastSeenTime = millis();
+
       if (acsettings.netverbose == 1) {
         Serial.print("Card on reader: ");
         card_on_reader.dump();
@@ -130,10 +154,7 @@ void ACNode::run() {
       } else {
         rgb.solid(RED);
       }
-    } else {
-      cardAnnounced = false;
-      deactivate();
-    }
+    } 
   }
 }
 
