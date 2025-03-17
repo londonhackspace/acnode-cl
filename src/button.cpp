@@ -11,44 +11,58 @@ void Button::begin() {
   pinMode(_pin, INPUT_PULLUP);
   Serial.print("Button init on pin ");
   Serial.println(_pin, DEC);
-  state = WAITING;
-  last_sample = millis();
+  _state = ButtonState::OFF;
+  _change_start = 0;
+  _press_start = 0;
 }
 
-int Button::poll() {
+ButtonEvent Button::poll() {
+  bool pin_state = digitalRead(_pin);
+  unsigned long time = millis();
 
-   // oh help yuck debouncing
-  if (last_sample + 20 > millis())
-    return NO_PRESS;
-  
-  last_sample = millis();
+  // First debounce
+
+  bool button_changed = false;
+  /*Serial.print("Current state ");
+  Serial.print(_state == ButtonState::OFF ? "OFF" : "ON");
+  Serial.print(" : button ");
+  Serial.println(pin_state ? "off" : "on");*/
+
+  if (pin_state == (_state == ButtonState::OFF)) {
+    _change_start = 0;
+    //Serial.println("no diff");
+  } else if (_change_start == 0) {
+    _change_start = time;
+  } else if (_change_start + BUTTON_DEBOUNCE < time) {
+    button_changed = true;
+  }
+
+  if (button_changed) {
+    Serial.println("Button Changed State");
+  }
+  // The button has stayed in the same new state for BUTTON_DEBOUNCE ms
   
   // pullup, so on by default.
-  if (digitalRead(_pin) == 0) {
-    if (state == WAITING) {
-      // first time we've noticed this press, so keep track of when it happened
-      state = START;
-      start_millis = millis();
-    }
-  } else {
-    // button is up
-    if (state == START) {
-      // we are waiting to see what happens with the button, it's just gone
-      // back up, so lets see how long it took
-      state = WAITING;
-//      Serial.println(millis() - start_millis);
 
-      // 600 here seems to be ok.
-      // short presses are 120-180 ms or so.
-      if ((millis() - start_millis) < 600) {
-        return SHORT_PRESS;
-      } else {
-        return LONG_PRESS;
-      }
-
+  if (button_changed) {
+    if (_state == ButtonState::OFF) {
+      _press_start = _change_start;
+      _state = ButtonState::SHORT_PRESS;
+      return ButtonEvent::PRESSED;
     }
+    if (_state == ButtonState::SHORT_PRESS) {
+      _state = ButtonState::OFF;
+      return ButtonEvent::SHORT_PRESS;
+    }
+    _state = ButtonState::OFF;
+    return ButtonEvent::NONE;
   }
-    
-  return NO_PRESS;
+
+  if (_state == ButtonState::SHORT_PRESS && (_press_start + BUTTON_LONG_PRESS) < time) {
+    _state = ButtonState::LONG_PRESS;
+    return ButtonEvent::LONG_PRESS;
+  }
+
+  return ButtonEvent::NONE;
 }
 

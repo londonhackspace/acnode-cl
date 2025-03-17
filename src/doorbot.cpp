@@ -34,10 +34,10 @@ void Doorbot::run() {
   } else {
     led.solid(BLUE);
   }
-  int poll = button.poll();
+  ButtonEvent poll = button.poll();
   switch (poll) {
-    case SHORT_PRESS:
-    case LONG_PRESS:
+    case ButtonEvent::SHORT_PRESS:
+    case ButtonEvent::LONG_PRESS:
       if (millis() - this->lastScannedTime > 2000) { // Silence doorbell button for two seconds after a card read
         this->lastDoorbellTime = millis();
         announcer->BELL();
@@ -51,11 +51,14 @@ void Doorbot::run() {
         Serial.println("Doorbell pushed within 2 seconds of card read");
       }
       break;
+    case ButtonEvent::NONE:
+    case ButtonEvent::PRESSED:
+      break;
   }
-  int poll_release = door_release_button.poll();
+  ButtonEvent poll_release = door_release_button.poll();
   switch (poll_release) {
-    case SHORT_PRESS:
-    case LONG_PRESS:
+    case ButtonEvent::SHORT_PRESS:
+    case ButtonEvent::LONG_PRESS:
     grantAccess();
     if ((millis() - this->lastDoorbellTime) < (1000*60*3)) {
       // Three minutes. We'll announce a doorbell acknowledgement rather than just an exit
@@ -66,6 +69,9 @@ void Doorbot::run() {
           announcer->EXIT(0);
           Serial.print("Door release");
     }
+    case ButtonEvent::NONE:
+    case ButtonEvent::PRESSED:
+      break;
   }
 };
 

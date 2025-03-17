@@ -67,12 +67,10 @@ bool ACNode::card_has_access() {
 void ACNode::activate() {
   deactivationAnnounced = false;
   if (card_on_reader.is_maintainer()) {
-    rgb.solid(ORANGE);
     tool.on(card_on_reader);
     announceCard(card_on_reader, 1);
   } else {
     if (is_enabled()) {
-      rgb.solid(GREEN);
       tool.on(card_on_reader);
       announceCard(card_on_reader, 1);
     } else {
@@ -111,7 +109,7 @@ void ACNode::run() {
       card_has_access(); // Read card permissions
       menu.run(&card_on_reader);
     } else {
-      if ((millis() - cardLastSeenTime) > 10000) { // 10 seconds is long enough to do the maintainer card switcheroo
+      if (!menu.is_adding_user() || (millis() - cardLastSeenTime) > 10000) { // 10 seconds is long enough to do the maintainer card switcheroo
         DEBUG("Menu resetting");
         menu.reset();
       }
@@ -165,9 +163,9 @@ bool ACNode::is_enabled() {
     this->last_status_checked_at = millis();
     
     int status = networking::networkCheckToolStatus();
-    enabled = (status == 1);
     acsettings.status = status;
   }
+  enabled = (acsettings.status == 1);
   return enabled;
 }
 

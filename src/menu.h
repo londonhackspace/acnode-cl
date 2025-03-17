@@ -14,7 +14,9 @@ enum MenuState {
   READY_TO_ADD_USER,
   READY_TO_TAKE_OFFLINE,
   READY_TO_TAKE_ONLINE,
-  ADDING_USER
+  ADDING_USER,
+  TAKEN_OFFLINE,
+  TAKEN_ONLINE
 };
 
 class Menu {
@@ -23,6 +25,7 @@ public:
   void run(Card *c);
   bool active();
   void reset();
+  bool is_adding_user();
 private:
   void advance(bool is_maintainer);
   void select(Card *c);
@@ -34,6 +37,7 @@ private:
   RGB &led;
   unsigned long menu_activated_at;
   MenuState state;
+  bool pending;
 };
 
 #endif

@@ -42,7 +42,7 @@ Card RAMCache::get(Card u) {
     if (!entry->expired(now)) {
       if (entry->card.compare_uid(u)) {
         entry->touch(now);
-        DEBUG("RAM Cache lookup: HIT")
+        //DEBUG("RAM Cache lookup: HIT")
         return entry->card;
       }
     }
