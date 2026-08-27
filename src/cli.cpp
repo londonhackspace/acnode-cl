@@ -39,6 +39,7 @@ void mrlprint(const char * str) {
 #define _CMD_FILL   "fill"
 #define _CMD_VERIFY "verify"
 #define _CMD_MINONTIME "minontime"
+#define _CMD_OFFDELAY "offdelay"
 #define _CMD_CACHE  "cache"
 #define _SCMD_EEPROM  "eeprom"
 #define _SCMD_SDCARD  "sdcard"
@@ -70,7 +71,7 @@ void mrlprint(const char * str) {
 const char *keyworld [] = {
   _CMD_HELP, _CMD_SHOW, _CMD_MAC, _CMD_SERVER, _CMD_NODEID, _CMD_PORT, _CMD_VER, _CMD_SAVE, _CMD_CLEAR,
   _CMD_LIST, _CMD_REBOOT, _CMD_NUKE, _CMD_SYSLOG, _CMD_NAME, _CMD_RTIME, _CMD_FILL, _CMD_VERIFY,
-  _CMD_MINONTIME, _CMD_CACHE, _CMD_NETVERBOSE, _CMD_TOOLONPIN, _CMD_TOOLRUNPIN, _CMD_SECRET, _CMD_ROLE, _CMD_ANNOUNCE_PORT,
+  _CMD_MINONTIME, _CMD_OFFDELAY, _CMD_CACHE, _CMD_NETVERBOSE, _CMD_TOOLONPIN, _CMD_TOOLRUNPIN, _CMD_SECRET, _CMD_ROLE, _CMD_ANNOUNCE_PORT,
   _CMD_ANNOUNCE_MODE, _CMD_MQTT_SERVER, _CMD_MQTT_PORT, _CMD_MQTT_TOPIC_BASE, _CMD_DOOR_KEEP_OPEN_MSEC, _CMD_MEMSTATS,
   _CMD_MAINTAINERCACHE, _CMD_INVERT
 };
@@ -108,6 +109,7 @@ void print_help ()
   Serial.println ("\tfill - fill the card cache with test cards");
   Serial.println ("\tverify - verify the card cache contents against the acserver");
   Serial.println ("\tminontime <time> - minimum time in seconds to keep the tool on for, up to 254 seconds");
+  Serial.println ("\toffdelay <time> - delay in seconds before the tool is switched off after the card is removed, up to 3600 seconds");
   Serial.println ("\tcache {eeprom | sdcard} - set where to cache cards.");
   Serial.println ("\tmaintainercache - Toggle use of maintainer cache.");
   Serial.println ("\tnetverbose - Toggle verbosity of network debugging messages.");
@@ -445,6 +447,82 @@ int mrlexecute (int argc, const char * const * argv)
         }
       } else {
         Serial.println("minontime <time>");
+      }
+    }
+    else if (strcmp (argv[i], _CMD_OFFDELAY) == 0) {
+      if ((++i) < argc) { // if value preset
+        // limit the off delay to one hour, way more than needed.
+        if ( strlen(argv[i]) < 4) {
+          Serial.print("new offdelay: ");
+          Serial.println(argv[i]);
+          errno = 0;
+          unsigned int ret;
+          char *end;
+          boolean ok = true;
+          ret = strtoul(argv[i], &end, 10);
+
+          if ((errno == ERANGE && ret == LONG_MAX)
+                   || (errno != 0 && ret == 0)) {
+            perror("strtol");
+            ok = false;
+          }
+
+          if (end == argv[i]) {
+            fprintf(stderr, "No digits were found\n");
+            ok = false;
+          }
+
+          if (ret < 0 || ret > 3600) {
+            ok = false;
+          }
+
+          if (ok) {
+            acsettings.off_delay = ret;
+          } else {
+            Serial.println("invalid offdelay");
+          }
+        } else {
+          Serial.println("offdelay too big");
+        }
+      } else {
+        Serial.println("offdelay <time>");
+      }
+    } else if (strcmp (argv[i], _CMD_OFFDELAY) == 0) {
+      if ((++i) < argc) { // if value preset
+        if ( strlen(argv[i]) < 6) {
+          Serial.print("new off_delay: ");
+          Serial.println(argv[i]);
+          errno = 0;
+          unsigned int ret;
+          char *end;
+          boolean ok = true;
+          ret = strtoul(argv[i], &end, 10);
+
+          if ((errno == ERANGE && ret == LONG_MAX)
+                   || (errno != 0 && ret == 0)) {
+            perror("strtol");
+            ok = false;
+          }
+
+          if (end == argv[i]) {
+            fprintf(stderr, "No digits were found\n");
+            ok = false;
+          }
+
+          if (ret < 0 || ret > 65535) {
+            ok = false;
+          }
+
+          if (ok) {
+            acsettings.off_delay = ret;
+          } else {
+            Serial.println("invalid off_delay");
+          }
+        } else {
+          Serial.println("off_delay too big");
+        }
+      } else {
+        Serial.println("offdelay <time>");
       }
     } else if (strcmp (argv[i], _CMD_CACHE) == 0) {
       if (++i < argc) {

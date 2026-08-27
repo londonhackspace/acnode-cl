@@ -105,6 +105,9 @@ void dump_settings(settings acsettings) {
   Serial.print("Minimum on time: ");
   Serial.println(acsettings.minontime);
 
+  Serial.print("Turn off delay: ");
+  Serial.println(acsettings.off_delay);
+
   Serial.print("Using ");
   if (acsettings.sdcache) {
     Serial.print("a SD Card");
@@ -210,6 +213,13 @@ settings get_settings(void) {
   memset(&acsettings, 0, sizeof(acsettings));
 
   EEPROMRead((uint32_t *)&acsettings, 0, sizeof(acsettings));
+  settings42 acsettings42;
+  settings43 acsettings43;
+  settings44 acsettings44;
+  settings45 acsettings45;
+  settings46 acsettings46;  
+  settings47 acsettings47;
+  bool upgraded = false;
 
   switch (acsettings.valid) {
     case ACSETTINGSVALID:
@@ -219,172 +229,196 @@ settings get_settings(void) {
       // upgrade the settings and add defaults for new settings.
       Serial.println("Old settings (42) found, upgrading");
       {
-        settings42 osettings;
-        memset(&osettings, 0, sizeof(osettings));
-        EEPROMRead((uint32_t *)&osettings, 0, sizeof(osettings));
+        memset(&acsettings42, 0, sizeof(settings42));
+        upgraded = true;
+        EEPROMRead((uint32_t *)&acsettings42, 0, sizeof(acsettings42));
 
-        memcpy(acsettings.mac, osettings.mac, 6);
-        memcpy(acsettings.servername, osettings.servername, SERVERNAMELEN);
-        memcpy(acsettings.syslogserver, osettings.syslogserver, SERVERNAMELEN);
-        memcpy(acsettings.toolname, osettings.toolname, TOOLNAMELEN);
-        acsettings.port = osettings.port;
-        acsettings.nodeid = osettings.nodeid;
-        acsettings.status = osettings.status;
-        acsettings.runtime = osettings.runtime;
-        acsettings.minontime = 5;
-        acsettings.sdcache = 0;
-        acsettings.netverbose = 1;
-        acsettings.toolonpin_activehigh = 1;
+        memcpy(acsettings43.mac, acsettings42.mac, 6);
+        memcpy(acsettings43.servername, acsettings42.servername, SERVERNAMELEN);
+        memcpy(acsettings43.syslogserver, acsettings42.syslogserver, SERVERNAMELEN);
+        memcpy(acsettings43.toolname, acsettings42.toolname, TOOLNAMELEN);
+        acsettings43.port = acsettings42.port;
+        acsettings43.nodeid = acsettings42.nodeid;
+        acsettings43.status = acsettings42.status;
+        acsettings43.runtime = acsettings42.runtime;
+        acsettings43.minontime = 5;
+        acsettings43.sdcache = 0;
+        acsettings43.netverbose = 1;
+        acsettings43.toolonpin_activehigh = 1;
         // the laser signal is inverted
-        acsettings.toolrunpin_activehigh = 0;
-        memset(acsettings.secret, 0, KEYLEN+1);
+        acsettings43.toolrunpin_activehigh = 0;
       }
-
-      acsettings.valid = ACSETTINGSVALID;
-      set_settings(acsettings);
-      break;
     case ACSETTINGS43:
       // upgrade the settings and add defaults for new settings.
       Serial.println("Old settings (43) found, upgrading");
       {
-        settings43 osettings;
-        memset(&osettings, 0, sizeof(osettings));
-        EEPROMRead((uint32_t *)&osettings, 0, sizeof(osettings));
+        if (!upgraded) {
+          memset(&acsettings43, 0, sizeof(settings43));
+          EEPROMRead((uint32_t *)&acsettings43, 0, sizeof(acsettings43));
+          upgraded = true;
+        }
 
-        memcpy(acsettings.mac, osettings.mac, 6);
-        memcpy(acsettings.servername, osettings.servername, SERVERNAMELEN);
-        memcpy(acsettings.syslogserver, osettings.syslogserver, SERVERNAMELEN);
-        memcpy(acsettings.toolname, osettings.toolname, TOOLNAMELEN);
-        acsettings.port = osettings.port;
-        acsettings.nodeid = osettings.nodeid;
-        acsettings.status = osettings.status;
-        acsettings.runtime = osettings.runtime;
-        acsettings.minontime = osettings.minontime;
-        acsettings.sdcache = osettings.sdcache;
-        acsettings.netverbose = osettings.netverbose;
-        acsettings.toolonpin_activehigh = osettings.toolonpin_activehigh;
-        acsettings.toolrunpin_activehigh = osettings.toolrunpin_activehigh;
+        memcpy(acsettings44.mac, acsettings43.mac, 6);
+        memcpy(acsettings44.servername, acsettings43.servername, SERVERNAMELEN);
+        memcpy(acsettings44.syslogserver, acsettings43.syslogserver, SERVERNAMELEN);
+        memcpy(acsettings44.toolname, acsettings43.toolname, TOOLNAMELEN);
+        acsettings44.port = acsettings43.port;
+        acsettings44.nodeid = acsettings43.nodeid;
+        acsettings44.status = acsettings43.status;
+        acsettings44.runtime = acsettings43.runtime;
+        acsettings44.minontime = acsettings43.minontime;
+        acsettings44.sdcache = acsettings43.sdcache;
+        acsettings44.netverbose = acsettings43.netverbose;
+        acsettings44.toolonpin_activehigh = acsettings43.toolonpin_activehigh;
+        acsettings44.toolrunpin_activehigh = acsettings43.toolrunpin_activehigh;
 
-        memset(acsettings.secret, 0, KEYLEN+1);
-
-        acsettings.valid = ACSETTINGSVALID;
-        set_settings(acsettings);
+        memset(acsettings44.secret, 0, KEYLEN+1);
       }
-      break;
       case ACSETTINGS44:
           // upgrade the settings and add defaults for new settings.
           Serial.println("Old settings (44) found, upgrading");
           {
-            settings44 osettings;
-            memset(&osettings, 0, sizeof(osettings));
-            EEPROMRead((uint32_t *)&osettings, 0, sizeof(osettings));
+            if (!upgraded) {
+              memset(&acsettings44, 0, sizeof(settings44));
+              EEPROMRead((uint32_t *)&acsettings44, 0, sizeof(acsettings44));
+              upgraded = true;
+            }
+            memcpy(acsettings45.mac, acsettings44.mac, 6);
+            memcpy(acsettings45.servername, acsettings44.servername, SERVERNAMELEN);
+            memcpy(acsettings45.syslogserver, acsettings44.syslogserver, SERVERNAMELEN);
+            memcpy(acsettings45.toolname, acsettings44.toolname, TOOLNAMELEN);
+            acsettings45.port = acsettings44.port;
+            acsettings45.nodeid = acsettings44.nodeid;
+            acsettings45.status = acsettings44.status;
+            acsettings45.runtime = acsettings44.runtime;
+            acsettings45.minontime = acsettings44.minontime;
+            acsettings45.sdcache = acsettings44.sdcache;
+            acsettings45.netverbose = acsettings44.netverbose;
+            acsettings45.toolonpin_activehigh = acsettings44.toolonpin_activehigh;
+            acsettings45.toolrunpin_activehigh = acsettings44.toolrunpin_activehigh;
+            memcpy(acsettings45.secret, acsettings44.secret, KEYLEN+1);
 
-            memcpy(acsettings.mac, osettings.mac, 6);
-            memcpy(acsettings.servername, osettings.servername, SERVERNAMELEN);
-            memcpy(acsettings.syslogserver, osettings.syslogserver, SERVERNAMELEN);
-            memcpy(acsettings.toolname, osettings.toolname, TOOLNAMELEN);
-            acsettings.port = osettings.port;
-            acsettings.nodeid = osettings.nodeid;
-            acsettings.status = osettings.status;
-            acsettings.runtime = osettings.runtime;
-            acsettings.minontime = osettings.minontime;
-            acsettings.sdcache = osettings.sdcache;
-            acsettings.netverbose = osettings.netverbose;
-            acsettings.toolonpin_activehigh = osettings.toolonpin_activehigh;
-            acsettings.toolrunpin_activehigh = osettings.toolrunpin_activehigh;
-            memcpy(acsettings.secret, osettings.secret, KEYLEN+1);
-
-            strncpy(acsettings.mqtt_server, "mqtt.lan.london.hackspace.org.uk", SERVERNAMELEN);
-            acsettings.mqtt_port = 1883;
-            strncpy(acsettings.mqtt_topic_base, "/door/999", MQTT_TOPIC_LEN);
-            acsettings.door_keep_open_ms = 1500;
+            strncpy(acsettings45.mqtt_server, "mqtt.lan.london.hackspace.org.uk", SERVERNAMELEN);
+            acsettings45.mqtt_port = 1883;
+            strncpy(acsettings45.mqtt_topic_base, "/door/999", MQTT_TOPIC_LEN);
+            acsettings45.door_keep_open_ms = 1500;
 
             // London Hackspace has now migrated all listeners to MQTT. Default changed
             // Keeping old broadcast announcer code for now in case any other
             // hackspaces are using our code and still use UDP broadcast listeners
             
-            acsettings.announce_mode = 2;
+            acsettings45.announce_mode = 2;
 
             // for future use
-            acsettings.doorbell_mode = 0;
-
-            // use persistent maintainer cache?
-            acsettings.maintainer_cache = 0;
-
-            acsettings.valid = ACSETTINGSVALID;
-            set_settings(acsettings);
+            acsettings45.doorbell_mode = 0;
           }
-          break;
       case ACSETTINGS45:
           // upgrade the settings and add defaults for new settings.
           Serial.println("Old settings (45) found, upgrading");
           {
-            settings45 osettings;
-            memset(&osettings, 0, sizeof(osettings));
-            EEPROMRead((uint32_t *)&osettings, 0, sizeof(osettings));
+            if (!upgraded) {
+              memset(&acsettings45, 0, sizeof(settings45));
+              EEPROMRead((uint32_t *)&acsettings45, 0, sizeof(acsettings45));
+              upgraded = true;
+            }
 
-            memcpy(acsettings.mac, osettings.mac, 6);
-            memcpy(acsettings.servername, osettings.servername, SERVERNAMELEN);
-            memcpy(acsettings.syslogserver, osettings.syslogserver, SERVERNAMELEN);
-            memcpy(acsettings.toolname, osettings.toolname, TOOLNAMELEN);
-            acsettings.port = osettings.port;
-            acsettings.nodeid = osettings.nodeid;
-            acsettings.status = osettings.status;
-            acsettings.runtime = osettings.runtime;
-            acsettings.minontime = osettings.minontime;
-            acsettings.sdcache = osettings.sdcache;
-            acsettings.netverbose = osettings.netverbose;
-            acsettings.toolonpin_activehigh = osettings.toolonpin_activehigh;
-            acsettings.toolrunpin_activehigh = osettings.toolrunpin_activehigh;
-            memcpy(acsettings.secret, osettings.secret, KEYLEN+1);
+            memcpy(acsettings46.mac, acsettings45.mac, 6);
+            memcpy(acsettings46.servername, acsettings45.servername, SERVERNAMELEN);
+            memcpy(acsettings46.syslogserver, acsettings45.syslogserver, SERVERNAMELEN);
+            memcpy(acsettings46.toolname, acsettings45.toolname, TOOLNAMELEN);
+            acsettings46.port = acsettings45.port;
+            acsettings46.nodeid = acsettings45.nodeid;
+            acsettings46.status = acsettings45.status;
+            acsettings46.runtime = acsettings45.runtime;
+            acsettings46.minontime = acsettings45.minontime;
+            acsettings46.sdcache = acsettings45.sdcache;
+            acsettings46.netverbose = acsettings45.netverbose;
+            acsettings46.toolonpin_activehigh = acsettings45.toolonpin_activehigh;
+            acsettings46.toolrunpin_activehigh = acsettings45.toolrunpin_activehigh;
+            memcpy(acsettings46.secret, acsettings45.secret, KEYLEN+1);
 
-            strncpy(acsettings.mqtt_server, osettings.mqtt_server, SERVERNAMELEN);
-            acsettings.mqtt_port = osettings.mqtt_port;
-            strncpy(acsettings.mqtt_topic_base, osettings.mqtt_topic_base, MQTT_TOPIC_LEN);
-            acsettings.door_keep_open_ms = osettings.door_keep_open_ms;
-            acsettings.announce_mode = osettings.announce_mode;
-            acsettings.doorbell_mode = osettings.doorbell_mode;
+            strncpy(acsettings46.mqtt_server, acsettings45.mqtt_server, SERVERNAMELEN);
+            acsettings46.mqtt_port = acsettings45.mqtt_port;
+            strncpy(acsettings46.mqtt_topic_base, acsettings45.mqtt_topic_base, MQTT_TOPIC_LEN);
+            acsettings46.door_keep_open_ms = acsettings45.door_keep_open_ms;
+            acsettings46.announce_mode = acsettings45.announce_mode;
+            acsettings46.doorbell_mode = acsettings45.doorbell_mode;
 
             // use persistent maintainer cache?
-            acsettings.maintainer_cache = 0;
-
-            acsettings.valid = ACSETTINGSVALID;
-            set_settings(acsettings);
+            acsettings46.maintainer_cache = 0;
           }
-          break;
       case ACSETTINGS46:
           // upgrade the settings and add defaults for new settings.
           Serial.println("Old settings (46) found, upgrading");
           {
-            settings46 osettings;
-            memset(&osettings, 0, sizeof(osettings));
-            EEPROMRead((uint32_t *)&osettings, 0, sizeof(osettings));
+            if (!upgraded) {
+              memset(&acsettings46, 0, sizeof(settings46));
+              EEPROMRead((uint32_t *)&acsettings46, 0, sizeof(acsettings46));
+              upgraded = true;
+            }
 
-            memcpy(acsettings.mac, osettings.mac, 6);
-            memcpy(acsettings.servername, osettings.servername, SERVERNAMELEN);
-            memcpy(acsettings.syslogserver, osettings.syslogserver, SERVERNAMELEN);
-            memcpy(acsettings.toolname, osettings.toolname, TOOLNAMELEN);
-            acsettings.port = osettings.port;
-            acsettings.nodeid = osettings.nodeid;
-            acsettings.status = osettings.status;
-            acsettings.runtime = osettings.runtime;
-            acsettings.minontime = osettings.minontime;
-            acsettings.sdcache = osettings.sdcache;
-            acsettings.netverbose = osettings.netverbose;
-            acsettings.toolonpin_activehigh = osettings.toolonpin_activehigh;
-            acsettings.maintainer_cache = osettings.maintainer_cache;
-            acsettings.toolrunpin_activehigh = osettings.toolrunpin_activehigh;
-            memcpy(acsettings.secret, osettings.secret, KEYLEN+1);
+            memcpy(acsettings47.mac, acsettings46.mac, 6);
+            memcpy(acsettings47.servername, acsettings46.servername, SERVERNAMELEN);
+            memcpy(acsettings47.syslogserver, acsettings46.syslogserver, SERVERNAMELEN);
+            memcpy(acsettings47.toolname, acsettings46.toolname, TOOLNAMELEN);
+            acsettings47.port = acsettings46.port;
+            acsettings47.nodeid = acsettings46.nodeid;
+            acsettings47.status = acsettings46.status;
+            acsettings47.runtime = acsettings46.runtime;
+            acsettings47.minontime = acsettings46.minontime;
+            acsettings47.sdcache = acsettings46.sdcache;
+            acsettings47.netverbose = acsettings46.netverbose;
+            acsettings47.toolonpin_activehigh = acsettings46.toolonpin_activehigh;
+            acsettings47.maintainer_cache = acsettings46.maintainer_cache;
+            acsettings47.toolrunpin_activehigh = acsettings46.toolrunpin_activehigh;
+            memcpy(acsettings47.secret, acsettings46.secret, KEYLEN+1);
 
-            strncpy(acsettings.mqtt_server, osettings.mqtt_server, SERVERNAMELEN);
-            acsettings.mqtt_port = osettings.mqtt_port;
-            strncpy(acsettings.mqtt_topic_base, osettings.mqtt_topic_base, MQTT_TOPIC_LEN);
-            acsettings.door_keep_open_ms = osettings.door_keep_open_ms;
-            acsettings.announce_mode = osettings.announce_mode;
-            acsettings.doorbell_mode = osettings.doorbell_mode;
+            strncpy(acsettings47.mqtt_server, acsettings46.mqtt_server, SERVERNAMELEN);
+            acsettings47.mqtt_port = acsettings46.mqtt_port;
+            strncpy(acsettings47.mqtt_topic_base, acsettings46.mqtt_topic_base, MQTT_TOPIC_LEN);
+            acsettings47.door_keep_open_ms = acsettings46.door_keep_open_ms;
+            acsettings47.announce_mode = acsettings46.announce_mode;
+            acsettings47.doorbell_mode = acsettings46.doorbell_mode;
 
-            // use persistent maintainer cache?
-            acsettings.invert_colours = 1;
+            acsettings47.invert_colours = 1;
+          } 
+      case ACSETTINGS47:
+          // upgrade the settings and add defaults for new settings.
+          Serial.println("Old settings (46) found, upgrading");
+          {
+            if (!upgraded) {
+              memset(&acsettings47, 0, sizeof(settings47));
+              EEPROMRead((uint32_t *)&acsettings47, 0, sizeof(acsettings47));
+              upgraded = true;
+            }
+
+            memcpy(acsettings.mac, acsettings47.mac, 6);
+            memcpy(acsettings.servername, acsettings47.servername, SERVERNAMELEN);
+            memcpy(acsettings.syslogserver, acsettings47.syslogserver, SERVERNAMELEN);
+            memcpy(acsettings.toolname, acsettings47.toolname, TOOLNAMELEN);
+            acsettings.port = acsettings47.port;
+            acsettings.nodeid = acsettings47.nodeid;
+            acsettings.status = acsettings47.status;
+            acsettings.runtime = acsettings47.runtime;
+            acsettings.minontime = acsettings47.minontime;
+            acsettings.off_delay = 1;
+            acsettings.sdcache = acsettings47.sdcache;
+            acsettings.netverbose = acsettings47.netverbose;
+            acsettings.toolonpin_activehigh = acsettings47.toolonpin_activehigh;
+            acsettings.maintainer_cache = acsettings47.maintainer_cache;
+            acsettings.toolrunpin_activehigh = acsettings47.toolrunpin_activehigh;
+            memcpy(acsettings.secret, acsettings47.secret, KEYLEN+1);
+
+            strncpy(acsettings.mqtt_server, acsettings47.mqtt_server, SERVERNAMELEN);
+            acsettings.mqtt_port = acsettings47.mqtt_port;
+            strncpy(acsettings.mqtt_topic_base, acsettings47.mqtt_topic_base, MQTT_TOPIC_LEN);
+            acsettings.door_keep_open_ms = acsettings47.door_keep_open_ms;
+            acsettings.announce_mode = acsettings47.announce_mode;
+            acsettings.doorbell_mode = acsettings47.doorbell_mode;
+
+            acsettings.invert_colours = acsettings47.invert_colours;
+
+
 
             acsettings.valid = ACSETTINGSVALID;
             set_settings(acsettings);
@@ -396,7 +430,7 @@ settings get_settings(void) {
 
       uint32_t ui32User0, ui32User1;
 
-      ROM_FlashUserGet(&ui32User0, &ui32User1);
+     ROM_FlashUserGet(&ui32User0, &ui32User1);
 
       acsettings.mac[0] = ((ui32User0 >> 0) & 0xff);
       acsettings.mac[1] = ((ui32User0 >> 8) & 0xff);
@@ -414,6 +448,7 @@ settings get_settings(void) {
       acsettings.runtime = 0;
       acsettings.sdcache = 1;
       acsettings.minontime = 5;
+      acsettings.off_delay = 1;
       acsettings.netverbose = 1;
       acsettings.toolonpin_activehigh = 1;
       // the laser signal is inverted
@@ -472,7 +507,7 @@ int clear_settings(void) {
   Serial.println("Done clear");
 
   if (ret != 0) {
-    Serial.print("Writeing settings problem: ");
+    Serial.print("Writing settings problem: ");
     Serial.println(ret, HEX);
   }
   return ret;

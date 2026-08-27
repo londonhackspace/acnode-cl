@@ -117,11 +117,13 @@ void ACNode::run() {
   } else {
     if (!card_present()) {
       // card removed
-      if ((millis() - cardLastSeenTime) > 1000) {
+      if ((millis() - cardLastSeenTime) > acsettings.off_delay * 1000) {
         // card absent for more than one second
         if (tool.status()) {
-          Serial.print("Card absent for over a second ");
-          Serial.println(millis() - cardLastSeenTime);
+          Serial.print("Card absent for over ");
+          Serial.print(acsettings.off_delay);
+          Serial.println(" seconds ");
+          Serial.println((millis() - cardLastSeenTime) / 1000);
         }
         cardAnnounced = false;
         deactivate(); 
