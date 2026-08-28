@@ -30,11 +30,11 @@ Table of Contents
 
 * Command line interface for settings over the usb port
 
-* Stores settings in eeprom
+* Stores settings in EEPROM
 
 * Can log to a syslog server
 
-* Uses DHCP to get it's ip address
+* Uses DHCP to get it's IP address
 
 * Optional pin to detect when a tool is running - good for detecting when consumables are being used
 
@@ -109,7 +109,7 @@ right:
 
 * 1 connect to GND on the connected launchpad with a black female to female lead.
 * 2 connect to PG_1 on the connected launchpad
-* 3 connect to - on the ssr VDC side with the black lead you made eairler
+* 3 connect to - on the ssr VDC side with the black lead you made earlier
 
 ## Wiring in the arcade switch
 
@@ -156,20 +156,37 @@ You can send a signal to the acnode via pin PE_4 to say when your tool is actual
 
 * Install git for your platform if you haven't already
 * Install cmake for your platform (http://cmake.org , debian/ubuntu package: cmake, MacOS homebrew: `brew install cmake`)
-* Create a build directory `mkdir build`
-* Run `./gettoolchain.sh`
-* Update/initialise the git submodules `git submodule update --init`
+* Create a build directory
+```
+mkdir build
+```
+* Run the shell script
+```
+./gettoolchain.sh
+````
+* Update/initialise the git submodules
+```
+git submodule update --init
+```
 * Use cmake to make a Makefile, and define your target board (EK-TM4C1294XL)
-  `cd build && cmake .. -DCMAKE_TOOLCHAIN_FILE=../targets/tivac-launchpad/EK-TM4C1294XL.cmake`
-  If building on MacOS, you may need to put the cmake binary on your path if you downloaded it manually or refer to it as
+  ```
+  cd build && cmake .. -DCMAKE_TOOLCHAIN_FILE=../targets/tivac-launchpad/EK-TM4C1294XL.cmake
+  ```
+    * If building on MacOS, you may need to put the cmake binary on your path if you downloaded it manually or refer to it as
   /Applications/CMake.app/Contents/bin/cmake
-* Use Gnu make to actually run the dependencies, compile and link: `make -j`
-* When ready to upload the resultant elf binary to the Launchpad, `make -j flash`
+* Use Gnu make to actually run the dependencies, compile and link:
+```
+make -j
+```
+* When ready to upload the resultant elf binary to the Launchpad,
+```
+make -j flash
+```
 
 # Pin assignments:
 
 * PG_1 - active high, switches power to the tool, output
-* PF_1 - the button, active low (uses internal pulllup), input
+* PF_1 - the button, active low (uses internal pullup), input
 * PM_0 - RGB button Red channel, output
 * PM_1 - RGB button Green channel, output
 * PM_2 - RGB button Blue channel, output
@@ -216,7 +233,7 @@ Other boards (Genuine Elechouse NFC module v3) sort of work at +3.3V, but may no
 
 # Reader installation
 
-For convenience of installation (acnode), and added security (doorbot), we recommend the reader module itself should be connected via an 8 wire cable, such as CAT5, and housed with a pushbutton NO switch and RGB LED in its own enclosure. This way, any intruder can't attack the reader and easily gain access. CAT5 (or above) wiring as above. Note the requirement for 220 ohm resistors on the Red/Green/Blue LED pins to prevent LED burnout. For operational convenience, it is advised to keep a spare reader that can be swapped out. Readers for doorbot enclosures can fit into standard single EN 60670-1 socket boxes with blanking plates, or outdoor junction boxes. For outdoor fitting, ensure that any holes for the button are suitably sealed against moisture ingress. Ditto for ACnode readers in a dusty or dirty environment. 
+For convenience of installation (acnode), and added security (doorbot), we recommend the reader module itself should be connected via an 8 wire cable, such as CAT5, and housed with a push-button NO switch and RGB LED in its own enclosure. This way, any intruder can't attack the reader and easily gain access. CAT5 (or above) wiring as above. Note the requirement for 220 ohm resistors on the Red/Green/Blue LED pins to prevent LED burnout. For operational convenience, it is advised to keep a spare reader that can be swapped out. Readers for doorbot enclosures can fit into standard single EN 60670-1 socket boxes with blanking plates, or outdoor junction boxes. For outdoor fitting, ensure that any holes for the button are suitably sealed against moisture ingress. Ditto for ACnode readers in a dusty or dirty environment. 
 
 # Common reader enclosures
 
@@ -227,7 +244,7 @@ Schneider Electric P/N SL00925 100x100x500 junction box smooth walls has been us
 Arcade Button with 5V Common Cathode RGB LED, from https://www.arcadeworlduk.com/, e.g. Ultralux RGB Illuminated Arcade Button, mounting hole required 28mm diameter hole in side of enclosure.
 Mount PN532 reader and breakout board on the lid
 (Optional - use RJ45 modular jack on the side of the enclosure and run a small patch lead to the breakout board, or find a suitable way of terminating the CAT5). Ideally, the readers are easily swappable between ACnodes, so mod jack on the side is a good plan.
-Mount modular jack on opposide side of enclosure box to arcade button.
+Mount modular jack on opposite side of enclosure box to arcade button.
 
 ## Internal doorbot role
 
@@ -241,7 +258,7 @@ British General WPJBS IP55 external junction box from B&Q
 [ Internal free space 50x60x35mm, 8mm outide this space, compromised by the mounting posts for the cover ]
 5V Common Cathode RGB LED
 N/O SPST push button, *water resistant*. Choose one that doesn't accidentally get triggered while swiping.
-Run CAT5 cable through a sealed grommit on the rear through the wall.
+Run CAT5 cable through a sealed grommet on the rear through the wall.
 
 
 Pin Assignments
@@ -249,7 +266,7 @@ Pin Assignments
 * GND : RJ45_2 : ORANGE : GND
 * PP_0 : RJ45_3 : WHITE/GREEN : -> PN532 TXD
 * PM_0 : RJ45_4 : BLUE : VIA R220 - RGB RED 
-* PF_1 : RJ45_5 : WHITE/BLUE : the button, active low (uses internal pulllup), input
+* PF_1 : RJ45_5 : WHITE/BLUE : the button, active low (uses internal pullup), input
 * PP_1 : RJ45_6 : GREEN : PN532 RXD
 * PM_1 : RJ45_7 : WHITE/BROWN : VIA R220 - RGB Green
 * PM_2 : RJ45_8 : BROWN : VIA R220 - RGB BLUE
@@ -334,29 +351,23 @@ The menu also times out after 60 seconds.
 
 ## So for a user to take a tool out of service:
 
-Press the button once, quickly, the button will be flashing red/green.
-
-Hold the button down for a second or so and release.
+* Press the button once, quickly, the button will be flashing red/green.
+* Hold the button down for a second or so and release.
 
 The button will go solid red and the tool will be out of service
 
 ## For a maintainer to access the menu and do nothing:
 
-press the button once, the button will flash Amber/yellow - the ACNode is in add mode.
-
-press the button again, the button will flash red/yellow - the menu is in take tool out of service mode.
-
-press the button again, the button will stop flashing, you have exited the menu.
+* Press the button once, the button will flash Amber/yellow - the ACNode is in add mode.
+* Press the button again, the button will flash red/yellow - the menu is in take tool out of service mode.
+* Press the button again, the button will stop flashing, you have exited the menu.
 
 ## For a maintainer to add a card:
 
-Press the button, it will flash Amber/yellow
-
-press the button for 1 second or so and let it go, the button will go yellow
-
-remove the maintainer card. add the card to be added - the button will go orange (invalid card colour)
-
-remove the card.
+* Press the button, it will flash Amber/yellow
+* Press the button for 1 second or so and let it go, the button will go yellow
+* Remove the maintainer card. add the card to be added - the button will go orange (invalid card colour)
+* Remove the card.
 
 The new card should now be added.
 
