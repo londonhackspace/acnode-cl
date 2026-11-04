@@ -45,6 +45,7 @@ public:
 protected:
   void feed_incoming_character();
   bool card_present();
+  bool card_changed();
   bool card_has_access();
   void activate();
   void deactivate();
@@ -65,6 +66,7 @@ private:
   unsigned long cardLastSeenTime;
   bool deactivationAnnounced;
   bool cardAnnounced;
+  bool last_card_is_maintainer;
 };
 
 #endif

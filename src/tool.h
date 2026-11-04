@@ -8,6 +8,11 @@
 class Tool
 {
   public:
+    enum ToolState {
+      OFF,
+      ON,
+      TURNING_OFF
+    };
     Tool(int pin);
     Tool(int pin, int onpin);
     void poll();
@@ -16,14 +21,17 @@ class Tool
     void on(Card user);
     void off();
     void begin();
-    boolean status(); // true if the tool has been switched on
+    ToolState status(); 
+  protected:
+    bool can_turn_off(); // true if the tool can be switched off (i.e. minontime and off_delay have been met)
+
   private:
     int _toolpin;
     int _toolrunpin;
-    boolean _toolon;
-    boolean _turnoff;
+    ToolState _toolstate;
     unsigned long _start;  // used the runtime as detected by the _toolonpin
     unsigned long _ontime; // used for when we switch the tool on
+    unsigned long _offtime; // used for when we switch the tool off
     Card tool_user;
 };
 

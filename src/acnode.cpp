@@ -10,7 +10,8 @@ ACNode::ACNode(PN532 &n, RGB &r, Tool &t, int button_pin) :
   enabled(false),
   cardLastSeenTime(-10000),
   deactivationAnnounced(false),
-  cardAnnounced(false)
+  cardAnnounced(false),
+  last_card_is_maintainer(false)
 {
   this->announcer = NULL;
 }
@@ -18,6 +19,10 @@ ACNode::ACNode(PN532 &n, RGB &r, Tool &t, int button_pin) :
 bool ACNode::card_present() {
   card_on_reader = readcard();
   return card_on_reader.is_valid();
+}
+
+bool ACNode::card_changed() {
+  return !cache->get(card_on_reader).compare_uid(card_on_reader);
 }
 
 void ACNode::enableAnnouncer(Announcer* announcer) {
@@ -34,15 +39,20 @@ bool ACNode::card_has_access() {
     if (acsettings.netverbose == 1) {
       Serial.println("Card has been seen before (cached)");
     }
+    
     // Use the cached version (TODO: restructure this)
     card_on_reader = cached;
+    last_card_is_maintainer = cached.is_maintainer();
+
     return cached.is_user() || cached.is_maintainer();
   }
 
+  last_card_is_maintainer = false;
   int status = networking::querycard(card_on_reader);
   switch (status) {
     case 2: // maintainer
       card_on_reader.set_maintainer(true);
+      last_card_is_maintainer = true;
     case 1: // user
       card_on_reader.set_user(true);
       Serial.println("Card has access");
@@ -83,8 +93,8 @@ void ACNode::deactivate() {
   // TODO: Try and move this into role.h
   // Force a status check, TODO: add an optional param to is_enabled()
 //  last_status_checked_at = -30000;
-  is_enabled() ? rgb.solid(BLUE) : rgb.solid(RED);
   tool.off();
+  is_enabled() ? (tool.status() == Tool::ToolState::TURNING_OFF ? rgb.solid(PURPLE, 1000) : rgb.solid(BLUE, 1000) ) : rgb.solid(RED, 1000);
   if (this->announcer) {
     if (!(tool.status())) {
       if (!(deactivationAnnounced)) { // debounce, since this is actually part of the loop, and actual off-time might be a few seconds later
@@ -117,23 +127,24 @@ void ACNode::run() {
   } else {
     if (!card_present()) {
       // card removed
-      if ((millis() - cardLastSeenTime) > acsettings.off_delay * 1000) {
-        // card absent for more than one second
-        if (tool.status()) {
+      if ((millis() - cardLastSeenTime) > acsettings.card_debounce) {
+        // card absent for more than card_debounce milliseconds, so we can switch off the tool.
+        if (tool.status() == Tool::ToolState::ON) {
           Serial.print("Card absent for over ");
-          Serial.print(acsettings.off_delay);
-          Serial.println(" seconds ");
+          Serial.print(acsettings.card_debounce / 1000);
+          Serial.println(" seconds - TURNING OFF");
           Serial.println((millis() - cardLastSeenTime) / 1000);
         }
         cardAnnounced = false;
         deactivate(); 
-      } else {
+      } else if (tool.status()){
+          rgb.solid(last_card_is_maintainer ? DIM_ORANGE : DIM_GREEN, 1000);
           Serial.print("Card absent for ");
           Serial.print(millis() - cardLastSeenTime);
           Serial.println(" ms");
-       // One second debounce limit not met
+       // Debounce limit not met
       }
-    } else if (!cache->get(card_on_reader).compare_uid(card_on_reader)) {
+    } else if (card_changed() && card_has_access()) {
       // card has changed
       Serial.println("Card has changed");
       cardAnnounced = false;

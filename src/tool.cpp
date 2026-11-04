@@ -5,9 +5,8 @@
 
 Tool::Tool(int pin) {
   _toolpin = pin;
-  _toolon = false;
+  _toolstate = OFF;
   _toolrunpin = -1;
-  _turnoff = false;
 }
 
 volatile int tool_on_state = 0;
@@ -17,11 +16,10 @@ int tool_on_pin;
 // If we have a seperate pin to tell us when the tool is actually running
 Tool::Tool(int pin, int runpin) {
   _toolpin = pin;
-  _toolon = false;
+  _toolstate = OFF;
   _toolrunpin = runpin;
   tool_on_pin = runpin;
   memset(&tool_user, 0, sizeof(user));
-  _turnoff = false;
 }
 
 // not a member function since it's an ISR.
@@ -57,15 +55,8 @@ void Tool::begin() {
 }
 
 void Tool::poll() {
-  if (_turnoff) {
-      unsigned long duration = (millis() - _ontime) / 1000;
-      // have we been running for more than the minimum on time?
-      if (duration > acsettings.minontime) {
-        // if so we can turn off now
-        _turnoff = false;
-
-        off();
-      }
+  if (_toolstate == TURNING_OFF && can_turn_off()) {
+    off();  
   }
 
   // do we need to run this?
@@ -93,7 +84,7 @@ void Tool::poll() {
   }
 
   if (tool_on_state == onstate) {
-    if (!_toolon) {
+    if (_toolstate != ON) {
       char msg[] = "Tool appears to have started running while it's off!";
       Serial.println(msg);
       syslog.syslog(LOG_WARNING, msg);
@@ -103,7 +94,7 @@ void Tool::poll() {
   }
 
   if (tool_on_state == offstate) {
-    if (!_toolon) {
+    if (_toolstate != ON) {
       char msg[] = "Tool appears to have stopped running while it's off!";
       Serial.println(msg);
       syslog.syslog(LOG_WARNING, msg);
@@ -153,8 +144,49 @@ void Tool::stoprunning() {
     }
 }
 
+bool Tool::can_turn_off() {
+    if (acsettings.minontime > 0) {
+      unsigned long duration = (millis() - _ontime) / 1000.0;
+      // have we been running for less than the minimum on time?
+      if (_toolstate == ON) {
+        Serial.print("minimum on, ");
+        Serial.print("duration: ");
+        Serial.print(duration);
+        Serial.print(" minontime ");
+        Serial.println(acsettings.minontime);
+      }
+      if (duration < acsettings.minontime) {
+        // if so we need to turn the tool off in the future
+        if (_toolstate != OFF) {
+          Serial.println("Tool has been on for less than the minimum on time, will turn off when minontime reached");
+        }
+        return false;
+      }
+    }
+    if (acsettings.off_delay > 0) {
+      unsigned long duration = (millis() - _offtime) / 1000.0;
+      // have we been off for less than the off delay time?
+      if (_toolstate == ON) {
+        Serial.print("off delay, ");
+        Serial.print("duration: ");
+        Serial.print(duration);
+        Serial.print(" off_delay ");
+        Serial.println(acsettings.off_delay);
+      }
+      if (duration < acsettings.off_delay) {
+        // if so we need to turn the tool off in the future
+        if (_toolstate != OFF) {
+          Serial.println("Card has beem removed for less than the off delay time, will turn off when off_delay reached");
+        }
+        return false;
+      }
+    }
+    Serial.println("Tool can be turned off");
+    return true;
+}
+
 void Tool::on(Card user) {
-  if (!_toolon) {
+  if (_toolstate != ON) {
     char msg[64];
     if (acsettings.status == 0 && !user.is_maintainer()) {
       // if the tool is disabled only maintainers can switch it on.
@@ -190,41 +222,27 @@ void Tool::on(Card user) {
       digitalWrite(_toolpin, LOW);
     }
     // end
-    _toolon = true;
+    _toolstate = ON;
     _ontime = millis();
     _start = millis();
     tool_user = user;
   }
 
-  if (_turnoff) {
-    // we were asked to turn the tool off
-    // but are now being asked to turn it on again
-    // so don't turn it off.
-    _turnoff = false;
-    // looks as if we cope ok if the tool is turned on by a different user
-  }
 }
 
+
 void Tool::off() {
-  // and switch it off here.
-  if (_toolon) {
+  if (_toolstate == ON) {
+      _offtime = millis();
 
-    if (acsettings.minontime > 0) {
-      unsigned long duration = (millis() - _ontime) / 1000.0;
-      // have we been running for less than the minimum on time?
-      Serial.print("minimum on, ");
-      Serial.print("duration: ");
-      Serial.print(duration);
-      Serial.print(" minontime ");
-      Serial.println(acsettings.minontime);
-      if (duration < acsettings.minontime) {
-        // if so we need to turn the tool off in the future
-        _turnoff = true;
-        Serial.println("Not turning off yet");
-        return;
-      }
+
+  }
+  if (_toolstate != OFF) {
+    if (!can_turn_off()) {
+      _toolstate = TURNING_OFF;
+      //rgb.solid(MAUVE);
+      return;
     }
-
     // switch tool off here
     if (acsettings.toolonpin_activehigh) {
       digitalWrite(_toolpin, LOW);
@@ -239,12 +257,12 @@ void Tool::off() {
     // report to the acserver that we're done with this tool
     networking::reportToolUse(tool_user, 0);
 
-    _toolon = false;
-    _turnoff = false;
+    _toolstate = OFF;
+    Serial.println("Tool switched off");
   }
 }
 
 // used to turn the button green when the tool is powerd on.
-boolean Tool::status() {
-  return _toolon;
+Tool::ToolState Tool::status() {
+  return _toolstate;
 }

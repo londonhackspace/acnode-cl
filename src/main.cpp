@@ -51,8 +51,6 @@ boolean network = false;
 // PG_1 to switch tool on, PE_4 is low when the tool is running
 Tool tool(PG_1, PE_4);
 
-RGB rgb(PM_0, PM_1, PM_2);
-
 Watchdog wdog;
 
 Cache *cache = NULL;
@@ -348,7 +346,7 @@ void loop() {
       if (alive_check_count > 29) {
         alive_check_count = 0;
         wdog.feed();
-        rgb.flashing(BLUE);
+        rgb.flashing(BLUE, false);
         Serial.println("Cache refreshing");
         cache->verify();
         rgb.solid(BLUE);

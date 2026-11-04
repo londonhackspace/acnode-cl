@@ -102,11 +102,14 @@ void dump_settings(settings acsettings) {
   duration_str(tmp, acsettings.runtime);
   Serial.println(tmp);
 
-  Serial.print("Minimum on time: ");
+  Serial.print("Minimum on time(s): ");
   Serial.println(acsettings.minontime);
 
-  Serial.print("Turn off delay: ");
+  Serial.print("Turn off delay(s): ");
   Serial.println(acsettings.off_delay);
+
+  Serial.print("Card debounce time(ms): ");
+  Serial.println(acsettings.card_debounce);
 
   Serial.print("Using ");
   if (acsettings.sdcache) {
@@ -218,7 +221,8 @@ settings get_settings(void) {
   settings44 acsettings44;
   settings45 acsettings45;
   settings46 acsettings46;  
-  settings47 acsettings47;
+  settings47 acsettings47;  
+  settings48 acsettings48;
   bool upgraded = false;
 
   switch (acsettings.valid) {
@@ -392,31 +396,68 @@ settings get_settings(void) {
               upgraded = true;
             }
 
-            memcpy(acsettings.mac, acsettings47.mac, 6);
-            memcpy(acsettings.servername, acsettings47.servername, SERVERNAMELEN);
-            memcpy(acsettings.syslogserver, acsettings47.syslogserver, SERVERNAMELEN);
-            memcpy(acsettings.toolname, acsettings47.toolname, TOOLNAMELEN);
-            acsettings.port = acsettings47.port;
-            acsettings.nodeid = acsettings47.nodeid;
-            acsettings.status = acsettings47.status;
-            acsettings.runtime = acsettings47.runtime;
-            acsettings.minontime = acsettings47.minontime;
-            acsettings.off_delay = 1;
-            acsettings.sdcache = acsettings47.sdcache;
-            acsettings.netverbose = acsettings47.netverbose;
-            acsettings.toolonpin_activehigh = acsettings47.toolonpin_activehigh;
-            acsettings.maintainer_cache = acsettings47.maintainer_cache;
-            acsettings.toolrunpin_activehigh = acsettings47.toolrunpin_activehigh;
-            memcpy(acsettings.secret, acsettings47.secret, KEYLEN+1);
+            memcpy(acsettings48.mac, acsettings47.mac, 6);
+            memcpy(acsettings48.servername, acsettings47.servername, SERVERNAMELEN);
+            memcpy(acsettings48.syslogserver, acsettings47.syslogserver, SERVERNAMELEN);
+            memcpy(acsettings48.toolname, acsettings47.toolname, TOOLNAMELEN);
+            acsettings48.port = acsettings47.port;
+            acsettings48.nodeid = acsettings47.nodeid;
+            acsettings48.status = acsettings47.status;
+            acsettings48.runtime = acsettings47.runtime;
+            acsettings48.minontime = acsettings47.minontime;
+            acsettings48.off_delay = 0;
+            acsettings48.sdcache = acsettings47.sdcache;
+            acsettings48.netverbose = acsettings47.netverbose;
+            acsettings48.toolonpin_activehigh = acsettings47.toolonpin_activehigh;
+            acsettings48.maintainer_cache = acsettings47.maintainer_cache;
+            acsettings48.toolrunpin_activehigh = acsettings47.toolrunpin_activehigh;
+            memcpy(acsettings48.secret, acsettings47.secret, KEYLEN+1);
 
-            strncpy(acsettings.mqtt_server, acsettings47.mqtt_server, SERVERNAMELEN);
-            acsettings.mqtt_port = acsettings47.mqtt_port;
-            strncpy(acsettings.mqtt_topic_base, acsettings47.mqtt_topic_base, MQTT_TOPIC_LEN);
-            acsettings.door_keep_open_ms = acsettings47.door_keep_open_ms;
-            acsettings.announce_mode = acsettings47.announce_mode;
-            acsettings.doorbell_mode = acsettings47.doorbell_mode;
+            strncpy(acsettings48.mqtt_server, acsettings47.mqtt_server, SERVERNAMELEN);
+            acsettings48.mqtt_port = acsettings47.mqtt_port;
+            strncpy(acsettings48.mqtt_topic_base, acsettings47.mqtt_topic_base, MQTT_TOPIC_LEN);
+            acsettings48.door_keep_open_ms = acsettings47.door_keep_open_ms;
+            acsettings48.announce_mode = acsettings47.announce_mode;
+            acsettings48.doorbell_mode = acsettings47.doorbell_mode;
 
             acsettings.invert_colours = acsettings47.invert_colours;
+          }
+      case ACSETTINGS48:
+          // upgrade the settings and add defaults for new settings.
+          Serial.println("Old settings (46) found, upgrading");
+          {
+            if (!upgraded) {
+              memset(&acsettings48, 0, sizeof(settings48));
+              EEPROMRead((uint32_t *)&acsettings48, 0, sizeof(acsettings48));
+              upgraded = true;
+            }
+
+            memcpy(acsettings.mac, acsettings48.mac, 6);
+            memcpy(acsettings.servername, acsettings48.servername, SERVERNAMELEN);
+            memcpy(acsettings.syslogserver, acsettings48.syslogserver, SERVERNAMELEN);
+            memcpy(acsettings.toolname, acsettings48.toolname, TOOLNAMELEN);
+            acsettings.port = acsettings48.port;
+            acsettings.nodeid = acsettings48.nodeid;
+            acsettings.status = acsettings48.status;
+            acsettings.runtime = acsettings48.runtime;
+            acsettings.minontime = acsettings48.minontime;
+            acsettings.off_delay = acsettings48.off_delay;
+            acsettings.card_debounce = 2000;
+            acsettings.sdcache = acsettings48.sdcache;
+            acsettings.netverbose = acsettings48.netverbose;
+            acsettings.toolonpin_activehigh = acsettings48.toolonpin_activehigh;
+            acsettings.maintainer_cache = acsettings48.maintainer_cache;
+            acsettings.toolrunpin_activehigh = acsettings48.toolrunpin_activehigh;
+            memcpy(acsettings.secret, acsettings48.secret, KEYLEN+1);
+
+            strncpy(acsettings.mqtt_server, acsettings48.mqtt_server, SERVERNAMELEN);
+            acsettings.mqtt_port = acsettings48.mqtt_port;
+            strncpy(acsettings.mqtt_topic_base, acsettings48.mqtt_topic_base, MQTT_TOPIC_LEN);
+            acsettings.door_keep_open_ms = acsettings48.door_keep_open_ms;
+            acsettings.announce_mode = acsettings48.announce_mode;
+            acsettings.doorbell_mode = acsettings48.doorbell_mode;
+
+            acsettings.invert_colours = acsettings48.invert_colours;
 
 
 
@@ -430,7 +471,7 @@ settings get_settings(void) {
 
       uint32_t ui32User0, ui32User1;
 
-     ROM_FlashUserGet(&ui32User0, &ui32User1);
+      ROM_FlashUserGet(&ui32User0, &ui32User1);
 
       acsettings.mac[0] = ((ui32User0 >> 0) & 0xff);
       acsettings.mac[1] = ((ui32User0 >> 8) & 0xff);
@@ -448,7 +489,8 @@ settings get_settings(void) {
       acsettings.runtime = 0;
       acsettings.sdcache = 1;
       acsettings.minontime = 5;
-      acsettings.off_delay = 1;
+      acsettings.off_delay = 0;
+      acsettings.card_debounce = 2000;
       acsettings.netverbose = 1;
       acsettings.toolonpin_activehigh = 1;
       // the laser signal is inverted

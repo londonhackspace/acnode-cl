@@ -10,11 +10,14 @@ public:
 
 extern Colour RED;
 extern Colour GREEN;
+extern Colour DIM_GREEN;
 extern Colour BLUE;
 extern Colour YELLOW;
 extern Colour ORANGE;
+extern Colour DIM_ORANGE;
 extern Colour WHITE;
 extern Colour BLACK;
+extern Colour PURPLE;
 extern Colour MAUVE;
 extern Colour RAINBOW[];
 

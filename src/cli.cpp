@@ -40,6 +40,7 @@ void mrlprint(const char * str) {
 #define _CMD_VERIFY "verify"
 #define _CMD_MINONTIME "minontime"
 #define _CMD_OFFDELAY "offdelay"
+#define _CMD_CARDDEBOUNCE "carddebounce"
 #define _CMD_CACHE  "cache"
 #define _SCMD_EEPROM  "eeprom"
 #define _SCMD_SDCARD  "sdcard"
@@ -62,7 +63,7 @@ void mrlprint(const char * str) {
 #define _SCMD_ON "on"
 #define _SCMD_OFF "off"
 
-#define _NUM_OF_CMD 26
+#define _NUM_OF_CMD 28
 #define _NUM_OF_VER_SCMD 2
 #define _NUM_OF_CACHE_SCMD 2
 #define _NUM_OF_PIN_SCMD 2
@@ -110,6 +111,7 @@ void print_help ()
   Serial.println ("\tverify - verify the card cache contents against the acserver");
   Serial.println ("\tminontime <time> - minimum time in seconds to keep the tool on for, up to 254 seconds");
   Serial.println ("\toffdelay <time> - delay in seconds before the tool is switched off after the card is removed, up to 3600 seconds");
+  Serial.println ("\tcarddebounce <time> - delay in milliseconds that a card can be disconnected before the tool is switched off");
   Serial.println ("\tcache {eeprom | sdcard} - set where to cache cards.");
   Serial.println ("\tmaintainercache - Toggle use of maintainer cache.");
   Serial.println ("\tnetverbose - Toggle verbosity of network debugging messages.");
@@ -487,10 +489,10 @@ int mrlexecute (int argc, const char * const * argv)
       } else {
         Serial.println("offdelay <time>");
       }
-    } else if (strcmp (argv[i], _CMD_OFFDELAY) == 0) {
+    } else if (strcmp (argv[i], _CMD_CARDDEBOUNCE) == 0) {
       if ((++i) < argc) { // if value preset
         if ( strlen(argv[i]) < 6) {
-          Serial.print("new off_delay: ");
+          Serial.print("new carddebounce: ");
           Serial.println(argv[i]);
           errno = 0;
           unsigned int ret;
@@ -514,15 +516,15 @@ int mrlexecute (int argc, const char * const * argv)
           }
 
           if (ok) {
-            acsettings.off_delay = ret;
+            acsettings.card_debounce = ret;
           } else {
-            Serial.println("invalid off_delay");
+            Serial.println("invalid card_debounce");
           }
         } else {
-          Serial.println("off_delay too big");
+          Serial.println("card_debounce too big");
         }
       } else {
-        Serial.println("offdelay <time>");
+        Serial.println("carddebounce <time>");
       }
     } else if (strcmp (argv[i], _CMD_CACHE) == 0) {
       if (++i < argc) {

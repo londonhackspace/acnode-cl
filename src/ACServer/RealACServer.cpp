@@ -15,6 +15,7 @@
 // Please replace me with less messy code
 /////////////////////////////////////////
 #include "../acnode.h"
+#include "../rgb.h"
 #define HTTP_TIMEOUT 3000
 #define USER_AGENT "ACNode rev " STRINGIFY(GIT_REVISION)
 // End old parts
@@ -61,6 +62,7 @@ aJsonObject* RealACServer::getRequest(const char* path)
     int ret = http.get(server, port, path, USER_AGENT);
     if(ret)
     {
+        rgb.solid(WHITE);
         Serial.print("Error connecting to ");
         Serial.println(server);
         return nullptr;
